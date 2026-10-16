@@ -1,0 +1,242 @@
+/* ===== 01 · PALETTE ===== */
+:root {
+    --porcelain: #F8F7F2;
+    --black-forest: #042E09;
+    --carbon: #212121;
+    --palm-leaf: #8A9B63;
+    --muted-olive: #B1C588;
+    --sky-blue: #89BCCF;
+    --rouge-brique: #B3402F;
+
+    --olive-pale: #E6EAD3;     /* fond des cartes */
+    --olive-border: #D3DDB8;   /* bordures légères */
+    --success-bg: #D6E0BE;
+    --radius: 14px;
+}
+
+/* ===== 02 · TYPOGRAPHIE ===== */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--porcelain);
+    color: var(--carbon);
+    font-family: "Nunito Sans", "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+    color: var(--black-forest);
+    margin: 0 0 .5em;
+    line-height: 1.15;
+}
+h1 { font-size: 44px; font-weight: 700; }
+h2 { font-size: 28px; font-weight: 600; }
+h3 { font-size: 20px; font-weight: 600; }
+
+label { font-weight: 700; font-size: 14px; }
+
+a { color: var(--black-forest); }
+a:hover { color: var(--palm-leaf); }
+
+main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* ===== 03 · BOUTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: 2px solid var(--black-forest);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+
+/* Primaire */
+.btn-primary { background: var(--black-forest); color: #fff; }
+.btn-primary:hover { background: var(--palm-leaf); color: var(--black-forest); }
+.btn-primary:disabled,
+.btn-primary.disabled {
+    background: var(--olive-border);
+    border-color: var(--olive-border);
+    color: var(--palm-leaf);
+    cursor: not-allowed;
+}
+
+/* Secondaire */
+.btn-secondary { background: #fff; color: var(--black-forest); }
+.btn-secondary:hover { background: var(--muted-olive); color: var(--black-forest); }
+
+.btn-block { width: 100%; }
+
+/* ===== 04 · FORMULAIRES ===== */
+.field { margin-bottom: 18px; }
+.field label { display: block; margin-bottom: 6px; }
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--carbon);
+    background: #fff;
+    border: 2px solid var(--palm-leaf);
+    border-radius: 10px;
+    outline: none;
+}
+.field input::placeholder { color: #8a8a8a; }
+
+/* État actif : bordure Black Forest + halo Sky Blue */
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: var(--black-forest);
+    box-shadow: 0 0 0 4px var(--sky-blue);
+}
+
+/* État erreur */
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea { border-color: var(--rouge-brique); }
+
+.field .help { font-size: 13px; color: #5c5c5c; margin-top: 6px; }
+.field .help ul { margin: 4px 0 0; padding-left: 18px; }
+.field .error-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rouge-brique);
+}
+
+/* ===== 05 · MESSAGES ET BADGES ===== */
+.msg {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    font-size: 15px;
+}
+.msg-info    { background: var(--sky-blue); color: var(--black-forest); }
+.msg-success { background: var(--success-bg); color: var(--black-forest); }
+.msg-error,
+.msg-warning { background: #fff; border: 2px solid var(--rouge-brique); color: var(--carbon); }
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--muted-olive);
+    color: var(--black-forest);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ===== 06 · NAVIGATION ===== */
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: var(--black-forest);
+    margin: 16px auto 0;
+    max-width: 1100px;
+    padding: 10px 18px;
+    border-radius: 16px;
+}
+.navbar .brand {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 18px;
+}
+.navbar a.nav-link,
+.navbar .nav-btn {
+    color: #fff;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.navbar a.nav-link:hover,
+.navbar .nav-btn:hover { background: var(--palm-leaf); color: var(--black-forest); }
+.navbar a.nav-link.active { background: var(--muted-olive); color: var(--black-forest); }
+.navbar .spacer { flex: 1; }
+.navbar .user { color: var(--muted-olive); font-size: 14px; margin-right: 6px; }
+
+/* ===== 07 · TUILES ET CARTES ===== */
+.grid { display: grid; gap: 16px; margin-bottom: 16px; }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.tile {
+    background: #fff;
+    border: 1px solid var(--olive-border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+}
+.tile .label { font-size: 14px; font-weight: 700; }
+.tile .value {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--black-forest);
+    line-height: 1.1;
+}
+
+.card {
+    background: var(--olive-pale);
+    border: 1px solid var(--olive-border);
+    border-radius: var(--radius);
+    padding: 20px;
+}
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.card-head h3 { margin: 0; }
+.card small, .card .meta { font-size: 13px; }
+.card-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+.progress {
+    height: 10px;
+    background: #fff;
+    border: 1px solid var(--olive-border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 12px 0 6px;
+}
+.progress > span { display: block; height: 100%; background: var(--black-forest); }
+
+/* ===== Page d'authentification ===== */
+.auth-card {
+    background: #fff;
+    max-width: 440px;
+    margin: 40px auto;
+    padding: 32px;
+    border: 1px solid var(--olive-border);
+    border-radius: 18px;
+}
+.auth-card h2 { margin-bottom: 20px; }
+.auth-foot { margin-top: 18px; font-size: 15px; }

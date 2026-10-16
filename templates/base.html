@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Vers le Vert{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% with current=request.resolver_match.url_name %}
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="brand">Vers le Vert</a>
+
+        {% if user.is_authenticated %}
+            <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Accueil</a>
+            {# Les liens ci-dessous seront remplacés par {% url '...' %} quand chaque module sera prêt #}
+            <a class="nav-link" href="#">Défis</a>
+            <a class="nav-link" href="#">Déchets</a>
+            <a class="nav-link" href="#">Événements</a>
+            <a class="nav-link" href="#">Lieux</a>
+            <a class="nav-link" href="#">Récompenses</a>
+            <a class="nav-link" href="#">Profil</a>
+
+            <span class="spacer"></span>
+            <span class="user">{{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="nav-btn">Déconnexion</button>
+            </form>
+        {% else %}
+            <span class="spacer"></span>
+            <a class="nav-link {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Connexion</a>
+            <a class="nav-link {% if current == 'signup' %}active{% endif %}" href="{% url 'signup' %}">Inscription</a>
+        {% endif %}
+    </nav>
+    {% endwith %}
+
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="msg msg-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

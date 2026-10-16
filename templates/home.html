@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Accueil · Vers le Vert{% endblock %}
+
+{% block content %}
+<h1>Bonjour, {{ user.username }}</h1>
+<p>Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
+
+<div class="grid grid-3">
+    {% include "components/stat_tile.html" with label="Points" value="1 240" %}
+    {% include "components/stat_tile.html" with label="CO<sub>2</sub> évité" value="86 kg" %}
+    {% include "components/stat_tile.html" with label="Badges" value="7" %}
+</div>
+
+<div class="grid grid-2">
+    {% include "components/challenge_card.html" with title="Pédaler 30 km ce mois-ci" points=50 percent=60 current=18 goal=30 unit="km" %}
+    {% include "components/offer_card.html" with title="[Nom de l'offre]" points=300 sponsor="[Nom du sponsor]" description="[Description de la réduction ou du coupon proposé par le sponsor.]" %}
+</div>
+{% endblock %}
