@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Défis · Vers le Vert{% endblock %}
+
+{% block content %}
+<h1>Défis</h1>
+<p>Relevez des défis écologiques personnels et gagnez des points.</p>
+
+<div class="grid grid-2">
+    {% include "components/challenge_card.html" with title="Exemple de défi" points=50 percent=60 current=18 goal=30 unit="km" %}
+</div>
+{% endblock %}

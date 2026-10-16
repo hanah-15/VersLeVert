@@ -24,5 +24,10 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
+    path("challenges/", include("challenges.urls")),
+    path("waste/", include("waste.urls")),
+    path("events/", include("events.urls")),
+    path("places/", include("places.urls")),
+    path("rewards/", include("gamification.urls")),
     path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

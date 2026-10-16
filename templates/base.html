@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Vers le Vert{% endblock %}</title>
 
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -14,33 +16,50 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    {% with current=request.resolver_match.url_name %}
+   {% with app=request.resolver_match.app_name current=request.resolver_match.url_name %}
+<header class="navbar-wrap">
     <nav class="navbar">
-        <a href="{% url 'home' %}" class="brand">Vers le Vert</a>
+        <a href="{% url 'home' %}" class="brand">
+            <span class="brand-leaf">🌿</span> Vers le Vert
+        </a>
 
         {% if user.is_authenticated %}
-            <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Accueil</a>
-            {# Les liens ci-dessous seront remplacés par {% url '...' %} quand chaque module sera prêt #}
-            <a class="nav-link" href="#">Défis</a>
-            <a class="nav-link" href="#">Déchets</a>
-            <a class="nav-link" href="#">Événements</a>
-            <a class="nav-link" href="#">Lieux</a>
-            <a class="nav-link" href="#">Récompenses</a>
-            <a class="nav-link" href="#">Profil</a>
+            <input type="checkbox" id="nav-toggle" class="nav-toggle">
+            <label for="nav-toggle" class="nav-burger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </label>
 
-            <span class="spacer"></span>
-            <span class="user">{{ user.username }}</span>
-            <form method="post" action="{% url 'logout' %}" style="display:inline">
-                {% csrf_token %}
-                <button type="submit" class="nav-btn">Déconnexion</button>
-            </form>
+            <div class="nav-menu">
+                <div class="nav-links">
+                    <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Accueil</a>
+                    <a class="nav-link {% if app == 'challenges' %}active{% endif %}" href="{% url 'challenges:index' %}">Défis</a>
+                    <a class="nav-link {% if app == 'waste' %}active{% endif %}" href="{% url 'waste:index' %}">Déchets</a>
+                    <a class="nav-link {% if app == 'events' %}active{% endif %}" href="{% url 'events:index' %}">Événements</a>
+                    <a class="nav-link {% if app == 'places' %}active{% endif %}" href="{% url 'places:index' %}">Lieux</a>
+                    <a class="nav-link {% if app == 'gamification' %}active{% endif %}" href="{% url 'gamification:index' %}">Récompenses</a>
+                    <a class="nav-link {% if current == 'profile' %}active{% endif %}" href="{% url 'profile' %}">Profil</a>
+                </div>
+
+                <div class="nav-user">
+                    <span class="avatar">{{ user.username|slice:":1"|upper }}</span>
+                    <span class="user">{{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-btn nav-logout">Déconnexion</button>
+                    </form>
+                </div>
+            </div>
         {% else %}
-            <span class="spacer"></span>
-            <a class="nav-link {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Connexion</a>
-            <a class="nav-link {% if current == 'signup' %}active{% endif %}" href="{% url 'signup' %}">Inscription</a>
+            <div class="nav-menu nav-menu-guest">
+                <div class="nav-links">
+                    <a class="nav-link {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Connexion</a>
+                    <a class="nav-link {% if current == 'signup' %}active{% endif %}" href="{% url 'signup' %}">Inscription</a>
+                </div>
+            </div>
         {% endif %}
     </nav>
-    {% endwith %}
+</header>
+{% endwith %}
 
     <main>
         {% if messages %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Récompenses · Vers le Vert{% endblock %}
+
+{% block content %}
+<h1>Récompenses</h1>
+<p>Échangez vos points contre des offres de nos partenaires.</p>
+
+<div class="grid grid-3">
+    {% include "components/stat_tile.html" with label="Points" value="1 240" %}
+    {% include "components/stat_tile.html" with label="Badges" value="7" %}
+</div>
+
+<div class="grid grid-2">
+    {% include "components/offer_card.html" with title="[Nom de l'offre]" points=300 sponsor="[Nom du sponsor]" description="[Description de l'offre.]" %}
+</div>
+{% endblock %}
