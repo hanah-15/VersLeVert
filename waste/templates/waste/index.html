@@ -2,7 +2,18 @@
 {% block title %}Déchets · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Déchets</h1>
-<p>Suivez vos déchets organiques et plastiques.</p>
-<div class="msg msg-info">Module en cours de développement.</div>
+<h1>Mes déchets</h1>
+<p><a href="{% url 'waste:create' %}" class="btn btn-primary">Déclarer un déchet</a></p>
+
+{% for r in requests %}
+<div class="card" style="margin-bottom:12px">
+    <div class="card-head">
+        <h3>{{ r.get_waste_type_display }} · {{ r.estimated_weight }} kg</h3>
+        <span class="badge">{{ r.get_status_display }}</span>
+    </div>
+    <p class="meta">{{ r.address }} · {{ r.created_at|date:"d/m/Y" }}</p>
+</div>
+{% empty %}
+<div class="msg msg-info">Aucune demande pour l'instant.</div>
+{% endfor %}
 {% endblock %}
