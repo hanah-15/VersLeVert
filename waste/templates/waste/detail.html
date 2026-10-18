@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Détail de la demande · Vers le Vert{% endblock %}
+
+{% block content %}
+<h1>Détail de la demande</h1>
+<div class="card">
+    <div class="card-head">
+        <h3>{{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg</h3>
+        <span class="badge status-{{ waste_request.status }}">{{ waste_request.get_status_display }}</span>
+    </div>
+    <div class="request-chips">
+        <span class="chip">{{ waste_request.address }}</span>
+        <span class="chip">{{ waste_request.created_at|date:"d/m/Y" }}</span>
+        {% if waste_request.collector %}
+            <span class="chip">Collecteur : {{ waste_request.collector.username }}</span>
+            <span class="chip">Passage prévu le {{ waste_request.planned_date|date:"d/m/Y à H:i" }}</span>
+        {% endif %}
+    </div>
+    {% if waste_request.status == "requested" %}
+        <div class="request-actions">
+            <form method="post" action="{% url 'waste:cancel' waste_request.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Annuler la demande</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+<h2>Propositions</h2>
+{% for row in offers %}
+    <div class="card offer-card">
+        <div class="offer-top">
+            <h3>{{ row.offer.collector.username }}</h3>
+            <span class="badge status-{{ row.offer.status }}">{{ row.offer.get_status_display }}</span>
+        </div>
+        <div class="offer-chips">
+            {% if row.distance is not None %}
+                <span class="chip">{{ row.distance|floatformat:1 }} km</span>
+            {% endif %}
+            <span class="chip">{{ row.offer.proposed_date|date:"d/m/Y à H:i" }}</span>
+        </div>
+        {% if row.offer.message %}<p class="offer-message">{{ row.offer.message }}</p>{% endif %}
+        {% if row.offer.status == "pending" and waste_request.status == "requested" %}
+            <div class="offer-actions">
+                <form method="post" action="{% url 'waste:offer_accept' row.offer.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Accepter</button>
+                </form>
+                <details class="decline-box">
+                    <summary class="btn btn-secondary btn-sm">Refuser</summary>
+                    <form method="post" action="{% url 'waste:offer_decline' row.offer.pk %}">
+                        {% csrf_token %}
+                        {{ decline_form }}
+                        <button type="submit" class="btn btn-secondary btn-sm">Confirmer le refus</button>
+                    </form>
+                </details>
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="msg msg-info">Aucune proposition pour cette demande.</div>
+{% endfor %}
+
+<h2>Historique</h2>
+{% for log in waste_request.logs.all %}
+    <p class="meta">{{ log.old_status }} → {{ log.new_status }} · {{ log.changed_at }}</p>
+{% empty %}
+    <p>Aucun changement de statut.</p>
+{% endfor %}
+{% endblock %}

@@ -25,9 +25,21 @@
             Déclaré le {{ row.request.created_at|date:"d/m/Y" }}
             par {{ row.request.user.username }}
         </p>
-        <a href="{% url 'waste:claim' row.request.pk %}" class="btn btn-secondary">
-            Je collecte
-        </a>
+        {% if row.offer %}
+            {% if row.offer.status == "declined" %}
+                <span class="badge">Proposition refusée</span>
+            {% elif row.offer.status == "withdrawn" %}
+                <a href="{% url 'waste:offer' row.request.pk %}" class="btn btn-secondary">
+                    Proposer de collecter
+                </a>
+            {% else %}
+                <span class="badge">Proposition envoyée</span>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'waste:offer' row.request.pk %}" class="btn btn-secondary">
+                Proposer de collecter
+            </a>
+        {% endif %}
     </div>
 {% empty %}
     <div class="msg msg-info">Aucune demande ouverte pour le moment.</div>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EmissionFactor, WasteRequest, WasteStatusLog
+from .models import CollectionOffer, EmissionFactor, WasteRequest, WasteStatusLog
 
 
 @admin.register(WasteRequest)
@@ -16,3 +16,10 @@ class EmissionFactorAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WasteStatusLog)
+
+
+@admin.register(CollectionOffer)
+class CollectionOfferAdmin(admin.ModelAdmin):
+    list_display = ("waste_request", "collector", "status", "proposed_date", "created_at")
+    list_filter = ("status",)
+    search_fields = ("collector__username", "waste_request__user__username")

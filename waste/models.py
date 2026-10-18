@@ -87,44 +87,134 @@ class WasteRequest(models.Model):
         self.status = new_status
         self.save()
 
-    def claim(self, collector_user, lat, lon, planned_date):
-        if lat is None or lon is None:
-            raise ValueError("Choisissez votre position sur la carte.")
-        if planned_date <= timezone.now():
-            raise ValueError("La date doit être dans le futur.")
-
+    def accept_offer(self, offer, by_user):
         with transaction.atomic():
             locked = type(self).objects.select_for_update().get(pk=self.pk)
+            locked_offer = CollectionOffer.objects.select_for_update().get(pk=offer.pk)
+            if locked.user_id != by_user.pk:
+                raise ValueError("Seul le déposant peut accepter cette proposition.")
+            if locked_offer.waste_request_id != locked.pk or locked_offer.status != CollectionOffer.Status.PENDING:
+                raise ValueError("Cette proposition n'est plus en attente.")
             if locked.status != Status.REQUESTED or locked.collector_id is not None:
-                raise ValueError("Cette demande n'est plus disponible.")
-            if locked.user_id == collector_user.pk:
-                raise ValueError("Vous ne pouvez pas collecter votre propre demande.")
-            locked.change_status(Status.PLANNED, collector_user)
-            locked.collector = collector_user
-            locked.collector_latitude = lat
-            locked.collector_longitude = lon
-            locked.planned_date = planned_date
+                raise ValueError("Cette demande n'est plus ouverte.")
+            locked.change_status(Status.PLANNED, by_user)
+            locked.collector = locked_offer.collector
+            locked.collector_latitude = locked_offer.latitude
+            locked.collector_longitude = locked_offer.longitude
+            locked.planned_date = locked_offer.proposed_date
             locked.save(update_fields=[
                 "collector", "collector_latitude", "collector_longitude", "planned_date"
             ])
-
+            locked_offer.status = CollectionOffer.Status.ACCEPTED
+            locked_offer.decided_at = timezone.now()
+            locked_offer.save(update_fields=["status", "decided_at"])
+            CollectionOffer.objects.filter(
+                waste_request=locked, status=CollectionOffer.Status.PENDING
+            ).exclude(pk=locked_offer.pk).update(
+                status=CollectionOffer.Status.DECLINED,
+                decision_note="Une autre proposition a été acceptée.",
+                decided_at=timezone.now(),
+            )
         self.refresh_from_db()
+
+    def decline_offer(self, offer, by_user, note=""):
+        with transaction.atomic():
+            locked = type(self).objects.select_for_update().get(pk=self.pk)
+            locked_offer = CollectionOffer.objects.select_for_update().get(pk=offer.pk)
+            if locked.user_id != by_user.pk:
+                raise ValueError("Seul le déposant peut refuser cette proposition.")
+            if locked_offer.waste_request_id != locked.pk or locked_offer.status != CollectionOffer.Status.PENDING:
+                raise ValueError("Cette proposition n'est plus en attente.")
+            if locked.status != Status.REQUESTED:
+                raise ValueError("Cette demande n'est plus ouverte.")
+            locked_offer.status = CollectionOffer.Status.DECLINED
+            locked_offer.decision_note = note
+            locked_offer.decided_at = timezone.now()
+            locked_offer.save(update_fields=["status", "decision_note", "decided_at"])
+
+    def cancel_request(self, by_user):
+        with transaction.atomic():
+            locked = type(self).objects.select_for_update().get(pk=self.pk)
+            if locked.user_id != by_user.pk:
+                raise ValueError("Seul le déposant peut annuler cette demande.")
+            if locked.status != Status.REQUESTED:
+                raise ValueError("Cette demande ne peut plus être annulée.")
+            locked.change_status(Status.CANCELLED, by_user)
+            CollectionOffer.objects.filter(
+                waste_request=locked, status=CollectionOffer.Status.PENDING
+            ).update(
+                status=CollectionOffer.Status.DECLINED,
+                decision_note="La demande a été annulée.",
+                decided_at=timezone.now(),
+            )
+
+
+class CollectionOffer(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        ACCEPTED = "accepted", "Acceptée"
+        DECLINED = "declined", "Refusée"
+        WITHDRAWN = "withdrawn", "Retirée"
+
+    waste_request = models.ForeignKey(
+        WasteRequest, on_delete=models.CASCADE, related_name="offers"
+    )
+    collector = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE, related_name="collection_offers"
+    )
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    proposed_date = models.DateTimeField()
+    message = models.CharField(max_length=300, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    decision_note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["waste_request", "collector"],
+                name="unique_offer_per_collector_per_request",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.collector.username} · {self.waste_request}"
+
+    def withdraw(self, by_user):
+        with transaction.atomic():
+            offer = type(self).objects.select_for_update().get(pk=self.pk)
+            if offer.collector_id != by_user.pk:
+                raise ValueError("Vous ne pouvez pas retirer cette proposition.")
+            if offer.status != self.Status.PENDING:
+                raise ValueError("Seule une proposition en attente peut être retirée.")
+            offer.status = self.Status.WITHDRAWN
+            offer.decided_at = timezone.now()
+            offer.save(update_fields=["status", "decided_at"])
 
     def release(self, by_user):
         with transaction.atomic():
-            locked = type(self).objects.select_for_update().get(pk=self.pk)
-            if locked.status != Status.PLANNED or locked.collector_id != by_user.pk:
-                raise ValueError("Vous ne pouvez pas vous désister de cette demande.")
-            locked.change_status(Status.REQUESTED, by_user)
-            locked.collector = None
-            locked.collector_latitude = None
-            locked.collector_longitude = None
-            locked.planned_date = None
-            locked.save(update_fields=[
+            current = type(self).objects.get(pk=self.pk)
+            request = WasteRequest.objects.select_for_update().get(pk=current.waste_request_id)
+            offer = type(self).objects.select_for_update().get(pk=self.pk)
+            if offer.collector_id != by_user.pk:
+                raise ValueError("Vous ne pouvez pas vous désister de cette proposition.")
+            if offer.status != self.Status.ACCEPTED or request.status != Status.PLANNED:
+                raise ValueError("Cette proposition acceptée ne peut plus être libérée.")
+            request.change_status(Status.REQUESTED, by_user)
+            request.collector = None
+            request.collector_latitude = None
+            request.collector_longitude = None
+            request.planned_date = None
+            request.save(update_fields=[
                 "collector", "collector_latitude", "collector_longitude", "planned_date"
             ])
-
-        self.refresh_from_db()
+            offer.status = self.Status.WITHDRAWN
+            offer.decided_at = timezone.now()
+            offer.save(update_fields=["status", "decided_at"])
 
 
 class WasteStatusLog(models.Model):

@@ -338,3 +338,110 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 }
 .map-picker .help { font-size: 13px; color: #5c5c5c; margin-top: 6px; }
 .field input[type="checkbox"] { width: auto; margin-right: 8px; }
+
+/* ===== Détail d'une demande et propositions ===== */
+.request-chips,
+.offer-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    border: 1px solid var(--olive-border);
+    border-radius: 999px;
+    background: var(--porcelain);
+    color: var(--black-forest);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.request-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.offer-card { margin-bottom: 12px; }
+.offer-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.offer-top h3 { margin: 0; }
+.offer-message {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-left: 4px solid var(--palm-leaf);
+    background: var(--porcelain);
+}
+.offer-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}
+.offer-actions > form,
+.decline-box {
+    width: 100%;
+    margin: 0;
+}
+.offer-actions > form .btn,
+.decline-box > summary {
+    width: 100%;
+    min-height: 44px;
+    min-width: 0;
+}
+.btn-sm {
+    padding: 10px 16px;
+    font-size: 15px;
+}
+.decline-box summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    cursor: pointer;
+}
+.decline-box summary::-webkit-details-marker { display: none; }
+.decline-box[open] summary { background: var(--muted-olive); }
+.decline-box form {
+    min-width: 280px;
+    margin-top: 10px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid var(--olive-border);
+    border-radius: 12px;
+}
+.decline-box form > div { margin-bottom: 10px; }
+.decline-box form label {
+    display: block;
+    margin-bottom: 6px;
+}
+.decline-box form input,
+.decline-box form textarea {
+    width: 100%;
+    padding: 9px 10px;
+    font-family: inherit;
+    font-size: 14px;
+    border: 2px solid var(--palm-leaf);
+    border-radius: 8px;
+}
+.decline-box form .btn { width: 100%; }
+.status-pending { background: var(--sky-blue); }
+.status-accepted { background: var(--success-bg); }
+.status-declined,
+.status-withdrawn { background: var(--olive-border); }
+
+@media (max-width: 600px) {
+    .offer-actions { grid-template-columns: 1fr; }
+    .offer-actions > form,
+    .decline-box,
+    .decline-box summary { width: 100%; }
+    .decline-box form { min-width: 0; }
+}

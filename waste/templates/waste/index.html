@@ -6,14 +6,22 @@
 <div class="page-actions">
     <a href="{% url 'waste:create' %}" class="btn btn-primary">Déclarer un déchet</a>
     <a href="{% url 'waste:market' %}" class="btn btn-secondary">Collecter un déchet</a>
-    <a href="{% url 'waste:my_collections' %}" class="btn btn-secondary">Mes collectes</a>
+    <a href="{% url 'waste:my_offers' %}" class="btn btn-secondary">Mes propositions</a>
 </div>
+{% if has_pending_offers %}
+    <div class="msg msg-info">Vous avez des propositions de collecte à examiner.</div>
+{% endif %}
 
 {% for r in requests %}
 <div class="card" style="margin-bottom:12px">
     <div class="card-head">
-        <h3>{{ r.get_waste_type_display }} · {{ r.estimated_weight }} kg</h3>
+        <h3><a href="{% url 'waste:detail' r.pk %}">
+            {{ r.get_waste_type_display }} · {{ r.estimated_weight }} kg
+        </a></h3>
         <span class="badge">{{ r.get_status_display }}</span>
+        {% if r.pending_offers %}
+            <span class="badge">{{ r.pending_offers }} proposition(s) à examiner</span>
+        {% endif %}
     </div>
     <p class="meta">{{ r.address }} · {{ r.created_at|date:"d/m/Y" }}</p>
     {% if r.collector %}

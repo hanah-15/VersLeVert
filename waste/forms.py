@@ -27,13 +27,19 @@ class WasteRequestForm(RequiresPositionMixin, forms.ModelForm):
         error_messages = {"address": {"required": "Ce champ est obligatoire."}}
 
 
-class ClaimForm(forms.Form):
+class OfferForm(forms.Form):
     planned_date = forms.DateTimeField(
-        label="Date et heure de passage",
+        label="Date et heure de passage proposées",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
     )
     latitude = forms.FloatField(required=False, widget=forms.HiddenInput)
     longitude = forms.FloatField(required=False, widget=forms.HiddenInput)
+    message = forms.CharField(
+        required=False,
+        max_length=300,
+        label="Message pour le déposant (facultatif)",
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
 
     def clean(self):
         data = super().clean()
@@ -43,6 +49,14 @@ class ClaimForm(forms.Form):
         if data.get("latitude") is None or data.get("longitude") is None:
             self.add_error(None, "Choisissez votre position sur la carte.")
         return data
+
+
+class DeclineForm(forms.Form):
+    note = forms.CharField(
+        required=False,
+        max_length=255,
+        label="Motif (facultatif)",
+    )
 
 
 class MarketFilterForm(forms.Form):
