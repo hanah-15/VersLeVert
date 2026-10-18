@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Planifier une collecte · Vers le Vert{% endblock %}
+{% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
+
+{% block content %}
+<div class="auth-card" style="max-width:640px">
+    <h2>Planifier une collecte</h2>
+    <p>
+        {{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg
+        · Déclaré par {{ waste_request.user.username }}
+    </p>
+    {% if form.non_field_errors %}
+        <div class="msg msg-error">{% for error in form.non_field_errors %}{{ error }} {% endfor %}</div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            {% include "components/form_field.html" %}
+        {% endfor %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" %}
+        <button type="submit" class="btn btn-primary btn-block">Confirmer la collecte</button>
+    </form>
+</div>
+{% endblock %}

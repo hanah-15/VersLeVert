@@ -4,10 +4,10 @@ from .models import EmissionFactor, WasteRequest, WasteStatusLog
 
 @admin.register(WasteRequest)
 class WasteRequestAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "waste_type", "estimated_weight", "confirmed_weight",
-                    "status", "collector", "created_at")
+    list_display = ("user", "waste_type", "estimated_weight", "status",
+                    "collector", "planned_date")
     list_filter = ("status", "waste_type")
-    search_fields = ("user__username", "address")
+    search_fields = ("user__username", "collector__username")
 
 
 @admin.register(EmissionFactor)

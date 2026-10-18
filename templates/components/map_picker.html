@@ -1,0 +1,10 @@
+<div class="map-picker" data-lat-input="{{ lat_id }}" data-lon-input="{{ lon_id }}">
+    <label>{{ label|default:"Position sur la carte" }}</label>
+    <div class="map-tools">
+        <input type="text" class="map-search" placeholder="Rechercher une adresse ou une ville">
+        <button type="button" class="btn btn-secondary map-search-btn">Rechercher</button>
+        <button type="button" class="btn btn-secondary map-locate-btn">Ma position</button>
+    </div>
+    <div class="map-canvas"></div>
+    <div class="help">Cliquez sur la carte ou déplacez le repère pour placer la position.</div>
+</div>

@@ -77,6 +77,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 
 .btn-block { width: 100%; }
 
+.page-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 20px;
+}
+
 /* ===== 04 · FORMULAIRES ===== */
 .field { margin-bottom: 18px; }
 .field label { display: block; margin-bottom: 6px; }
@@ -158,7 +165,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 10px 14px 10px 22px;
     background: var(--black-forest);
@@ -186,7 +193,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
     gap: 16px;
 }
 .nav-menu-guest { justify-content: flex-end; }
-.nav-links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.nav-links { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
 
 .navbar a.nav-link,
 .navbar .nav-btn {
@@ -195,11 +202,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
     font-family: inherit;
     font-size: 15px;
     font-weight: 700;
-    padding: 8px 14px;
+    padding: 8px 10px;
     border-radius: 10px;
     background: none;
     border: none;
     cursor: pointer;
+    white-space: nowrap;
     transition: background .15s, color .15s;
 }
 .navbar a.nav-link:hover,
@@ -235,7 +243,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 }
 
 /* Mobile */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
     .nav-burger { display: block; }
     .nav-menu {
         display: none;
@@ -313,3 +321,20 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 }
 .auth-card h2 { margin-bottom: 20px; }
 .auth-foot { margin-top: 18px; font-size: 15px; }
+
+
+/* ===== Hana Sélecteur de position (carte) ===== */
+.map-picker { margin-bottom: 18px; }
+.map-picker > label { display: block; margin-bottom: 6px; }
+.map-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.map-tools input {
+    flex: 1; min-width: 180px; padding: 10px 12px; font-family: inherit;
+    font-size: 15px; border: 2px solid var(--palm-leaf); border-radius: 10px;
+}
+.map-tools .btn { padding: 8px 14px; font-size: 14px; }
+.map-canvas {
+    position: relative; z-index: 0;   /* garde la carte sous la navbar */
+    height: 320px; border: 2px solid var(--palm-leaf); border-radius: 12px;
+}
+.map-picker .help { font-size: 13px; color: #5c5c5c; margin-top: 6px; }
+.field input[type="checkbox"] { width: auto; margin-right: 8px; }

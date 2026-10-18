@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
+from django.utils import timezone
 
 
 class WasteType(models.TextChoices):
@@ -22,7 +23,7 @@ class Status(models.TextChoices):
 # statuts autorisés à partir de chaque statut
 ALLOWED_TRANSITIONS = {
     Status.REQUESTED: {Status.PLANNED, Status.REFUSED, Status.CANCELLED},
-    Status.PLANNED: {Status.COLLECTED, Status.REFUSED},
+    Status.PLANNED: {Status.REQUESTED, Status.COLLECTED, Status.REFUSED},
     Status.COLLECTED: {Status.CONFIRMED},
     Status.CONFIRMED: set(),
     Status.REFUSED: set(),
@@ -48,9 +49,8 @@ class EmissionFactor(models.Model):
 class WasteRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                              related_name="waste_requests")
-    # À brancher sur accounts.CollectorProfile quand M1 l'aura poussé
-    collector = models.ForeignKey("accounts.CollectorProfile", on_delete=models.SET_NULL,
-                                  null=True, blank=True, related_name="waste_requests")
+    collector = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                  null=True, blank=True, related_name="collections")
     waste_type = models.CharField(max_length=10, choices=WasteType.choices)
     estimated_weight = models.DecimalField(max_digits=7, decimal_places=2,
                                            validators=[MinValueValidator(Decimal("0.01"))])
@@ -58,6 +58,8 @@ class WasteRequest(models.Model):
     address = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    collector_latitude = models.FloatField(null=True, blank=True)
+    collector_longitude = models.FloatField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     planned_date = models.DateTimeField(null=True, blank=True)
     refusal_reason = models.CharField(max_length=255, blank=True)
@@ -84,6 +86,45 @@ class WasteRequest(models.Model):
                                       new_status=new_status, changed_by=by_user)
         self.status = new_status
         self.save()
+
+    def claim(self, collector_user, lat, lon, planned_date):
+        if lat is None or lon is None:
+            raise ValueError("Choisissez votre position sur la carte.")
+        if planned_date <= timezone.now():
+            raise ValueError("La date doit être dans le futur.")
+
+        with transaction.atomic():
+            locked = type(self).objects.select_for_update().get(pk=self.pk)
+            if locked.status != Status.REQUESTED or locked.collector_id is not None:
+                raise ValueError("Cette demande n'est plus disponible.")
+            if locked.user_id == collector_user.pk:
+                raise ValueError("Vous ne pouvez pas collecter votre propre demande.")
+            locked.change_status(Status.PLANNED, collector_user)
+            locked.collector = collector_user
+            locked.collector_latitude = lat
+            locked.collector_longitude = lon
+            locked.planned_date = planned_date
+            locked.save(update_fields=[
+                "collector", "collector_latitude", "collector_longitude", "planned_date"
+            ])
+
+        self.refresh_from_db()
+
+    def release(self, by_user):
+        with transaction.atomic():
+            locked = type(self).objects.select_for_update().get(pk=self.pk)
+            if locked.status != Status.PLANNED or locked.collector_id != by_user.pk:
+                raise ValueError("Vous ne pouvez pas vous désister de cette demande.")
+            locked.change_status(Status.REQUESTED, by_user)
+            locked.collector = None
+            locked.collector_latitude = None
+            locked.collector_longitude = None
+            locked.planned_date = None
+            locked.save(update_fields=[
+                "collector", "collector_latitude", "collector_longitude", "planned_date"
+            ])
+
+        self.refresh_from_db()
 
 
 class WasteStatusLog(models.Model):

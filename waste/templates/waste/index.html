@@ -3,7 +3,11 @@
 
 {% block content %}
 <h1>Mes déchets</h1>
-<p><a href="{% url 'waste:create' %}" class="btn btn-primary">Déclarer un déchet</a></p>
+<div class="page-actions">
+    <a href="{% url 'waste:create' %}" class="btn btn-primary">Déclarer un déchet</a>
+    <a href="{% url 'waste:market' %}" class="btn btn-secondary">Collecter un déchet</a>
+    <a href="{% url 'waste:my_collections' %}" class="btn btn-secondary">Mes collectes</a>
+</div>
 
 {% for r in requests %}
 <div class="card" style="margin-bottom:12px">
@@ -12,6 +16,12 @@
         <span class="badge">{{ r.get_status_display }}</span>
     </div>
     <p class="meta">{{ r.address }} · {{ r.created_at|date:"d/m/Y" }}</p>
+    {% if r.collector %}
+        <p class="meta">Collecteur : {{ r.collector.username }}</p>
+        {% if r.planned_date %}
+            <p class="meta">Passage prévu le {{ r.planned_date|date:"d/m/Y à H:i" }}</p>
+        {% endif %}
+    {% endif %}
 </div>
 {% empty %}
 <div class="msg msg-info">Aucune demande pour l'instant.</div>
