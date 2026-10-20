@@ -1,0 +1,4 @@
+<div class="flex items-start gap-3 rounded-md-ui p-3.5 px-4 text-[15px] {% if variant == 'success' %}bg-olive/50 text-forest{% elif variant == 'error' %}border-2 border-brick bg-porcelain text-carbon{% else %}bg-sky text-forest{% endif %}" role="alert">
+    {% if variant == "error" %}<span aria-hidden="true" class="font-bold text-brick">!</span>{% endif %}
+    <span>{{ message }}</span>
+</div>

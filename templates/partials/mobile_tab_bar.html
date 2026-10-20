@@ -1,0 +1,18 @@
+<nav class="fixed inset-x-0 bottom-0 z-40 border-t border-olive bg-porcelain px-2 pb-[env(safe-area-inset-bottom)] pt-1 md:hidden" aria-label="Navigation mobile">
+    <div class="grid grid-cols-5 gap-1">
+        {% for item in mobile_nav_items %}
+            <a href="{{ item.url }}" class="flex min-h-[46px] flex-col items-center justify-center rounded-sm-ui text-xs font-bold text-forest focus:outline-none focus:ring-4 focus:ring-sky {% if request.resolver_match.namespace == item.namespace and item.namespace or not item.namespace and request.resolver_match.url_name == item.url_name %}bg-porcelain border-t-2 border-palm{% endif %}">{% include "partials/icon.html" with name=item.icon %}<span>{{ item.label }}</span></a>
+        {% endfor %}
+        <details class="relative">
+            <summary class="flex min-h-[46px] cursor-pointer list-none flex-col items-center justify-center rounded-sm-ui text-xs font-bold text-forest focus:outline-none focus:ring-4 focus:ring-sky"><span class="text-xl">⋯</span><span>Plus</span></summary>
+            <div class="absolute bottom-14 right-0 w-64 rounded-md-ui border border-olive bg-porcelain p-2 shadow-lg">
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'events:index' %}">Événements</a>
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'places:index' %}">Lieux</a>
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'profile-overview' %}">Profil</a>
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'waste-create' %}">Publier un déchet</a>
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'proof-create' %}">Ajouter une preuve</a>
+                {% if is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
+            </div>
+        </details>
+    </div>
+</nav>

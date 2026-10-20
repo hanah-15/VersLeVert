@@ -2,7 +2,7 @@
 {% block title %}Déchets · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Déchets</h1>
+<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Déchets</h1>
 <p>Suivez vos déchets organiques et plastiques.</p>
-<div class="msg msg-info">Module en cours de développement.</div>
+{% include "partials/alert.html" with variant="info" message="Module en cours de développement." %}
 {% endblock %}

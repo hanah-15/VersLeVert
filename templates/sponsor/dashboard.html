@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Espace sponsor | Vers le Vert{% endblock %}
+{% block content %}
+<section>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <h1 class="font-heading text-h1 font-bold text-forest">Espace sponsor</h1>
+        <span class="rounded-full bg-olive px-3 py-1 text-sm font-bold text-forest">{{ sponsor.get_status_display }}</span>
+    </div>
+    <p class="mt-2 text-carbon">{{ sponsor.business_name }}</p>
+    <div class="mt-6 flex flex-wrap gap-3">
+        <a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-shop' %}">Gérer la boutique</a>
+        <a class="rounded-md-ui border-2 border-forest px-5 py-2.5 font-bold text-forest" href="{% url 'sponsor-stats' %}">Voir les statistiques</a>
+        <a class="rounded-md-ui border-2 border-forest px-5 py-2.5 font-bold text-forest" href="{% url 'sponsor-profile' %}">Profil entreprise</a>
+    </div>
+</section>
+{% endblock %}

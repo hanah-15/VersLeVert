@@ -2,15 +2,15 @@
 {% block title %}Récompenses · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Récompenses</h1>
+<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Récompenses</h1>
 <p>Échangez vos points contre des offres de nos partenaires.</p>
 
-<div class="grid grid-3">
+<div class="mb-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
     {% include "components/stat_tile.html" with label="Points" value="1 240" %}
     {% include "components/stat_tile.html" with label="Badges" value="7" %}
 </div>
 
-<div class="grid grid-2">
+<div class="mb-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
     {% include "components/offer_card.html" with title="[Nom de l'offre]" points=300 sponsor="[Nom du sponsor]" description="[Description de l'offre.]" %}
 </div>
 {% endblock %}

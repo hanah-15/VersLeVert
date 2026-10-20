@@ -1,0 +1,8 @@
+<article class="flex flex-col gap-3.5 rounded-lg-ui border border-olive bg-olive/25 p-6">
+    <div class="flex items-start justify-between gap-3">
+        <h3 class="font-heading text-[20px] font-semibold leading-tight text-forest">{{ title }}</h3>
+        <span class="inline-flex rounded-full bg-olive px-3 py-[5px] text-[13px] font-bold text-forest">+{{ points }} pts</span>
+    </div>
+    {% include "partials/progress.html" with value=current maximum=goal percent=percent %}
+    <small class="text-[13px]">{{ current }} / {{ goal }} {{ unit }}</small>
+</article>

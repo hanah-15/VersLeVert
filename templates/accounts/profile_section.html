@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ section_title }} · Vers le Vert{% endblock %}
+{% block content %}
+<div class="grid gap-6 md:grid-cols-[220px_1fr]">
+    <aside>{% include "partials/profile_sidebar.html" %}</aside>
+    <section class="min-w-0">
+        <h1 class="font-heading text-h1 font-bold text-forest">{{ section_title }}</h1>
+        {% if section == "profile" %}
+            <form method="post" enctype="multipart/form-data" class="card mt-6 flex flex-col gap-4 rounded-lg-ui border border-olive bg-olive/25 p-6">{% csrf_token %}{{ form.as_p }}<p class="text-sm text-carbon">E-mail : {{ email }} (non modifiable)</p><button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky" type="submit">Enregistrer</button></form>
+        {% elif section == "sponsor" %}
+            {% if application.status == "APPROVED" %}<div class="alert-info mt-6 rounded-md-ui bg-olive/50 p-4 text-forest">Votre demande est approuvée. <a class="font-bold underline" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div>
+            {% elif application.status == "PENDING" %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Demande en cours de vérification.</div>
+            {% elif application.status == "REJECTED" %}<div class="alert-error mt-6 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">Demande rejetée : {{ application.rejection_reason }}. <a class="font-bold text-forest underline" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div>
+            {% else %}<div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-apply' %}">Devenir sponsor</a></div>{% endif %}
+        {% elif section == "notifications" %}
+            <div class="mt-6 grid gap-3">{% for notification in user.notifications.all %}<div class="rounded-md-ui border border-olive p-4">{{ notification.message }}</div>{% empty %}<p class="mt-6">Aucune notification.</p>{% endfor %}</div>
+        {% elif section == "security" %}
+            <div class="mt-6 flex flex-wrap gap-3"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="rounded-md-ui border-2 border-brick px-5 py-2.5 font-bold text-brick" type="submit">Se déconnecter</button></form></div>
+        {% elif section == "points" %}
+            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
+                <p class="text-[13px] font-bold uppercase tracking-[0.09em] text-forest">Solde actuel</p>
+                <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ points_balance }} pts</strong>
+                <p class="mt-3 text-sm text-carbon">L'historique des points sera disponible prochainement (module dédié).</p>
+            </div>
+        {% elif section == "proofs" %}
+            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
+                <p class="text-carbon">Les actions prouvées (preuves validées) apparaîtront ici. Elles servent à valider des défis et générer des points.</p>
+            </div>
+        {% else %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Bientôt disponible. TODO : données du module {{ section }}.</div>{% endif %}
+    </section>
+</div>
+{% endblock %}

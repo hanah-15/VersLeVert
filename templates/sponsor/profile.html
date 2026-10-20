@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-heading text-h1 font-bold text-forest">Profil entreprise</h1>
+<article class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
+    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-4">{% csrf_token %}{{ form.as_p }}<button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" type="submit">Enregistrer</button></form>
+</article>
+{% endblock %}
