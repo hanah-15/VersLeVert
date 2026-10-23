@@ -56,6 +56,11 @@ class WasteRequest(models.Model):
                                            validators=[MinValueValidator(Decimal("0.01"))])
     confirmed_weight = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     address = models.CharField(max_length=255)
+    #ajout champs dedie au image 
+    image = models.ImageField(upload_to="waste/images/",
+         blank=True,
+         null=True
+        )   
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     collector_latitude = models.FloatField(null=True, blank=True)

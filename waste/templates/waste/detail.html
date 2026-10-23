@@ -16,6 +16,9 @@
             <span class="chip">Passage prévu le {{ waste_request.planned_date|date:"d/m/Y à H:i" }}</span>
         {% endif %}
     </div>
+    {% if waste_request.image %}
+        <img src="{{ waste_request.image.url }}" alt="Photo du déchet" class="waste-image waste-detail-image">
+    {% endif %}
     {% if waste_request.status == "requested" %}
         <div class="request-actions">
             <form method="post" action="{% url 'waste:cancel' waste_request.pk %}">

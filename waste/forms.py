@@ -17,7 +17,7 @@ class RequiresPositionMixin:
 class WasteRequestForm(RequiresPositionMixin, forms.ModelForm):
     class Meta:
         model = WasteRequest
-        fields = ("waste_type", "estimated_weight", "address", "latitude", "longitude")
+        fields = ("waste_type", "estimated_weight", "address", "image", "latitude", "longitude")
         widgets = HIDDEN_COORDS
         labels = {
             "waste_type": "Type de déchet",
@@ -25,6 +25,12 @@ class WasteRequestForm(RequiresPositionMixin, forms.ModelForm):
             "address": "Adresse de collecte",
         }
         error_messages = {"address": {"required": "Ce champ est obligatoire."}}
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image and image.name.lower().split(".")[-1] not in {"jpg", "jpeg", "png"}:
+            raise forms.ValidationError("Formats acceptés : JPG, JPEG ou PNG.")
+        return image
 
 
 class OfferForm(forms.Form):

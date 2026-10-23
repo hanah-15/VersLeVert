@@ -24,6 +24,9 @@
         {% endif %}
     </div>
     <p class="meta">{{ r.address }} · {{ r.created_at|date:"d/m/Y" }}</p>
+    {% if r.image %}
+        <img src="{{ r.image.url }}" alt="Photo du déchet" class="waste-image">
+    {% endif %}
     {% if r.collector %}
         <p class="meta">Collecteur : {{ r.collector.username }}</p>
         {% if r.planned_date %}

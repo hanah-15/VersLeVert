@@ -445,3 +445,19 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
     .decline-box summary { width: 100%; }
     .decline-box form { min-width: 0; }
 }
+
+.waste-image {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: 180px;
+    margin-top: 12px;
+    border: 1px solid var(--olive-border);
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.waste-detail-image {
+    max-width: 520px;
+    height: 300px;
+}

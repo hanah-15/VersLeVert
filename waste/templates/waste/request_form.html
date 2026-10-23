@@ -10,7 +10,9 @@
         <div class="msg msg-error">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>
     {% endif %}
 
-    <form method="post">
+    #enctype="multipart/form-data" ajouter pour acceêter form fichier dans formulaire
+
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form.visible_fields %}
             {% include "components/form_field.html" %}
