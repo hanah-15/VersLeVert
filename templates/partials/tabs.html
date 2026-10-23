@@ -1,0 +1,5 @@
+<nav class="flex max-w-full gap-1 overflow-x-auto whitespace-nowrap border-b border-olive pb-1" aria-label="{{ tabs_label|default:'Navigation secondaire' }}">
+    {% for tab in tabs %}
+        <a href="{% url tab.url_name %}" class="rounded-sm-ui px-3 py-2 font-bold text-forest no-underline focus:outline-none focus:ring-4 focus:ring-sky {% if request.resolver_match.url_name == tab.url_name %}bg-olive{% endif %}">{{ tab.label }}</a>
+    {% endfor %}
+</nav>

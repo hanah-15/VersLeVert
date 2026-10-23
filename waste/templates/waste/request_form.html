@@ -3,16 +3,14 @@
 {% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
 
 {% block content %}
-<div class="auth-card" style="max-width:640px">
-    <h2>Déclarer un déchet trié</h2>
+<div class="mx-auto max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
+    <h2 class="font-heading text-h2 font-bold text-forest">Déclarer un déchet trié</h2>
 
     {% if form.non_field_errors %}
-        <div class="msg msg-error">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>
+        <div class="mt-4 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>
     {% endif %}
 
-    #enctype="multipart/form-data" ajouter pour acceêter form fichier dans formulaire
-
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5">
         {% csrf_token %}
         {% for field in form.visible_fields %}
             {% include "components/form_field.html" %}
@@ -21,7 +19,7 @@
 
         {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Emplacement de collecte" %}
 
-        <button type="submit" class="btn btn-primary btn-block">Envoyer la demande</button>
+        <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-3 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Envoyer la demande</button>
     </form>
 </div>
 {% endblock %}

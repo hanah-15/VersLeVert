@@ -2,7 +2,7 @@
 {% block title %}Événements · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Événements</h1>
+<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Événements</h1>
 <p>Découvrez les événements à venir dans votre région.</p>
-<div class="msg msg-info">Module en cours de développement.</div>
+{% include "partials/alert.html" with variant="info" message="Module en cours de développement." %}
 {% endblock %}

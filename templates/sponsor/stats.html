@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-heading text-h1 font-bold text-forest">Mes statistiques</h1>
+<div class="mt-6 grid gap-4 md:grid-cols-3">
+    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Offres</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ offer_count }}</strong></div>
+    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Actives</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ active_count }}</strong></div>
+    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Échanges</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ redeemed_count }}</strong></div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+<header class="sticky top-0 z-50 px-4 pt-3 sm:px-6">
+    <nav class="mx-auto flex w-full items-center justify-between gap-4 rounded-lg-ui bg-palm px-4 py-2.5 sm:gap-6 sm:px-6 sm:py-3 min-[901px]:w-[85vw]" aria-label="Navigation principale">
+        <a href="{% url 'home' %}" class="flex shrink-0 items-center gap-2 font-heading text-xl font-bold text-porcelain no-underline focus:outline-none focus:ring-4 focus:ring-sky">
+            <img src="{% static 'images/logo1.png' %}" alt="" class="h-10 w-10"><span class="hidden sm:inline">Vers le Vert</span>
+        </a>
+        {% if user.is_authenticated %}
+            <div class="hidden flex-1 items-center justify-center gap-3 min-[901px]:flex">
+                {% for item in nav_items %}
+                    <a href="{{ item.url }}" class="rounded-lg-ui px-5 py-2.5 font-bold no-underline focus:outline-none focus:ring-4 focus:ring-sky {% if item.active %}bg-porcelain text-palm hover:bg-porcelain hover:text-palm{% else %}text-porcelain hover:bg-palm hover:text-forest{% endif %}" {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>
+                {% endfor %}
+            </div>
+            <div class="flex items-center gap-2.5">
+                <a href="{% url 'profile-section' 'points' %}" class="badge inline-flex items-center gap-1 focus:outline-none focus:ring-4 focus:ring-sky" aria-label="{{ points_balance }} points">{{ points_balance }} pts</a>
+                <a href="{% url 'notifications' %}" class="relative rounded-full p-2 text-forest focus:outline-none focus:ring-4 focus:ring-sky" aria-label="Notifications, {{ unread_notifications }} non lues">
+                    {% include "partials/icon.html" with name="bell" %}
+                    {% if unread_notifications %}<span class="absolute -right-1 -top-1 rounded-full bg-brick px-1.5 text-xs font-bold text-porcelain">{% if unread_notifications > 9 %}9+{% else %}{{ unread_notifications }}{% endif %}</span>{% endif %}
+                </a>
+                {% include "partials/avatar_menu.html" %}
+            </div>
+        {% else %}
+            <div class="flex items-center gap-2">
+                <a href="{% url 'login' %}" class="rounded-md-ui border-2 border-forest bg-transparent px-4 py-2 font-bold text-forest no-underline focus:outline-none focus:ring-4 focus:ring-sky">Se connecter</a>
+                <a href="{% url 'signup' %}" class="rounded-md-ui border-2 border-forest bg-forest px-4 py-2 font-bold text-porcelain no-underline focus:outline-none focus:ring-4 focus:ring-sky">S'inscrire</a>
+            </div>
+        {% endif %}
+    </nav>
+</header>
+{% if user.is_authenticated %}
+    {% include "partials/mobile_tab_bar.html" %}
+{% endif %}
+{% include "partials/quick_actions.html" %}
+<script>
+document.addEventListener("click", function (event) {
+    document.querySelectorAll("details[open]").forEach(function (menu) {
+        if (!menu.contains(event.target)) menu.removeAttribute("open");
+    });
+});
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") document.querySelectorAll("details[open]").forEach(function (menu) { menu.removeAttribute("open"); });
+});
+</script>

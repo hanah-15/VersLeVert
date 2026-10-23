@@ -2,7 +2,7 @@
 {% block title %}Lieux · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Lieux éco-responsables</h1>
+<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Lieux éco-responsables</h1>
 <p>Découvrez des adresses et recommandations près de chez vous.</p>
-<div class="msg msg-info">Module en cours de développement.</div>
+{% include "partials/alert.html" with variant="info" message="Module en cours de développement." %}
 {% endblock %}

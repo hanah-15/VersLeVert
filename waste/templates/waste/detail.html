@@ -2,72 +2,74 @@
 {% block title %}Détail de la demande · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Détail de la demande</h1>
-<div class="card">
-    <div class="card-head">
-        <h3>{{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg</h3>
-        <span class="badge status-{{ waste_request.status }}">{{ waste_request.get_status_display }}</span>
+<div class="mx-auto max-w-page">
+<h1 class="font-heading text-h1 font-bold text-forest">Détail de la demande</h1>
+<section class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-5 sm:p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <h3 class="font-heading text-h3 font-bold text-forest">{{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg</h3>
+        <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">{{ waste_request.get_status_display }}</span>
     </div>
-    <div class="request-chips">
-        <span class="chip">{{ waste_request.address }}</span>
-        <span class="chip">{{ waste_request.created_at|date:"d/m/Y" }}</span>
+    <div class="mt-4 flex flex-wrap gap-2">
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ waste_request.address }}</span>
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ waste_request.created_at|date:"d/m/Y" }}</span>
         {% if waste_request.collector %}
-            <span class="chip">Collecteur : {{ waste_request.collector.username }}</span>
-            <span class="chip">Passage prévu le {{ waste_request.planned_date|date:"d/m/Y à H:i" }}</span>
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">Collecteur : {{ waste_request.collector.username }}</span>
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">Passage prévu le {{ waste_request.planned_date|date:"d/m/Y à H:i" }}</span>
         {% endif %}
     </div>
     {% if waste_request.image %}
-        <img src="{{ waste_request.image.url }}" alt="Photo du déchet" class="waste-image waste-detail-image">
+        <img src="{{ waste_request.image.url }}" alt="Photo du déchet" class="mt-4 h-72 w-full max-w-xl rounded-md-ui border border-olive object-cover">
     {% endif %}
     {% if waste_request.status == "requested" %}
         <div class="request-actions">
             <form method="post" action="{% url 'waste:cancel' waste_request.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">Annuler la demande</button>
+                <button type="submit" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Annuler la demande</button>
             </form>
         </div>
     {% endif %}
-</div>
+</section>
 
-<h2>Propositions</h2>
+<h2 class="mt-10 font-heading text-h2 font-bold text-forest">Propositions</h2>
 {% for row in offers %}
-    <div class="card offer-card">
-        <div class="offer-top">
-            <h3>{{ row.offer.collector.username }}</h3>
-            <span class="badge status-{{ row.offer.status }}">{{ row.offer.get_status_display }}</span>
+    <article class="mt-4 rounded-lg-ui border border-olive bg-olive/25 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <h3 class="font-heading text-h3 font-bold text-forest">{{ row.offer.collector.username }}</h3>
+            <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">{{ row.offer.get_status_display }}</span>
         </div>
-        <div class="offer-chips">
+        <div class="mt-4 flex flex-wrap gap-2">
             {% if row.distance is not None %}
-                <span class="chip">{{ row.distance|floatformat:1 }} km</span>
+                <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ row.distance|floatformat:1 }} km</span>
             {% endif %}
-            <span class="chip">{{ row.offer.proposed_date|date:"d/m/Y à H:i" }}</span>
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ row.offer.proposed_date|date:"d/m/Y à H:i" }}</span>
         </div>
-        {% if row.offer.message %}<p class="offer-message">{{ row.offer.message }}</p>{% endif %}
+        {% if row.offer.message %}<p class="mt-4 border-l-4 border-palm bg-porcelain p-3 text-carbon">{{ row.offer.message }}</p>{% endif %}
         {% if row.offer.status == "pending" and waste_request.status == "requested" %}
-            <div class="offer-actions">
+            <div class="mt-5 grid gap-3 sm:grid-cols-2">
                 <form method="post" action="{% url 'waste:offer_accept' row.offer.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Accepter</button>
+                    <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Accepter</button>
                 </form>
-                <details class="decline-box">
-                    <summary class="btn btn-secondary btn-sm">Refuser</summary>
-                    <form method="post" action="{% url 'waste:offer_decline' row.offer.pk %}">
+                <details class="group">
+                    <summary class="flex min-h-[44px] cursor-pointer list-none items-center justify-center rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Refuser</summary>
+                    <form method="post" class="mt-3 rounded-md-ui border border-olive bg-porcelain p-4" action="{% url 'waste:offer_decline' row.offer.pk %}">
                         {% csrf_token %}
                         {{ decline_form }}
-                        <button type="submit" class="btn btn-secondary btn-sm">Confirmer le refus</button>
+                        <button type="submit" class="mt-3 w-full rounded-md-ui border-2 border-brick px-4 py-2.5 font-bold text-brick hover:bg-brick hover:text-porcelain focus:outline-none focus:ring-4 focus:ring-sky">Confirmer le refus</button>
                     </form>
                 </details>
             </div>
         {% endif %}
-    </div>
+    </article>
 {% empty %}
-    <div class="msg msg-info">Aucune proposition pour cette demande.</div>
+    <div class="mt-4 rounded-md-ui bg-sky p-4 text-forest">Aucune proposition pour cette demande.</div>
 {% endfor %}
 
-<h2>Historique</h2>
+<h2 class="mt-10 font-heading text-h2 font-bold text-forest">Historique</h2>
 {% for log in waste_request.logs.all %}
-    <p class="meta">{{ log.old_status }} → {{ log.new_status }} · {{ log.changed_at }}</p>
+    <p class="mt-2 text-sm text-carbon">{{ log.old_status }} → {{ log.new_status }} · {{ log.changed_at }}</p>
 {% empty %}
-    <p>Aucun changement de statut.</p>
+    <p class="mt-2 text-sm text-carbon">Aucun changement de statut.</p>
 {% endfor %}
+</div>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from core.views import PlaceholderView
 
 app_name = "waste"
 

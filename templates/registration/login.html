@@ -2,13 +2,13 @@
 {% block title %}Connexion · Vers le Vert{% endblock %}
 
 {% block content %}
-<div class="auth-card">
-    <h2>Connexion</h2>
+<div class="mx-auto my-10 max-w-[440px] rounded-lg-ui border border-olive bg-porcelain p-8">
+    <h2 class="font-heading text-[28px] font-semibold leading-tight text-forest">Connexion</h2>
 
     {% if form.non_field_errors %}
-        <div class="msg msg-error">
-            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-        </div>
+        {% for error in form.non_field_errors %}
+            {% include "partials/alert.html" with variant="error" message=error %}
+        {% endfor %}
     {% endif %}
 
     <form method="post">
@@ -17,9 +17,9 @@
             {% include "components/form_field.html" %}
         {% endfor %}
         <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+        <button type="submit" class="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-md-ui border-2 border-forest bg-forest px-[22px] py-2.5 text-base font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Se connecter</button>
     </form>
 
-    <p class="auth-foot">Pas encore de compte ? <a href="{% url 'signup' %}">Inscris-toi</a></p>
+    <p class="mt-[18px] text-[15px]">Pas encore de compte ? <a href="{% url 'signup' %}">Inscris-toi</a></p>
 </div>
 {% endblock %}

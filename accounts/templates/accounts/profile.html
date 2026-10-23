@@ -2,10 +2,10 @@
 {% block title %}Profil · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Profil</h1>
-<div class="tile">
-    <div class="label">Nom d'utilisateur</div>
-    <div class="value" style="font-size:28px">{{ user.username }}</div>
+<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Profil</h1>
+<div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
+    <div class="text-sm font-bold text-carbon">Nom d'utilisateur</div>
+    <div class="font-heading text-[28px] font-bold leading-tight text-forest">{{ user.username }}</div>
     <p>{{ user.email }}</p>
 </div>
 {% endblock %}

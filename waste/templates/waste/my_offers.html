@@ -2,41 +2,47 @@
 {% block title %}Mes propositions · Vers le Vert{% endblock %}
 
 {% block content %}
-<h1>Mes propositions</h1>
-<div class="page-actions">
-    <a href="{% url 'waste:my_offers' %}" class="btn btn-secondary">Toutes</a>
+<div class="mx-auto max-w-page">
+<h1 class="font-heading text-h1 font-bold text-forest">Mes propositions</h1>
+<div class="mt-6 flex flex-wrap gap-2">
+    <a href="{% url 'waste:my_offers' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Toutes</a>
     {% for value, label in offer_statuses %}
-        <a href="?status={{ value }}" class="btn btn-secondary">{{ label }}</a>
+        <a href="?status={{ value }}" class="rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">{{ label }}</a>
     {% endfor %}
 </div>
+<div class="mt-8 grid gap-4">
 {% for offer in offers %}
-    <div class="card" style="margin-bottom:12px">
-        <div class="card-head">
-            <h3>{{ offer.waste_request.get_waste_type_display }} · {{ offer.waste_request.estimated_weight }} kg</h3>
-            <span class="badge">{{ offer.get_status_display }}</span>
+    <article class="rounded-lg-ui border border-olive bg-olive/25 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <h3 class="font-heading text-h3 font-bold text-forest">{{ offer.waste_request.get_waste_type_display }} · {{ offer.waste_request.estimated_weight }} kg</h3>
+            <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">{{ offer.get_status_display }}</span>
         </div>
-        <p class="meta">Déposant : {{ offer.waste_request.user.username }}</p>
-        <p class="meta">Date proposée : {{ offer.proposed_date|date:"d/m/Y à H:i" }}</p>
-        <p class="meta">Demande : {{ offer.waste_request.get_status_display }}</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-sm text-carbon">
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1">Déposant : {{ offer.waste_request.user.username }}</span>
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1">Date proposée : {{ offer.proposed_date|date:"d/m/Y à H:i" }}</span>
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1">Demande : {{ offer.waste_request.get_status_display }}</span>
+        </div>
         {% if offer.status == "declined" and offer.decision_note %}
-            <p>{{ offer.decision_note }}</p>
+            <p class="mt-4 rounded-md-ui border-l-4 border-brick bg-porcelain p-3 text-carbon">{{ offer.decision_note }}</p>
         {% endif %}
         {% if offer.status == "accepted" %}
-            <p>{{ offer.waste_request.address }}</p>
+            <p class="mt-4 rounded-md-ui bg-porcelain p-3 text-carbon">{{ offer.waste_request.address }}</p>
             {% if offer.waste_request.status == "planned" %}
                 <form method="post" action="{% url 'waste:offer_release' offer.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-secondary">Se désister</button>
+                    <button type="submit" class="mt-4 rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Se désister</button>
                 </form>
             {% endif %}
         {% elif offer.status == "pending" %}
             <form method="post" action="{% url 'waste:offer_withdraw' offer.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">Retirer la proposition</button>
+                <button type="submit" class="mt-4 rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Retirer la proposition</button>
             </form>
         {% endif %}
-    </div>
+    </article>
 {% empty %}
-    <div class="msg msg-info">Aucune proposition pour le moment.</div>
+    <div class="rounded-md-ui bg-sky p-4 text-forest">Aucune proposition pour le moment.</div>
 {% endfor %}
+</div>
+</div>
 {% endblock %}
