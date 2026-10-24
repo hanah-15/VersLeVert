@@ -20,6 +20,19 @@
     {% if waste_request.image %}
         <img src="{{ waste_request.image.url }}" alt="Photo du déchet" class="mt-4 h-72 w-full max-w-xl rounded-md-ui border border-olive object-cover">
     {% endif %}
+
+    {% if waste_request.status == "planned" %}
+        <div class="mt-4 rounded-md-ui bg-sky p-4 text-forest">Collecte planifiée. Le collecteur confirmera le poids réel sur place.</div>
+    {% endif %}
+
+    {% if waste_request.status == "confirmed" %}
+        <div class="mt-4 flex flex-wrap gap-2">
+            <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Poids confirmé : {{ waste_request.confirmed_weight }} kg</span>
+            <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">CO₂ évité : {{ waste_request.co2_avoided }} kg</span>
+            <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Points : {{ waste_request.points_awarded }}</span>
+        </div>
+    {% endif %}
+
     {% if waste_request.status == "requested" %}
         <div class="request-actions">
             <form method="post" action="{% url 'waste:cancel' waste_request.pk %}">
@@ -44,6 +57,7 @@
             <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ row.offer.proposed_date|date:"d/m/Y à H:i" }}</span>
         </div>
         {% if row.offer.message %}<p class="mt-4 border-l-4 border-palm bg-porcelain p-3 text-carbon">{{ row.offer.message }}</p>{% endif %}
+        {% if row.offer.decision_note %}<p class="mt-3 text-sm text-carbon">Motif : {{ row.offer.decision_note }}</p>{% endif %}
         {% if row.offer.status == "pending" and waste_request.status == "requested" %}
             <div class="mt-5 grid gap-3 sm:grid-cols-2">
                 <form method="post" action="{% url 'waste:offer_accept' row.offer.pk %}">

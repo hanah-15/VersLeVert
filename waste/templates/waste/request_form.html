@@ -18,6 +18,8 @@
         {% for field in form.hidden_fields %}{{ field }}{% endfor %}
 
         {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Emplacement de collecte" %}
+        {% include "components/position_status.html" with label="Position sélectionnée" %}
+
 
         <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-3 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Envoyer la demande</button>
     </form>

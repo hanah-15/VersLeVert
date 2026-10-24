@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function setPoint(lat, lon, zoom) {
       latInput.value = lat.toFixed(6);
       lonInput.value = lon.toFixed(6);
+      document.dispatchEvent(new CustomEvent("map:position", { detail: { lat: lat, lon: lon } }));
       if (marker) {
         marker.setLatLng([lat, lon]);
       } else {

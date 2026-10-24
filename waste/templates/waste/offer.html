@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Proposer une collecte · Vers le Vert{% endblock %}
 {% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
-
+{% include "components/position_status.html" with label="Votre position" %}
 {% block content %}
 <div class="mx-auto max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
     <h2 class="font-heading text-h2 font-bold text-forest">Proposer une collecte</h2>

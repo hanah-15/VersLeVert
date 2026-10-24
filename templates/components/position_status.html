@@ -1,0 +1,29 @@
+<div class="rounded-md-ui border border-olive bg-porcelain px-4 py-3 text-sm text-carbon" aria-live="polite">
+    <span class="font-bold text-forest">{{ label|default:"Position sélectionnée" }} :</span>
+    <span id="position-text">aucune. Cliquez sur la carte.</span>
+</div>
+
+<script>
+(function () {
+    var out = document.getElementById("position-text");
+    var timer = null;
+
+    document.addEventListener("map:position", function (e) {
+        var lat = e.detail.lat, lon = e.detail.lon;
+        out.textContent = lat.toFixed(5) + ", " + lon.toFixed(5);
+
+        // nom du lieu (facultatif), après une courte pause pour ne pas spammer pendant un glissement
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            fetch("https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&lat=" + lat + "&lon=" + lon)
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (d && d.display_name) {
+                        out.textContent = d.display_name + " (" + lat.toFixed(5) + ", " + lon.toFixed(5) + ")";
+                    }
+                })
+                .catch(function () { /* on garde les coordonnées */ });
+        }, 600);
+    });
+})();
+</script>
