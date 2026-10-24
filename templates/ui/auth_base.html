@@ -1,0 +1,20 @@
+{% extends "ui/base.html" %}
+{% load static %}
+{% block body_class %}auth-page{% endblock %}
+{% block navigation %}{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <aside class="auth-visual" aria-label="L'esprit Vers le Vert">
+    <img src="{% static 'images/forest-path.webp' %}" alt="" fetchpriority="high" width="1536" height="1024">
+    {% include "ui/brand.html" %}
+    <div class="auth-visual-copy"><span class="mb-5 inline-flex rounded-full border border-porcelain/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em]">Le changement est dans nos habitudes</span><div class="auth-quote">Un petit geste.<br>Un grand<br>pas vers le vert.</div><p>Des défis qui motivent, des découvertes qui inspirent, une communauté qui agit.</p><div class="auth-visual-foot">{% include "ui/icon.html" with name="leaf" %}Ensemble, cultivons un quotidien plus responsable.</div></div>
+  </aside>
+  <section class="auth-panel">
+    <div class="auth-panel-top">{% include "ui/brand.html" %}<a href="{% url 'home' %}">Retour à l'accueil <span aria-hidden="true">↗</span></a></div>
+    <div class="auth-form-wrap">{% block auth_content %}{% endblock %}</div>
+    <p class="auth-panel-foot">Vers le Vert · Des habitudes qui font la différence.</p>
+  </section>
+</div>
+{% endblock %}

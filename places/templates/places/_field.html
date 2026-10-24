@@ -1,6 +1,1 @@
-<div class="space-y-2">
-  <label for="{{ field.id_for_label }}" class="block text-sm font-bold text-forest">{{ field.label }}{% if field.field.required %} <span aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>{% endif %}</label>
-  {{ field }}
-  {% if field.help_text %}<p id="{{ field.id_for_label }}_help" class="text-sm text-carbon">{{ field.help_text }}</p>{% endif %}
-  {% if field.errors %}<div id="{{ field.id_for_label }}_errors" class="text-sm font-bold text-brick" role="alert">{{ field.errors }}</div>{% endif %}
-</div>
+<div class="ui-field"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-palm" aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>{% endif %}</label>{{ field }}{% if field.help_text %}<p id="{{ field.auto_id }}_helptext" class="ui-help">{{ field.help_text }}</p>{% endif %}{% if field.errors %}<div id="{{ field.auto_id }}_error" class="ui-errors" role="alert">{{ field.errors }}</div>{% endif %}</div>

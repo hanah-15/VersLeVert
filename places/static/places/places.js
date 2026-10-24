@@ -57,7 +57,7 @@ if (guideForm && window.fetch) {
       for (const [key, label] of [["places", "Lieu"], ["products", "Produit recommandé"]]) {
         for (const item of data[key]) {
           const card = document.createElement("article");
-          card.className = "rounded-lg-ui border border-olive bg-white p-6";
+          card.className = "ui-card p-6";
           const category = document.createElement("p");
           category.className = "text-xs font-bold uppercase text-forest";
           category.textContent = label;

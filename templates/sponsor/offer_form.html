@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-{% block content %}
-<h1 class="font-heading text-h1 font-bold text-forest">Offre</h1>
-<form method="post" class="mt-6 flex max-w-2xl flex-col gap-4">{% csrf_token %}{{ form.as_p }}<button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" type="submit">Enregistrer</button></form>
-{% endblock %}
+{% extends "ui/base.html" %}
+{% block title %}Mon offre · Vers le Vert{% endblock %}
+{% block content %}<div class="mx-auto max-w-2xl space-y-6"><header class="ui-page-header"><div><p class="ui-eyebrow">Une récompense qui fait plaisir</p><h1>{% if object %}Modifier l'offre{% else %}Créer une offre{% endif %}</h1><p>Décrivez votre offre et son coût en points.</p></div></header><form method="post" class="ui-card ui-card-pad space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="ui-form-actions"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button><a class="ui-link" href="{% url 'sponsor-shop' %}">Annuler</a></div></form></div>{% endblock %}

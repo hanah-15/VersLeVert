@@ -1,18 +1,6 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
+{% block title %}Ma boutique · Vers le Vert{% endblock %}
 {% block content %}
-<div class="flex flex-wrap items-center justify-between gap-4">
-    <h1 class="font-heading text-h1 font-bold text-forest">Ma boutique</h1>
-    <a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a>
-</div>
-<div class="mt-6 grid gap-4 md:grid-cols-3">
-{% for offer in offers %}
-    <article class="rounded-lg-ui border border-olive bg-olive/25 p-6">
-        <h2 class="font-heading text-h2 text-forest">{{ offer.title }}</h2>
-        <p class="mt-2">{{ offer.description }}</p>
-        <p class="mt-3 font-bold">{{ offer.points_cost }} points</p>
-        <span class="mt-3 inline-flex rounded-full bg-olive px-3 py-1 text-sm font-bold text-forest">{% if offer.active %}Active{% else %}Inactive{% endif %}</span>
-        <div class="mt-4 flex gap-2"><a class="font-bold text-forest underline" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a>{% if offer.active %}<a class="font-bold text-brick underline" href="{% url 'sponsor-offer-deactivate' offer.pk %}">Désactiver</a>{% endif %}</div>
-    </article>
-{% empty %}<p>Aucune offre pour le moment.</p>{% endfor %}
-</div>
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace partenaire</p><h1>Ma boutique</h1><p>Des offres pour récompenser les gestes de la communauté.</p></div><a class="ui-button ui-button-primary" href="{% url 'sponsor-offer-new' %}">{% include "ui/icon.html" with name="plus" %} Nouvelle offre</a></header>
+<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{% for offer in offers %}<article class="ui-card ui-card-pad flex flex-col"><div class="flex items-center justify-between gap-3"><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><span class="ui-badge">{% if offer.active %}Active{% else %}Inactive{% endif %}</span></div><h2 class="mb-3 mt-6 text-2xl">{{ offer.title }}</h2><p class="mb-5 text-sm text-muted">{{ offer.description }}</p><strong class="mt-auto font-heading text-2xl text-forest">{{ offer.points_cost }} <span class="font-body text-xs text-muted">points</span></strong><div class="mt-5 flex flex-wrap gap-4 border-t border-line pt-4"><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a>{% if offer.active %}<a class="ui-link text-brick" href="{% url 'sponsor-offer-deactivate' offer.pk %}">Désactiver</a>{% endif %}</div></article>{% empty %}<div class="ui-empty md:col-span-2 xl:col-span-3"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2>Votre première offre commence ici.</h2><p>Aucune offre pour le moment. Présentez une récompense à la communauté.</p><a class="ui-button ui-button-secondary mt-3" href="{% url 'sponsor-offer-new' %}">Créer une offre</a></div>{% endfor %}</div>
 {% endblock %}

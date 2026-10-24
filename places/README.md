@@ -38,8 +38,9 @@ changements de publication et de likes verrouillent la recommandation en transac
   de rôle ou de localisation n'a été ajouté au modèle User.
 - Pas d'attribution de points pour proposer un produit ou aimer un avis.
 - Les noms de routes existants `places:index` et `places:recommendations` sont conservés.
-- Le CSS du module corrige le débordement du menu partagé uniquement sur ses
-  propres pages ; les autres espaces gardent leur présentation.
+- Le module utilise la présentation commune `ui/base.html`. Les formulaires,
+  URLs et attributs utilisés par `places.js` restent les mêmes. Les pages déchets
+  de Hana conservent leur base et leur présentation d'origine.
 
 ## API REST de consultation
 

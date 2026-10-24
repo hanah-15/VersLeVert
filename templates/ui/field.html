@@ -1,0 +1,8 @@
+{% load i18n %}{% language 'fr' %}
+<div class="ui-field">
+  <label for="{{ field.id_for_label }}">{% if label %}{{ label }}{% elif field.name == 'first_name' %}Prénom{% elif field.name == 'last_name' %}Nom{% elif field.name == 'city' %}Ville{% elif field.name == 'avatar' %}Photo de profil{% elif field.name == 'business_name' %}Nom de l'entreprise{% elif field.name == 'activity' %}Activité{% elif field.name == 'contact_email' %}Email de contact{% elif field.name == 'phone' %}Téléphone{% elif field.name == 'title' %}Titre{% elif field.name == 'points_cost' %}Coût en points{% elif field.name == 'active' %}Offre active{% else %}{{ field.label }}{% endif %}{% if field.field.required %} <span class="text-palm" aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>{% endif %}</label>
+  {% if field.field.widget.input_type == 'password' %}<div class="password-control">{{ field }}<button type="button" class="password-toggle" data-password-toggle="{{ field.id_for_label }}" aria-label="Afficher le mot de passe" aria-pressed="false">{% include "ui/icon.html" with name="eye" %}</button></div>{% else %}{{ field }}{% endif %}
+  {% if field.help_text %}<div class="ui-help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+  {% if field.errors %}<div class="ui-errors" id="{{ field.auto_id }}_error" role="alert">{% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+</div>
+{% endlanguage %}

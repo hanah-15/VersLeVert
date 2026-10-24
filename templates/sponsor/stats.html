@@ -1,9 +1,3 @@
-{% extends "base.html" %}
-{% block content %}
-<h1 class="font-heading text-h1 font-bold text-forest">Mes statistiques</h1>
-<div class="mt-6 grid gap-4 md:grid-cols-3">
-    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Offres</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ offer_count }}</strong></div>
-    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Actives</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ active_count }}</strong></div>
-    <div class="rounded-lg-ui border border-olive p-5"><span class="font-bold text-forest">Échanges</span><strong class="mt-2 block font-heading text-4xl text-forest">{{ redeemed_count }}</strong></div>
-</div>
-{% endblock %}
+{% extends "ui/base.html" %}
+{% block title %}Mes statistiques · Vers le Vert{% endblock %}
+{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">L'activité de votre boutique</p><h1>Mes statistiques</h1><p>Un aperçu simple de vos offres et de leurs échanges.</p></div><a class="ui-button ui-button-secondary" href="{% url 'sponsor-shop' %}">Voir ma boutique</a></header><div class="grid gap-5 md:grid-cols-3"><article class="ui-stat"><div class="flex items-center justify-between"><span class="ui-stat-label">Offres</span><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span></div><strong class="ui-stat-value">{{ offer_count }}</strong><p class="ui-stat-foot">Votre catalogue de récompenses</p></article><article class="ui-stat"><div class="flex items-center justify-between"><span class="ui-stat-label">Actives</span><span class="ui-icon-box">{% include "ui/icon.html" with name="check" %}</span></div><strong class="ui-stat-value">{{ active_count }}</strong><p class="ui-stat-foot">Les offres disponibles actuellement</p></article><article class="ui-stat"><div class="flex items-center justify-between"><span class="ui-stat-label">Échanges</span><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span></div><strong class="ui-stat-value">{{ redeemed_count }}</strong><p class="ui-stat-foot">Les récompenses utilisées</p></article></div>{% endblock %}

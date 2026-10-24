@@ -1,32 +1,25 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% block title %}{{ section_title }} · Vers le Vert{% endblock %}
 {% block content %}
-<div class="grid gap-6 md:grid-cols-[220px_1fr]">
-    <aside>{% include "partials/profile_sidebar.html" %}</aside>
-    <section class="min-w-0">
-        <h1 class="font-heading text-h1 font-bold text-forest">{{ section_title }}</h1>
-        {% if section == "profile" %}
-            <form method="post" enctype="multipart/form-data" class="card mt-6 flex flex-col gap-4 rounded-lg-ui border border-olive bg-olive/25 p-6">{% csrf_token %}{{ form.as_p }}<p class="text-sm text-carbon">E-mail : {{ email }} (non modifiable)</p><button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky" type="submit">Enregistrer</button></form>
-        {% elif section == "sponsor" %}
-            {% if application.status == "APPROVED" %}<div class="alert-info mt-6 rounded-md-ui bg-olive/50 p-4 text-forest">Votre demande est approuvée. <a class="font-bold underline" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div>
-            {% elif application.status == "PENDING" %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Demande en cours de vérification.</div>
-            {% elif application.status == "REJECTED" %}<div class="alert-error mt-6 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">Demande rejetée : {{ application.rejection_reason }}. <a class="font-bold text-forest underline" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div>
-            {% else %}<div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-apply' %}">Devenir sponsor</a></div>{% endif %}
-        {% elif section == "notifications" %}
-            <div class="mt-6 grid gap-3">{% for notification in user.notifications.all %}<div class="rounded-md-ui border border-olive p-4">{{ notification.message }}</div>{% empty %}<p class="mt-6">Aucune notification.</p>{% endfor %}</div>
-        {% elif section == "security" %}
-            <div class="mt-6 flex flex-wrap gap-3"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="rounded-md-ui border-2 border-brick px-5 py-2.5 font-bold text-brick" type="submit">Se déconnecter</button></form></div>
-        {% elif section == "points" %}
-            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
-                <p class="text-[13px] font-bold uppercase tracking-[0.09em] text-forest">Solde actuel</p>
-                <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ points_balance }} pts</strong>
-                <p class="mt-3 text-sm text-carbon">L'historique des points sera disponible prochainement (module dédié).</p>
-            </div>
-        {% elif section == "proofs" %}
-            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
-                <p class="text-carbon">Les actions prouvées (preuves validées) apparaîtront ici. Elles servent à valider des défis et générer des points.</p>
-            </div>
-        {% else %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Bientôt disponible. TODO : données du module {{ section }}.</div>{% endif %}
-    </section>
-</div>
+<header class="ui-page-header"><div><p class="ui-eyebrow">Un espace à votre image</p><h1>{{ section_title }}</h1><p>Vos informations, vos préférences et les étapes de votre parcours.</p></div></header>
+<div class="profile-layout"><aside>{% include "ui/profile_nav.html" %}</aside><section class="min-w-0 space-y-5">
+{% if section == "profile" %}
+  <div class="ui-card ui-card-pad"><div class="mb-7 flex items-center gap-4"><div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-olive/30 font-heading text-2xl text-forest">{% if user.avatar %}<img class="h-full w-full object-cover" src="{{ user.avatar.url }}" alt="Votre photo de profil">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</div><div><h2 class="text-xl">{{ user.first_name|default:user.username }}</h2><p class="text-sm text-muted">{{ user.email }}</p></div></div><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<p class="ui-help">Adresse e-mail : {{ email }} (non modifiable)</p><div class="ui-form-actions"><button class="ui-button ui-button-primary" type="submit">Enregistrer les modifications</button></div></form></div>
+{% elif section == "sponsor" %}
+  {% if application.status == "APPROVED" %}<div class="ui-alert ui-alert-success">{% include "ui/icon.html" with name="check" %}<div>Votre demande est approuvée. <a class="ui-link" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div></div>
+  {% elif application.status == "PENDING" %}<div class="ui-alert">{% include "ui/icon.html" with name="clock" %}Demande en cours de vérification.</div>
+  {% elif application.status == "REJECTED" %}<div class="ui-alert ui-alert-error"><div>Demande rejetée : {{ application.rejection_reason }}. <a class="ui-link" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div></div>
+  {% else %}<div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mt-5 text-2xl">Votre entreprise a sa place ici.</h2><p class="mb-6 mt-3 max-w-lg text-sm text-muted">Rejoignez les partenaires qui encouragent les gestes responsables et faites découvrir votre activité à la communauté.</p><a class="ui-button ui-button-primary" href="{% url 'sponsor-apply' %}">Devenir sponsor {% include "ui/icon.html" with name="arrow" %}</a></div>{% endif %}
+{% elif section == "notifications" %}
+  <div class="ui-card ui-card-pad"><h2 class="mb-5 text-xl">Votre fil d'actualité</h2>{% for notification in user.notifications.all %}<div class="flex gap-3 border-b border-line py-4"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><p class="text-sm">{{ notification.message }}</p></div>{% empty %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><h3>Tout est calme.</h3><p>Aucune notification pour le moment. Les nouvelles de votre parcours apparaîtront ici.</p></div>{% endfor %}</div>
+{% elif section == "security" %}
+  <div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shield" %}</span><h2 class="mt-5 text-2xl">Votre compte, en toute sérénité.</h2><p class="mb-6 mt-3 text-sm text-muted">Gardez un mot de passe personnel et sécurisé.</p><div class="ui-form-actions"><a class="ui-button ui-button-primary" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ui-button ui-button-danger" type="submit">Se déconnecter</button></form></div></div>
+{% elif section == "points" %}
+  <div class="ui-card ui-card-pad"><p class="ui-eyebrow">Votre énergie récompensée</p><div class="flex items-center gap-4"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="spark" %}</span><div><p class="text-xs text-muted">Solde actuel</p><strong class="font-heading text-5xl text-forest">{{ points_balance }} <span class="text-lg text-muted">pts</span></strong></div></div><p class="mt-6 border-t border-line pt-5 text-sm text-muted">L'historique des points sera disponible prochainement.</p></div>
+{% elif section == "proofs" %}
+  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="camera" %}</span><h2>Les preuves de vos petits pas.</h2><p>Vos actions prouvées apparaîtront ici après leur validation. Elles permettent de suivre vos défis et vos points.</p></div>
+{% else %}
+  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h2>Votre parcours continue de grandir.</h2><p>Cet espace sera disponible prochainement.</p></div>
+{% endif %}
+</section></div>
 {% endblock %}

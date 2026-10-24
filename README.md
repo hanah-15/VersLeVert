@@ -24,8 +24,9 @@ npm run build:css
 
 During development, run `npm run watch:css` in a separate terminal. The generated
 `static/css/tailwind.css` file is ignored because it is a build artifact. Design
-tokens are defined in `tailwind.config.js`; pages use Tailwind utility classes
-directly in their HTML.
+tokens are defined in `tailwind.config.js`; shared UI components are defined in
+`static/css/tailwind.source.css` and `templates/ui/`. See `DESIGN_SYSTEM.md` for
+the layout, components, and the waste module exception.
 
 ## PostgreSQL
 
@@ -93,6 +94,8 @@ Les variables `GEMINI_API_KEY`, `GEMINI_MODEL` (par défaut `gemini-3.1-flash-li
 ## Règles d'équipe
 - Une app = un module = un responsable
 - Ne jamais pousser sur `main` / `develop` : passer par une Pull Request
-- Pages : étendre `base.html`, utiliser directement les classes Tailwind et les
-  includes de `templates/partials/` ou `templates/components/`
+- Pages hors déchets : étendre `ui/base.html` et réutiliser `templates/ui/`
+  et les composants `ui-*` décrits dans `DESIGN_SYSTEM.md`
+- Module déchets (Hana) : conserver `base.html`, les anciens partials et son UI
+  actuelle ; la refonte commune ne s'applique pas à ce module
 - `git pull` avant de commencer à travailler

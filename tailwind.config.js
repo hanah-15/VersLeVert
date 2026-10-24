@@ -27,7 +27,14 @@ module.exports = {
         palm: '#8A9B63',
         olive: '#B1C588',
         sky: '#89BCCF',
-        brick: '#B3402F'
+        brick: '#B3402F',
+        paper: '#FFFFFF',
+        mist: '#F0F3EB',
+        line: '#DEE5D9',
+        muted: '#657361',
+        sand: '#EEE8DB',
+        sun: '#E6C779',
+        ink: '#23362B'
       },
       fontFamily: {
         heading: ['Fraunces', 'serif'],
@@ -46,6 +53,10 @@ module.exports = {
       },
       maxWidth: {
         page: '1180px'
+      },
+      boxShadow: {
+        card: '0 4px 24px -12px rgba(4, 46, 9, 0.12)',
+        float: '0 16px 48px -16px rgba(4, 46, 9, 0.24)'
       }
     }
   },

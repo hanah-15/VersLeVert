@@ -1,25 +1,15 @@
-{% extends "base.html" %}
+{% extends "ui/auth_base.html" %}
 {% block title %}Connexion · Vers le Vert{% endblock %}
-
-{% block content %}
-<div class="mx-auto my-10 max-w-[440px] rounded-lg-ui border border-olive bg-porcelain p-8">
-    <h2 class="font-heading text-[28px] font-semibold leading-tight text-forest">Connexion</h2>
-
-    {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}
-            {% include "partials/alert.html" with variant="error" message=error %}
-        {% endfor %}
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            {% include "components/form_field.html" %}
-        {% endfor %}
-        <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-md-ui border-2 border-forest bg-forest px-[22px] py-2.5 text-base font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Se connecter</button>
-    </form>
-
-    <p class="mt-[18px] text-[15px]">Pas encore de compte ? <a href="{% url 'signup' %}">Inscris-toi</a></p>
-</div>
+{% block auth_content %}
+<p class="ui-eyebrow"><span class="ui-dot"></span> Heureux de vous retrouver</p>
+<h1>De retour<br>du bon côté.</h1>
+<p class="auth-intro">Connectez-vous pour retrouver vos gestes, vos découvertes et votre progression.</p>
+{% if form.non_field_errors %}<div class="ui-alert ui-alert-error mb-5" role="alert">{% include "ui/icon.html" with name="info" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+<form method="post" class="auth-form">
+  {% csrf_token %}
+  {% for field in form %}{% if field.name == 'username' %}{% include "ui/field.html" with label="Adresse e-mail ou nom d’utilisateur" %}{% else %}{% include "ui/field.html" with label="Mot de passe" %}{% endif %}{% endfor %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit" class="ui-button ui-button-primary">Se connecter {% include "ui/icon.html" with name="arrow" %}</button>
+</form>
+<p class="auth-switch">Vous découvrez Vers le Vert ? <a href="{% url 'signup' %}">Créer un compte</a></p>
 {% endblock %}

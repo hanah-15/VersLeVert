@@ -1,34 +1,36 @@
-{% extends "base.html" %}
-{% load waste_stats %}
+{% extends "ui/base.html" %}
+{% load static waste_stats %}
 {% block title %}Accueil · Vers le Vert{% endblock %}
-
 {% block content %}
 {% if not user.is_authenticated %}
-<section class="mx-auto max-w-4xl py-12 text-center">
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Agissons ensemble pour un avenir plus vert.</h1>
-<p class="mx-auto mt-4 max-w-2xl">Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
-<a href="{% url 'signup' %}" class="mt-6 inline-flex rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain">Créer mon compte</a>
+<section class="landing-hero">
+  <div class="landing-hero-copy">
+    <span class="ui-badge mb-7"><span class="ui-dot"></span> Un quotidien plus responsable</span>
+    <h1>Les petits gestes.<br>Un avenir<br><em>plus vert.</em></h1>
+    <p>Transformez vos bonnes intentions en habitudes. Des défis, des adresses et une communauté pour avancer, un geste après l'autre.</p>
+    <div class="mt-8 flex flex-wrap gap-3"><a href="{% url 'signup' %}" class="ui-button ui-button-primary">Je fais le premier pas {% include "ui/icon.html" with name="arrow" %}</a><a href="#comment-ca-marche" class="ui-button ui-button-secondary">Découvrir le concept</a></div>
+    <p class="mt-5 text-sm text-muted sm:hidden">Déjà membre ? <a href="{% url 'login' %}" class="ui-link">Se connecter</a></p>
+    <div class="mt-8 flex items-center gap-3 text-xs text-muted"><span class="ui-icon-box h-8 w-8">{% include "ui/icon.html" with name="leaf" %}</span>À votre rythme. Avec un impact collectif.</div>
+  </div>
+  <div class="landing-photo"><img src="{% static 'images/forest-path.webp' %}" alt="Un sentier ensoleillé au milieu des oliviers" width="1536" height="1024" fetchpriority="high"><div class="landing-photo-note"><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span><div><strong class="block text-sm text-forest">Le changement prend racine ici.</strong><span class="text-xs text-muted">Dans nos choix, nos habitudes, notre quotidien.</span></div></div></div>
 </section>
+<section id="comment-ca-marche" class="py-12 sm:py-16">
+  <div class="mb-8 max-w-2xl"><p class="ui-eyebrow">Simplement, concrètement</p><h2 class="font-heading text-3xl font-semibold sm:text-4xl">De l'intention à l'action.</h2><p class="mt-4 text-muted">Pas besoin de tout changer. Commencez par un geste qui vous ressemble.</p></div>
+  <div class="grid gap-5 md:grid-cols-3"><article class="landing-feature"><span class="ui-eyebrow">01 · Découvrez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="place" %}</span><h3>Trouvez votre déclic</h3><p>Explorez des lieux responsables, des produits recommandés et des défis du quotidien.</p></article><article class="landing-feature"><span class="ui-eyebrow">02 · Agissez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span><h3>Faites votre part</h3><p>Triez, participez et changez vos habitudes. Les actions vérifiées comptent dans votre parcours.</p></article><article class="landing-feature"><span class="ui-eyebrow">03 · Avancez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h3>Voyez la différence</h3><p>Suivez votre progression et profitez des récompenses proposées par les partenaires.</p></article></div>
+</section>
+<section id="nos-univers" class="space-y-8 pb-8"><div class="ui-section-heading"><div><p class="ui-eyebrow">À chacun sa façon d'agir</p><h2>Tout un monde à explorer.</h2></div><a href="{% url 'signup' %}" class="ui-link">Rejoindre l'aventure {% include "ui/icon.html" with name="arrow" %}</a></div><div class="landing-universes"><article class="landing-feature">{% include "ui/icon.html" with name="challenge" %}<h3>Des défis qui motivent</h3><p>Des objectifs personnels pour ancrer de meilleures habitudes.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="waste" %}<h3>Des déchets valorisés</h3><p>Du tri à la collecte locale, donnez une nouvelle utilité à vos déchets.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="event" %}<h3>Une énergie collective</h3><p>Rencontrez celles et ceux qui veulent agir près de chez vous.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="place" %}<h3>De bonnes adresses</h3><p>Découvrez des lieux et des produits pour consommer autrement.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="reward" %}<h3>Des gestes valorisés</h3><p>Des points, des badges et des offres partenaires pour entretenir votre élan.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="spark" %}<h3>Un peu d'inspiration</h3><p>Un guide pour trouver des pistes dans le catalogue de la communauté.</p></article></div></section>
 {% else %}
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Bonjour, {{ user.username }}</h1>
-<p>Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
-
 {% waste_impact user as impact %}
-<section class="mt-6 grid gap-4 sm:grid-cols-3">
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">CO₂ évité</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.co2|floatformat:1 }} kg</strong>
-    </div>
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">Déchets triés</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.kg }} kg</strong>
-    </div>
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">Collectes réalisées</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.collected.count }}</strong>
-    </div>
+<header class="dashboard-welcome"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Chaque geste compte</p><h1>Bonjour, {{ user.first_name|default:user.username }}<span class="text-palm">.</span></h1><p class="mt-3 text-sm text-muted">Un nouveau jour pour faire un peu mieux, ensemble.</p></div><a href="{% url 'places:guide' %}" class="ui-button ui-button-secondary">{% include "ui/icon.html" with name="spark" %} Trouver de l'inspiration</a></header>
+<section class="grid gap-4 sm:grid-cols-3" aria-label="Votre impact">
+  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">CO₂ évité</span><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span></div><strong class="ui-stat-value">{{ impact.declared.co2|floatformat:1 }} <span class="text-lg text-muted">kg</span></strong><p class="ui-stat-foot">Grâce à vos collectes confirmées</p></article>
+  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">Déchets triés</span><span class="ui-icon-box bg-sand/60">{% include "ui/icon.html" with name="waste" %}</span></div><strong class="ui-stat-value">{{ impact.declared.kg }} <span class="text-lg text-muted">kg</span></strong><p class="ui-stat-foot">Un geste concret pour la planète</p></article>
+  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">Collectes réalisées</span><span class="ui-icon-box bg-sky/20">{% include "ui/icon.html" with name="check" %}</span></div><strong class="ui-stat-value">{{ impact.collected.count }}</strong><p class="ui-stat-foot">Des ressources remises en circulation</p></article>
 </section>
-
-<section class="card mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><h2 class="font-heading text-h2 text-forest">Derniers mouvements de points</h2><p class="mt-3">Aucun mouvement pour le moment. TODO(points) : connecter l'historique.</p></section>
+<div class="dashboard-grid">
+  <section class="dashboard-hero">{% include "ui/icon.html" with name="leaf" %}<span class="mb-4 inline-flex rounded-full border border-porcelain/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Votre prochain petit pas</span><h2>Le vert se trouve<br>aussi au coin de la rue.</h2><p>Un café engagé, une boutique en vrac, un parc pour souffler. Découvrez les adresses qui changent le quotidien.</p><a href="{% url 'places:index' %}" class="ui-button">Explorer les lieux {% include "ui/icon.html" with name="arrow" %}</a></section>
+  <section class="ui-card ui-card-pad"><p class="ui-eyebrow">À votre rythme</p><h2 class="text-2xl">Envie de passer à l'action ?</h2><div class="mt-4"><a class="discovery-item" href="{% url 'challenges:index' %}"><span class="ui-icon-box">{% include "ui/icon.html" with name="challenge" %}</span><div><strong>Relever un défi</strong><span>Cultiver une nouvelle habitude</span></div>{% include "ui/icon.html" with name="arrow" %}</a><a class="discovery-item" href="{% url 'events:index' %}"><span class="ui-icon-box bg-sand/60">{% include "ui/icon.html" with name="event" %}</span><div><strong>Agir ensemble</strong><span>Découvrir les événements</span></div>{% include "ui/icon.html" with name="arrow" %}</a><a class="discovery-item" href="{% url 'places:recommendation-create' %}"><span class="ui-icon-box bg-sky/20">{% include "ui/icon.html" with name="heart" %}</span><div><strong>Partager une découverte</strong><span>Recommander un produit</span></div>{% include "ui/icon.html" with name="arrow" %}</a></div></section>
+</div>
+<section class="ui-card ui-card-pad"><div class="ui-section-heading"><div><p class="ui-eyebrow">Votre parcours</p><h2>Derniers mouvements de points</h2></div><a href="{% url 'profile-section' 'points' %}" class="ui-link">Mon historique {% include "ui/icon.html" with name="arrow" %}</a></div><div class="mt-5 flex items-center gap-4 rounded-2xl bg-mist/60 p-5"><span class="ui-icon-box bg-paper">{% include "ui/icon.html" with name="clock" %}</span><div><p class="text-sm font-bold text-forest">Votre histoire commence ici.</p><p class="mt-1 text-xs text-muted">Aucun mouvement pour le moment. Vos prochaines actions vérifiées feront grandir votre parcours.</p></div></div></section>
 {% endif %}
 {% endblock %}
