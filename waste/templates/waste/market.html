@@ -27,18 +27,21 @@
             Déclaré le {{ row.request.created_at|date:"d/m/Y" }}
             par {{ row.request.user.username }}
         </p>
+        {% if row.request.image %}
+            <img src="{{ row.request.image.url }}" alt="Photo du déchet {{ row.request.get_waste_type_display|lower }}" class="mt-4 h-48 w-full rounded-md-ui border border-olive object-cover sm:max-w-md">
+        {% endif %}
         {% if row.offer %}
             {% if row.offer.status == "declined" %}
                 <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Proposition refusée</span>
             {% elif row.offer.status == "withdrawn" %}
-                <a href="{% url 'waste:offer' row.request.pk %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">
+                <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
                     Proposer de collecter
                 </a>
             {% else %}
                 <span class="rounded-full bg-sky px-3 py-1 text-caption font-bold text-forest">Proposition envoyée</span>
             {% endif %}
         {% else %}
-            <a href="{% url 'waste:offer' row.request.pk %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">
+            <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
                 Proposer de collecter
             </a>
         {% endif %}
