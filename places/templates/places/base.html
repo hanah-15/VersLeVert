@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Découvrir · Vers le Vert{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'places/places.css' %}"><script src="{% static 'places/places.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-7xl space-y-7">
+  <nav aria-label="Outils de découverte" class="flex flex-wrap items-center gap-3 text-sm font-bold text-forest">
+    <a href="{% url 'places:guide' %}" class="rounded-xl border border-olive bg-olive/25 px-4 py-2.5 hover:bg-olive/50 focus:outline-none focus:ring-4 focus:ring-sky">✦ Guide éco avec Gemini</a>
+    <a href="{% url 'places:my-recommendations' %}" class="rounded-xl px-3 py-2.5 hover:bg-olive/25 focus:outline-none focus:ring-4 focus:ring-sky">Mes publications</a>
+    {% if request.user.is_staff %}<a href="{% url 'places:moderation' %}" class="rounded-xl px-3 py-2.5 hover:bg-olive/25 focus:outline-none focus:ring-4 focus:ring-sky">Modération</a>{% endif %}
+  </nav>
+  {% block places_content %}{% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<article class="flex flex-col gap-4 rounded-lg-ui border border-olive bg-white p-6">
+  <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-forest"><span class="rounded-full bg-olive/50 px-3 py-1.5">{{ recommendation.get_category_display }}</span>{% if mine %}<span>{{ recommendation.get_status_display }}</span>{% endif %}</div>
+  <h3 class="break-words font-heading text-xl font-semibold text-forest"><a href="{{ recommendation.get_absolute_url }}" class="rounded hover:underline focus:outline-none focus:ring-4 focus:ring-sky">{{ recommendation.product_name }}</a></h3>
+  <p class="line-clamp-3 break-words text-sm leading-relaxed">{{ recommendation.description }}</p>
+  {% if recommendation.place %}<a href="{{ recommendation.place.get_absolute_url }}" class="rounded text-sm font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">{{ recommendation.place.name }}</a>{% endif %}
+  <div class="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-olive pt-3">
+    <span class="text-xs">Par {{ recommendation.user.first_name|default:recommendation.user.username }}</span>
+    {% if recommendation.status == 'approved' %}<form method="post" action="{% url 'places:recommendation-like' recommendation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button aria-pressed="{{ recommendation.liked_by_me|yesno:'true,false' }}" aria-label="{% if recommendation.liked_by_me %}Retirer ma mention J’aime pour{% else %}Aimer{% endif %} {{ recommendation.product_name }}" class="min-h-[46px] rounded-xl border border-palm px-3 py-2 text-sm font-bold text-forest hover:bg-olive/25 focus:outline-none focus:ring-4 focus:ring-sky">{% if recommendation.liked_by_me %}♥{% else %}♡{% endif %} {{ recommendation.like_count }}</button></form>{% else %}<a href="{{ recommendation.get_absolute_url }}" class="rounded py-3 text-sm font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">Voir le suivi →</a>{% endif %}
+  </div>
+</article>

@@ -1,0 +1,10 @@
+{% extends "places/base.html" %}
+{% block title %}{{ page_title }} · Vers le Vert{% endblock %}
+{% block places_content %}
+<div class="mx-auto max-w-xl space-y-5 rounded-lg-ui border border-olive bg-white p-6 sm:p-9">
+  <h1 class="font-heading text-3xl font-bold text-forest">{{ page_title }}</h1>
+  <p>Vous allez supprimer <strong>{{ object }}</strong>. Cette action est définitive.</p>
+  {% if delete_kind == 'place' %}<p>Les recommandations associées seront conservées, sans lien vers ce lieu.</p>{% endif %}
+  <form method="post" class="flex flex-wrap items-center gap-4">{% csrf_token %}<button class="rounded-xl border-2 border-brick px-5 py-3 font-bold text-brick focus:outline-none focus:ring-4 focus:ring-sky">Confirmer la suppression</button><a href="{{ object.get_absolute_url }}" class="rounded px-3 py-3 font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">Annuler</a></form>
+</div>
+{% endblock %}

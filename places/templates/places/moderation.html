@@ -1,0 +1,7 @@
+{% extends "places/base.html" %}
+{% block title %}Modération · Vers le Vert{% endblock %}
+{% block places_content %}
+<header class="space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">Espace administrateur</p><h1 class="font-heading text-3xl font-bold text-forest">Les découvertes à vérifier</h1><p>{{ paginator.count }} recommandation{{ paginator.count|pluralize }} en attente. Vérifiez le contenu et donnez un motif en cas de refus.</p></header>
+<div class="space-y-4">{% for recommendation in recommendations %}<article class="flex flex-col justify-between gap-4 rounded-lg-ui border border-olive bg-white p-6 sm:flex-row sm:items-center"><div class="space-y-2"><h2 class="break-words font-heading text-xl font-semibold text-forest">{{ recommendation.product_name }}</h2><p class="text-sm">{{ recommendation.get_category_display }} · {{ recommendation.created_at|date:"d/m/Y H:i" }}</p><p class="line-clamp-2 break-words text-sm">{{ recommendation.description }}</p></div><a href="{% url 'places:recommendation-moderate' recommendation.pk %}" class="shrink-0 rounded-xl bg-forest px-5 py-3 text-center font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky">Examiner →</a></article>{% empty %}<div class="rounded-lg-ui border border-dashed border-palm p-9"><h2 class="font-heading text-xl font-semibold text-forest">Tout est à jour</h2><p class="mt-2">Aucune recommandation en attente de modération.</p></div>{% endfor %}</div>
+{% include "places/_pagination.html" %}
+{% endblock %}
