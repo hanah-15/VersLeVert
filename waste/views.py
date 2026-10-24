@@ -8,7 +8,7 @@ from django.views.generic import CreateView, DetailView, ListView, TemplateView,
 
 from accounts.utils import distance_km
 
-from .forms import DeclineForm, MarketFilterForm, OfferForm, WasteRequestForm
+from .forms import DeclineForm, MarketFilterForm, OfferForm, WasteRequestForm,ConfirmWeightForm
 from .models import CollectionOffer, Status, WasteRequest
 
 
@@ -279,4 +279,40 @@ class OfferReleaseView(LoginRequiredMixin, View):
             messages.error(request, str(error))
         else:
             messages.success(request, "Vous vous êtes désisté.")
+        return redirect("waste:my_offers")
+class ConfirmWeightView(LoginRequiredMixin, TemplateView):
+    """Le collecteur confirme le poids réel d'une collecte planifiée."""
+    template_name = "waste/confirm.html"
+
+    def get_waste_request(self):
+        # 404 si la demande n'est pas planifiée ou si je n'en suis pas le collecteur
+        return get_object_or_404(
+            WasteRequest, pk=self.kwargs["pk"],
+            collector=self.request.user, status=Status.PLANNED,
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        req = self.get_waste_request()
+        ctx["waste_request"] = req
+        ctx.setdefault("form", ConfirmWeightForm(waste_request=req))
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        req = self.get_waste_request()
+        form = ConfirmWeightForm(request.POST, waste_request=req)
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+
+        try:
+            req.confirm(form.cleaned_data["confirmed_weight"], request.user)
+        except ValueError as exc:
+            messages.error(request, str(exc))
+            return redirect("waste:my_offers")
+
+        messages.success(
+            request,
+            f"Collecte confirmée : {req.confirmed_weight} kg, "
+            f"{req.co2_avoided} kg de CO₂ évités.",
+        )
         return redirect("waste:my_offers")

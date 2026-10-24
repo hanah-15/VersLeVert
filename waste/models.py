@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -35,6 +35,12 @@ POINTS_RULES = {
     WasteType.ORGANIC: (10, Decimal("1.0")),
     WasteType.PLASTIC: (10, Decimal("1.5")),
 }
+MAX_WEIGHT_RATIO = Decimal("3")   # poids confirmé <= 3 x poids estimé
+
+
+def compute_points(waste_type, weight):
+    base, factor = POINTS_RULES[waste_type]
+    return int((Decimal(weight) * base * factor).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
 class EmissionFactor(models.Model):
@@ -56,11 +62,10 @@ class WasteRequest(models.Model):
                                            validators=[MinValueValidator(Decimal("0.01"))])
     confirmed_weight = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     address = models.CharField(max_length=255)
-    #ajout champs dedie au image 
-    image = models.ImageField(upload_to="waste/images/",
-         blank=True,
-         null=True
-        )   
+
+    # photo du déchet
+    image = models.ImageField(upload_to="waste/images/", blank=True, null=True)
+
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     collector_latitude = models.FloatField(null=True, blank=True)
@@ -69,6 +74,8 @@ class WasteRequest(models.Model):
     planned_date = models.DateTimeField(null=True, blank=True)
     refusal_reason = models.CharField(max_length=255, blank=True)
     co2_avoided = models.DecimalField(max_digits=8, decimal_places=3, null=True, blank=True)
+    points_awarded = models.PositiveIntegerField(null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -152,6 +159,61 @@ class WasteRequest(models.Model):
                 decision_note="La demande a été annulée.",
                 decided_at=timezone.now(),
             )
+
+    def confirm(self, weight, by_user):
+        """Le collecteur confirme le poids réel : planned -> collected -> confirmed.
+        Calcule le CO2 et les points, une seule fois. Retourne la demande à jour."""
+        try:
+            weight = Decimal(str(weight))
+        except Exception:
+            raise ValueError("Poids invalide.")
+
+        with transaction.atomic():
+            # verrou : deux confirmations simultanées ne peuvent pas passer toutes les deux
+            req = WasteRequest.objects.select_for_update().get(pk=self.pk)
+
+            if req.status != Status.PLANNED:
+                raise ValueError("Cette collecte n'est pas planifiée ou a déjà été confirmée.")
+            if req.collector_id != by_user.pk:
+                raise ValueError("Seul le collecteur de cette demande peut confirmer le poids.")
+            if weight <= 0:
+                raise ValueError("Le poids doit être supérieur à zéro.")
+            if weight > req.estimated_weight * MAX_WEIGHT_RATIO:
+                raise ValueError(
+                    f"Le poids confirmé ne peut pas dépasser {MAX_WEIGHT_RATIO} fois "
+                    f"le poids estimé ({req.estimated_weight} kg)."
+                )
+            try:
+                factor = EmissionFactor.objects.get(waste_type=req.waste_type)
+            except EmissionFactor.DoesNotExist:
+                raise ValueError("Facteur d'émission manquant : contactez un administrateur.")
+
+            req.confirmed_weight = weight
+            req.co2_avoided = (weight * factor.kg_co2_per_kg).quantize(Decimal("0.001"))
+            req.points_awarded = compute_points(req.waste_type, weight)
+            req.confirmed_at = timezone.now()
+
+            # deux changements de statut journalisés dans WasteStatusLog
+            req.change_status(Status.COLLECTED, by_user)
+            req.change_status(Status.CONFIRMED, by_user)
+            req._award_points()
+
+        self.refresh_from_db()
+        return self
+
+    def _award_points(self):
+        """Envoie les points au module gamification s'il est disponible."""
+        try:
+            from gamification.services import award_points
+        except ImportError:
+            return   # M2 pas encore livré : les points restent stockés sur la demande
+        base, factor = POINTS_RULES[self.waste_type]
+        award_points(
+            self.user, "waste", self.pk,
+            base_points=self.confirmed_weight * base,
+            impact_factor=factor,
+            description=f"Collecte confirmée : {self.confirmed_weight} kg",
+        )
 
 
 class CollectionOffer(models.Model):

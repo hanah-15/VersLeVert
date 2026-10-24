@@ -1,7 +1,9 @@
 from django import forms
 from django.utils import timezone
+from decimal import Decimal
 
-from .models import WasteRequest
+
+from .models import WasteRequest,MAX_WEIGHT_RATIO
 
 HIDDEN_COORDS = {"latitude": forms.HiddenInput, "longitude": forms.HiddenInput}
 
@@ -73,3 +75,24 @@ class MarketFilterForm(forms.Form):
     )
     latitude = forms.FloatField(required=False, widget=forms.HiddenInput)
     longitude = forms.FloatField(required=False, widget=forms.HiddenInput)
+
+class ConfirmWeightForm(forms.Form):
+    confirmed_weight = forms.DecimalField(
+        label="Poids réel collecté (kg)",
+        min_value=Decimal("0.01"),
+        max_digits=7,
+        decimal_places=2,
+    )
+
+    def __init__(self, *args, waste_request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.waste_request = waste_request
+
+    def clean_confirmed_weight(self):
+        weight = self.cleaned_data["confirmed_weight"]
+        if self.waste_request and weight > self.waste_request.estimated_weight * MAX_WEIGHT_RATIO:
+            raise forms.ValidationError(
+                f"Le poids ne peut pas dépasser {MAX_WEIGHT_RATIO} fois le poids estimé "
+                f"({self.waste_request.estimated_weight} kg)."
+            )
+        return weight

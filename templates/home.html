@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load waste_stats %}
 {% block title %}Accueil · Vers le Vert{% endblock %}
 
 {% block content %}
@@ -11,6 +12,22 @@
 {% else %}
 <h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Bonjour, {{ user.username }}</h1>
 <p>Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
+
+{% waste_impact user as impact %}
+<section class="mt-6 grid gap-4 sm:grid-cols-3">
+    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
+        <span class="text-[13px] font-bold text-carbon">CO₂ évité</span>
+        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.co2|floatformat:1 }} kg</strong>
+    </div>
+    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
+        <span class="text-[13px] font-bold text-carbon">Déchets triés</span>
+        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.kg }} kg</strong>
+    </div>
+    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
+        <span class="text-[13px] font-bold text-carbon">Collectes réalisées</span>
+        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.collected.count }}</strong>
+    </div>
+</section>
 
 <section class="card mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><h2 class="font-heading text-h2 text-forest">Derniers mouvements de points</h2><p class="mt-3">Aucun mouvement pour le moment. TODO(points) : connecter l'historique.</p></section>
 {% endif %}

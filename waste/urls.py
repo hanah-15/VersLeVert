@@ -17,4 +17,5 @@ urlpatterns = [
     path("offers/<int:pk>/decline/", views.OfferDeclineView.as_view(), name="offer_decline"),
     path("offers/<int:pk>/withdraw/", views.OfferWithdrawView.as_view(), name="offer_withdraw"),
     path("offers/<int:pk>/release/", views.OfferReleaseView.as_view(), name="offer_release"),
+    path("<int:pk>/confirm/", views.ConfirmWeightView.as_view(), name="confirm"),
 ]

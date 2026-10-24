@@ -27,11 +27,23 @@
         {% endif %}
         {% if offer.status == "accepted" %}
             <p class="mt-4 rounded-md-ui bg-porcelain p-3 text-carbon">{{ offer.waste_request.address }}</p>
+
             {% if offer.waste_request.status == "planned" %}
-                <form method="post" action="{% url 'waste:offer_release' offer.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="mt-4 rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Se désister</button>
-                </form>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <a href="{% url 'waste:confirm' offer.waste_request.pk %}"
+                       class="inline-flex items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain no-underline hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Confirmer la collecte</a>
+                    <form method="post" action="{% url 'waste:offer_release' offer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Se désister</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            {% if offer.waste_request.status == "confirmed" %}
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Poids confirmé : {{ offer.waste_request.confirmed_weight }} kg</span>
+                    <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">CO₂ évité : {{ offer.waste_request.co2_avoided }} kg</span>
+                </div>
             {% endif %}
         {% elif offer.status == "pending" %}
             <form method="post" action="{% url 'waste:offer_withdraw' offer.pk %}">

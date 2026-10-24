@@ -9,9 +9,15 @@ from django.utils import timezone
 from accounts.utils import distance_km
 
 from .forms import OfferForm, WasteRequestForm
-from .models import CollectionOffer, Status, WasteRequest, WasteStatusLog, WasteType
-
-
+from .models import (
+    CollectionOffer,
+    EmissionFactor,
+    Status,
+    WasteRequest,
+    WasteStatusLog,
+    WasteType,
+)
+from .services import user_impact
 User = get_user_model()
 
 
@@ -229,3 +235,118 @@ class WasteTestCase(TestCase):
         self.assertAlmostEqual(
             distance_km(36.8065, 10.1815, 36.868, 10.1815), 6.8, delta=0.5
         )
+    
+
+class ConfirmViewTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user("own2", "own2@test.com", "Pass12345!")
+        self.collector = User.objects.create_user("col2", "col2@test.com", "Pass12345!")
+        EmissionFactor.objects.update_or_create(
+            waste_type="plastic", defaults={"kg_co2_per_kg": Decimal("1.5")})
+        self.req = WasteRequest.objects.create(
+            user=self.owner, collector=self.collector, waste_type="plastic",
+            estimated_weight=Decimal("2"), address="x", status=Status.PLANNED)
+        self.url = reverse("waste:confirm", args=[self.req.pk])
+
+    def test_login_required(self):
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+
+    def test_collector_sees_the_page(self):
+        self.client.force_login(self.collector)
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+
+    def test_owner_cannot_open_the_page(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_stranger_cannot_open_the_page(self):
+        stranger = User.objects.create_user("str", "str@test.com", "Pass12345!")
+        self.client.force_login(stranger)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_valid_post_confirms(self):
+        self.client.force_login(self.collector)
+        response = self.client.post(self.url, {"confirmed_weight": "1.8"})
+        self.assertRedirects(response, reverse("waste:my_offers"))
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.status, Status.CONFIRMED)
+        self.assertEqual(self.req.points_awarded, 27)
+        self.assertEqual(self.req.co2_avoided, Decimal("2.700"))
+
+    def test_too_heavy_is_rejected(self):
+        self.client.force_login(self.collector)
+        response = self.client.post(self.url, {"confirmed_weight": "6.5"})
+        self.assertEqual(response.status_code, 200)
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.status, Status.PLANNED)
+
+    def test_zero_weight_is_rejected(self):
+        self.client.force_login(self.collector)
+        self.client.post(self.url, {"confirmed_weight": "0"})
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.status, Status.PLANNED)
+
+    def test_second_confirmation_is_blocked(self):
+        self.client.force_login(self.collector)
+        self.client.post(self.url, {"confirmed_weight": "1.8"})
+        response = self.client.post(self.url, {"confirmed_weight": "1.9"})
+        self.assertEqual(response.status_code, 404)
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.confirmed_weight, Decimal("1.80"))
+
+    def test_detail_shows_results_to_the_owner(self):
+        self.client.force_login(self.collector)
+        self.client.post(self.url, {"confirmed_weight": "1.8"})
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("waste:detail", args=[self.req.pk]))
+        self.assertContains(response, "Points : 27")
+
+
+class ImpactTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user("impact-owner", "impact-owner@test.com", "Pass12345!")
+        self.collector = User.objects.create_user(
+            "impact-collector", "impact-collector@test.com", "Pass12345!"
+        )
+        self.inactive = User.objects.create_user(
+            "impact-inactive", "impact-inactive@test.com", "Pass12345!"
+        )
+
+    def make_request(self, **overrides):
+        values = {
+            "user": self.owner,
+            "collector": self.collector,
+            "waste_type": WasteType.ORGANIC,
+            "estimated_weight": Decimal("2"),
+            "confirmed_weight": Decimal("1.5"),
+            "co2_avoided": Decimal("1.500"),
+            "address": "Adresse",
+            "status": Status.CONFIRMED,
+        }
+        values.update(overrides)
+        return WasteRequest.objects.create(**values)
+
+    def test_only_confirmed_requests_count(self):
+        self.make_request()
+        self.make_request(status=Status.COLLECTED, confirmed_weight=Decimal("4"), co2_avoided=Decimal("4"))
+
+        impact = user_impact(self.owner)
+
+        self.assertEqual(impact["declared"], {"co2": Decimal("1.500"), "kg": Decimal("1.5"), "count": 1})
+
+    def test_collector_has_separate_totals(self):
+        self.make_request()
+        self.make_request(user=self.collector, confirmed_weight=Decimal("2"), co2_avoided=Decimal("2.000"))
+
+        impact = user_impact(self.collector)
+
+        self.assertEqual(impact["declared"], {"co2": Decimal("2.000"), "kg": Decimal("2"), "count": 1})
+        self.assertEqual(impact["collected"], {"co2": Decimal("3.500"), "kg": Decimal("3.5"), "count": 2})
+
+    def test_user_without_activity_has_zero_totals(self):
+        impact = user_impact(self.inactive)
+
+        self.assertEqual(impact, {
+            "declared": {"co2": Decimal("0"), "kg": Decimal("0"), "count": 0},
+            "collected": {"co2": Decimal("0"), "kg": Decimal("0"), "count": 0},
+        })
