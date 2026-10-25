@@ -6,7 +6,7 @@ import httpx
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -16,6 +16,7 @@ from .models import Event, EventRegistration
 User = get_user_model()
 
 
+@override_settings(GEMINI_API_KEY="")
 class EventM3Tests(TestCase):
     def setUp(self):
         self.citizen = User.objects.create_user(
@@ -278,7 +279,8 @@ class EventM3Tests(TestCase):
     # E-05 : En tant que participant confirmé, je veux recevoir mes points
     # CA : Points attribués une seule fois, à la clôture, via M2.
     # --------------------------------------------------------------------------
-    def test_e05_points_awarded_once_at_closing_via_m2(self):
+    @patch("gamification.services.award_points", autospec=True)
+    def test_e05_points_awarded_once_at_closing_via_m2(self, award_points):
         past_event = Event.objects.create(
             title="Collecte de mégots",
             objective="Ramasser les mégots.",
@@ -305,11 +307,16 @@ class EventM3Tests(TestCase):
         self.assertFalse(reg2.points_awarded)
         self.assertEqual(reg2.points_amount, 0)
         self.assertEqual(past_event.status, Event.Status.CLOSED)
+        award_points.assert_called_once()
+        self.assertEqual(award_points.call_args.kwargs["source_type"], "event")
+        self.assertEqual(award_points.call_args.kwargs["source_id"], past_event.pk)
+        self.assertEqual(award_points.call_args.kwargs["base_points"], 50)
 
         # Vérification qu'une seconde clôture n'attribue pas les points deux fois (une seule fois)
         result_second_award = reg1.award_points(50)
         self.assertFalse(result_second_award)
         self.assertEqual(reg1.points_amount, 50)
+        self.assertEqual(award_points.call_count, 1)
 
     # --------------------------------------------------------------------------
     # E-06 : En tant qu'organisateur, je veux publier le résultat (quantité, nombre)

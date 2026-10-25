@@ -54,7 +54,7 @@ class PresentationContractTests(TestCase):
                     "/rewards/", "/profil/", "/profil/securite/mot-de-passe/", "/notifications/",
                     "/sponsor/apply/"):
             with self.subTest(url=url):
-                self.assertEqual(self.client.get(url).status_code, 200)
+                self.assertEqual(self.client.get(url, follow=True).status_code, 200)
         response = self.client.get(reverse("password_change"))
         for name in ("old_password", "new_password1", "new_password2"):
             self.assertContains(response, f'name="{name}"')

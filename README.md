@@ -49,6 +49,39 @@ python manage.py createsuperuser
 
 Never commit `.env` or database credentials.
 
+## Intégration des défis et des événements
+
+La branche `feature/team-integration` réunit la base Sofiene/Hana, les défis
+d'Aymen et les événements d'Oussema. La fusion de Mariem et l'harmonisation avec
+son design restent une étape séparée.
+
+- Défis : `/challenges/`, défis personnels, participation, progression, jalons,
+  rappels, classement, administration et API REST.
+- Événements : `/events/`, propositions, validation, inscriptions, présences,
+  clôture, résultats, assistants Gemini et météo Open-Meteo.
+- Les recommandations de défis utilisent Groq : renseigner `GROQ_API_KEY` dans
+  `.env` pour activer ce service. Les autres variables `GROQ_*` figurent dans
+  `.env.example`. Les assistants de lieux et d'événements utilisent la
+  configuration `GEMINI_*` existante.
+- Le service `gamification.services.award_points` est encore un contrat
+  provisoire. Il renvoie un résultat descriptif lorsque le modèle de transactions
+  n'est pas disponible. La persistance du solde et le raccordement aux récompenses
+  devront être vérifiés lors de l'intégration du module de Mariem.
+
+Après récupération de la branche, installer les dépendances, appliquer les
+migrations et reconstruire le CSS :
+
+```powershell
+.\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\venv\Scripts\python.exe manage.py migrate
+npm.cmd ci
+npm.cmd run build:css
+.\venv\Scripts\python.exe manage.py test --noinput
+```
+
+Les tests de ces modules utilisent des réponses simulées ou une configuration
+sans clé pour les services externes ; ils ne consomment pas le quota des API.
+
 ## Environnement local de Sofiene (module `places`)
 
 Python 3.13, Node.js et Docker Desktop sont utilisés pour ce poste. Depuis PowerShell,

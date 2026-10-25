@@ -331,7 +331,7 @@ class EventRegistration(models.Model):
             from gamification.services import award_points
             award_points(
                 user=self.user,
-                source="event",
+                source_type="event",
                 source_id=self.event_id,
                 base_points=pts,
                 description=f"Participation à l'événement : {self.event.title}",
