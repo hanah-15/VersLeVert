@@ -1,18 +1,19 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
+{% block body_class %}community-page{% endblock %}
 {% block title %}Mes propositions · Vers le Vert{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-page">
-<h1 class="font-heading text-h1 font-bold text-forest">Mes propositions</h1>
+<div class="mx-auto w-full max-w-page">
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Espace collecteur</p><h1>Mes propositions</h1><p>Suivez vos engagements et confirmez les collectes réalisées.</p></div></header>
 <div class="mt-6 flex flex-wrap gap-2">
-    <a href="{% url 'waste:my_offers' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Toutes</a>
+    <a href="{% url 'waste:my_offers' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/40 px-6 py-3 font-ui text-[14px] font-semibold text-forest backdrop-blur-md transition-all duration-300 hover:bg-palm/20 focus:outline-none focus:ring-4 focus:ring-palm/40">Toutes</a>
     {% for value, label in offer_statuses %}
-        <a href="?status={{ value }}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">{{ label }}</a>
+        <a href="?status={{ value }}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/40 px-6 py-3 font-ui text-[14px] font-semibold text-forest backdrop-blur-md transition-all duration-300 hover:bg-palm/20 focus:outline-none focus:ring-4 focus:ring-palm/40">{{ label }}</a>
     {% endfor %}
 </div>
 <div class="mt-8 grid gap-4">
 {% for offer in offers %}
-    <article class="rounded-lg-ui border border-olive bg-olive/25 p-5">
+    <article class="ui-card p-5 shadow-card">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <h3 class="font-heading text-h3 font-bold text-forest">{{ offer.waste_request.get_waste_type_display }} · {{ offer.waste_request.estimated_weight }} kg</h3>
             <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">{{ offer.get_status_display }}</span>
@@ -32,9 +33,9 @@
                 <div class="mt-4 flex flex-wrap gap-3">
                     <a href="{% url 'waste:confirm' offer.waste_request.pk %}"
                        class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Confirmer la collecte</a>
-                    <form method="post" action="{% url 'waste:offer_release' offer.pk %}">
+                    <form method="post" action="{% url 'waste:offer_release' offer.pk %}" onsubmit="return confirm('Se désister de cette collecte ?');">
                         {% csrf_token %}
-                        <button type="submit" class="w-full inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Se désister</button>
+                        <button type="submit"                         class="w-full inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/40 px-7 py-3.5 font-ui text-[14px] font-semibold text-brick transition-all duration-300 hover:border-brick hover:bg-brick/10 focus:outline-none focus:ring-4 focus:ring-brick/30">Se désister</button>
                     </form>
                 </div>
             {% endif %}
@@ -43,12 +44,13 @@
                 <div class="mt-4 flex flex-wrap gap-2">
                     <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Poids confirmé : {{ offer.waste_request.confirmed_weight }} kg</span>
                     <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">CO₂ évité : {{ offer.waste_request.co2_avoided }} kg</span>
+                    <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Points : {{ offer.waste_request.points_awarded }}</span>
                 </div>
             {% endif %}
         {% elif offer.status == "pending" %}
-            <form method="post" action="{% url 'waste:offer_withdraw' offer.pk %}">
+            <form method="post" action="{% url 'waste:offer_withdraw' offer.pk %}" onsubmit="return confirm('Retirer cette proposition ?');">
                 {% csrf_token %}
-                <button type="submit" class="w-full mt-4 inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-brick backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-brick hover:bg-brick/10 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Retirer la proposition</button>
+                <button type="submit" class="w-full mt-4 inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/40 px-7 py-3.5 font-ui text-[14px] font-semibold text-brick transition-all duration-300 hover:border-brick hover:bg-brick/10 focus:outline-none focus:ring-4 focus:ring-brick/30">Retirer la proposition</button>
             </form>
         {% endif %}
     </article>

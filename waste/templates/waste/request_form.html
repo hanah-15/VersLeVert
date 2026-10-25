@@ -1,10 +1,12 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
+{% block body_class %}community-page{% endblock %}
 {% block title %}Déclarer un déchet · Vers le Vert{% endblock %}
 {% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
-    <h2 class="font-heading text-h2 font-bold text-forest">Déclarer un déchet trié</h2>
+<div class="mx-auto w-full max-w-2xl">
+    <header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Nouvelle demande</p><h1>Déclarer un déchet trié</h1><p>Préparez votre demande de collecte en quelques étapes.</p></div></header>
+    <div class="ui-content-panel mt-6 p-6 shadow-card sm:p-8">
 
     {% if form.non_field_errors %}
         <div class="mt-4 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>
@@ -21,7 +23,7 @@
         {% include "components/position_status.html" with label="Position sélectionnée" %}
 
 
-        <button type="submit" class="w-full inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Envoyer la demande</button>
+        <button type="submit" class="w-full inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus:outline-none focus:ring-4 focus:ring-palm/40">Publier la demande</button>
     </form>
-</div>
+</div></div>
 {% endblock %}
