@@ -1,0 +1,203 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Événements à venir · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <div class="ui-page-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <p class="ui-eyebrow"><span class="ui-dot"></span> Événements écologiques</p>
+      <h1 class="text-3xl md:text-4xl font-bold text-forest">Rencontres et actions citoyennes</h1>
+      <p class="text-muted mt-1 text-base">Participez à des actions collectives près de chez vous pour un impact mesurable.</p>
+    </div>
+    <div>
+      <a href="{% url 'events:create' %}" class="ui-button ui-button-primary inline-flex items-center gap-2">
+        {% include "ui/icon.html" with name="plus" %}
+        <span>Proposer un événement</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Conseiller Écologique IA & Recherche Intelligente -->
+  <div class="ui-card ui-card-pad bg-sun/15 border-2 border-sun/60 space-y-3 rounded-2xl">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-forest">{% include "ui/icon.html" with name="spark" %}</span>
+        <h2 class="text-base font-bold text-forest">Conseiller IA : Trouvez l'action qui vous correspond</h2>
+      </div>
+      <span class="text-xs bg-sun/40 text-forest font-bold px-2.5 py-0.5 rounded-full">Recherche Sémantique</span>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <input
+        type="text"
+        id="ai-search-input"
+        placeholder="Décrivez votre envie (ex : Je cherche une sortie nature samedi pour planter des arbres...)"
+        class="ui-input input flex-1 text-sm bg-paper"
+      />
+      <button
+        type="button"
+        id="ai-search-btn"
+        class="ui-button ui-button-primary inline-flex items-center justify-center gap-1.5 shrink-0"
+        onclick="searchWithAI()"
+      >
+        <span>{% include "ui/icon.html" with name="spark" %}</span>
+        <span id="ai-search-btn-text">Demander à l'IA</span>
+      </button>
+    </div>
+    <div id="ai-search-results" class="hidden p-4 rounded-xl bg-paper border border-sun/60 space-y-3">
+      <p id="ai-search-summary" class="text-xs font-semibold text-forest"></p>
+      <div id="ai-search-matches" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Barre de recherche classique par mot-clé -->
+  <form method="get" class="flex gap-2 max-w-lg">
+    <div class="relative flex-1">
+      <input
+        type="search"
+        name="q"
+        value="{{ search_query }}"
+        placeholder="Filtrer par lieu, titre ou mot-clé..."
+        class="ui-input input w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-line bg-paper text-carbon focus:border-forest focus:outline-none"
+      />
+      <span class="absolute left-3 top-3 text-muted pointer-events-none" aria-hidden="true">
+        {% include "ui/icon.html" with name="place" %}
+      </span>
+    </div>
+    <button type="submit" class="ui-button ui-button-secondary">Filtrer</button>
+    {% if search_query %}
+      <a href="{% url 'events:upcoming' %}" class="ui-button ui-button-secondary text-muted">Effacer</a>
+    {% endif %}
+  </form>
+
+  <!-- Grille des événements -->
+  {% if events %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="events-grid">
+      {% for event in events %}
+        <article class="ui-card ui-card-pad flex flex-col justify-between hover:shadow-md transition-shadow" id="event-card-{{ event.pk }}">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <span class="ui-badge inline-flex items-center gap-1.5 bg-mist text-forest font-semibold text-xs px-2.5 py-1 rounded-full">
+                {% include "ui/icon.html" with name="event" %}
+                <span>{{ event.date|date:"d M Y · H:i" }}</span>
+              </span>
+              {% if event.is_full %}
+                <span class="bg-brick/15 text-brick text-xs font-bold px-2.5 py-1 rounded-full">Complet</span>
+              {% elif event.capacity %}
+                <span class="bg-olive/30 text-forest text-xs font-bold px-2.5 py-1 rounded-full">
+                  {{ event.available_spots }} place{{ event.available_spots|pluralize }} dispo
+                </span>
+              {% else %}
+                <span class="bg-mist text-muted text-xs font-semibold px-2.5 py-1 rounded-full">Entrée libre</span>
+              {% endif %}
+            </div>
+
+            <div>
+              <h2 class="text-xl font-bold text-forest hover:text-palm transition-colors">
+                <a href="{% url 'events:detail' event.pk %}">{{ event.title }}</a>
+              </h2>
+              <p class="text-xs text-muted mt-1 flex items-center gap-1">
+                {% include "ui/icon.html" with name="place" %}
+                <span>{{ event.location }}</span>
+              </p>
+            </div>
+
+            <p class="text-carbon/80 text-sm line-clamp-3 leading-relaxed">
+              {{ event.objective }}
+            </p>
+
+            {% if event.checklist_items %}
+              <div class="text-xs text-forest bg-mist/60 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 font-semibold">
+                {% include "ui/icon.html" with name="check" %}
+                <span>Éco-checklist préparée</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-line flex items-center justify-between">
+            <div class="text-xs text-muted">
+              Organisé par <strong class="text-carbon">{{ event.organizer.first_name|default:event.organizer.username }}</strong>
+            </div>
+            <a href="{% url 'events:detail' event.pk %}" class="ui-button ui-button-secondary ui-button-small inline-flex items-center gap-1">
+              <span>Détails</span>
+              {% include "ui/icon.html" with name="arrow" %}
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="ui-empty text-center py-12 px-6 rounded-2xl bg-mist/60 border border-line space-y-4">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-paper text-forest mx-auto shadow-sm">
+        {% include "ui/icon.html" with name="event" %}
+      </div>
+      <h3 class="text-xl font-bold text-forest">Aucun événement à venir pour l'instant</h3>
+      <p class="text-muted max-w-md mx-auto text-sm">
+        {% if search_query %}
+          Aucun événement ne correspond à votre recherche « {{ search_query }} ». Essayez d'autres termes.
+        {% else %}
+          Les prochaines mobilisations sont en préparation. Vous souhaitez organiser une action citoyenne ?
+        {% endif %}
+      </p>
+      <div class="pt-2">
+        <a href="{% url 'events:create' %}" class="ui-button ui-button-primary">Proposer un événement</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+async function searchWithAI() {
+  const input = document.getElementById("ai-search-input");
+  const query = input.value.trim();
+  const btn = document.getElementById("ai-search-btn");
+  const btnText = document.getElementById("ai-search-btn-text");
+  const resBox = document.getElementById("ai-search-results");
+  const summaryEl = document.getElementById("ai-search-summary");
+  const matchesEl = document.getElementById("ai-search-matches");
+
+  if (!query) {
+    alert("Veuillez exprimer votre souhait écologique dans le champ de recherche.");
+    input.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btnText.textContent = "Recherche IA...";
+
+  try {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : "";
+    const res = await fetch("{% url 'events:ai_search' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify({ query: query })
+    });
+    const data = await res.json();
+    summaryEl.textContent = data.summary || "Recommandations trouvées :";
+    matchesEl.innerHTML = "";
+
+    if (data.recommendations && data.recommendations.length > 0) {
+      data.recommendations.forEach(rec => {
+        const div = document.createElement("div");
+        div.className = "p-2.5 rounded-lg bg-mist/50 border border-line text-xs flex items-center justify-between";
+        div.innerHTML = `<div><strong class="text-forest">Recommandation :</strong> ${rec.match_reason}</div>` +
+          `<a href="/events/${rec.id}/" class="ui-button ui-button-secondary ui-button-small shrink-0 ml-3">Voir</a>`;
+        matchesEl.appendChild(div);
+      });
+    } else {
+      matchesEl.innerHTML = "<p class='text-xs text-muted'>Aucun événement ne correspond exactement à ce critère pour le moment.</p>";
+    }
+
+    resBox.classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = "Demander à l'IA";
+  }
+}
+</script>
+{% endblock %}

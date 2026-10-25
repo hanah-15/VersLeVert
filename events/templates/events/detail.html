@@ -1,0 +1,559 @@
+{% extends "ui/base.html" %}
+
+{% block title %}{{ event.title }} · Événements · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+  <!-- Fil d'Ariane -->
+  <nav class="text-sm text-muted flex items-center gap-2">
+    <a href="{% url 'events:upcoming' %}" class="hover:text-forest">Événements</a>
+    <span>/</span>
+    <span class="text-carbon font-semibold truncate">{{ event.title }}</span>
+  </nav>
+
+  <!-- En-tête de l'événement -->
+  <div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-2">
+      {% if event.status == "pending" %}
+        <span class="bg-sun/40 text-forest text-xs font-bold px-3 py-1 rounded-full">En attente de validation</span>
+      {% elif event.status == "published" %}
+        <span class="bg-olive/40 text-forest text-xs font-bold px-3 py-1 rounded-full">Événement publié</span>
+      {% elif event.status == "closed" %}
+        <span class="bg-forest text-porcelain text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1">
+          {% include "ui/icon.html" with name="check" %}
+          Clôturé
+        </span>
+      {% elif event.status == "cancelled" %}
+        <span class="bg-brick/15 text-brick text-xs font-bold px-3 py-1 rounded-full">Annulé</span>
+      {% elif event.status == "refused" %}
+        <span class="bg-brick/15 text-brick text-xs font-bold px-3 py-1 rounded-full">Refusé par l'administration</span>
+      {% endif %}
+
+      {% if event.is_upcoming %}
+        <span class="bg-mist text-forest text-xs font-semibold px-3 py-1 rounded-full">À venir</span>
+      {% else %}
+        <span class="bg-mist text-muted text-xs font-semibold px-3 py-1 rounded-full">Terminé</span>
+      {% endif %}
+
+      <span class="bg-sun/30 text-forest text-xs font-bold px-3 py-1 rounded-full ml-auto">
+        +{{ event.points_reward }} points par participant confirmé
+      </span>
+    </div>
+
+    <h1 class="text-3xl md:text-4xl font-bold text-forest leading-tight">{{ event.title }}</h1>
+
+    <div class="flex flex-wrap items-center gap-6 text-sm text-muted pt-2 border-b border-line pb-4">
+      <div class="flex items-center gap-2 text-carbon">
+        <span class="text-forest">{% include "ui/icon.html" with name="event" %}</span>
+        <strong>{{ event.date|date:"l d F Y à H:i" }}</strong>
+      </div>
+      <div class="flex items-center gap-2 text-carbon">
+        <span class="text-forest">{% include "ui/icon.html" with name="place" %}</span>
+        <span>{{ event.location }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-forest">{% include "ui/icon.html" with name="profile" %}</span>
+        <span>Organisé par <strong class="text-carbon">{{ event.organizer.first_name|default:event.organizer.username }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  {% if event.status == "published" and event.is_upcoming %}
+    <section class="ui-card ui-card-pad bg-sky/20 border border-sky space-y-3" aria-labelledby="event-weather-title">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="ui-eyebrow">Prévisions météo</p>
+          <h2 id="event-weather-title" class="text-lg font-bold text-forest">Météo à l'heure de l'événement</h2>
+        </div>
+        <span class="text-2xl" aria-hidden="true">☀</span>
+      </div>
+      <p id="event-weather-status" class="text-sm text-muted" role="status" aria-live="polite">
+        Chargement des prévisions pour {{ event.location }}…
+      </p>
+      <div id="event-weather-details" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Conditions</p>
+          <p id="event-weather-description" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Température</p>
+          <p id="event-weather-temperature" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Risque de pluie</p>
+          <p id="event-weather-rain" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Vent</p>
+          <p id="event-weather-wind" class="font-semibold text-forest"></p>
+        </div>
+      </div>
+      <p id="event-weather-source" class="hidden text-xs text-muted"></p>
+      <p class="text-xs text-muted">
+        Prévision indicative, susceptible d'évoluer.
+        Données météo et géocodage par
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="underline">Open-Meteo</a>.
+      </p>
+    </section>
+  {% endif %}
+
+  <!-- Bloc Résultats visibles si clôturé (CA E-06) + Innovation IA Impact -->
+  {% if event.status == "closed" %}
+    <section class="ui-card ui-card-pad bg-olive/20 border-2 border-olive space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-forest">{% include "ui/icon.html" with name="spark" %}</span>
+          <h2 class="text-2xl font-bold text-forest">Résultats & Bilan de l'action</h2>
+        </div>
+        {% if event.impact_analysis_dict.eco_badge_title %}
+          <span class="bg-forest text-porcelain text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1">
+            {% include "ui/icon.html" with name="leaf" %}
+            Distinction : {{ event.impact_analysis_dict.eco_badge_title }}
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Métriques chiffrées -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-paper p-4 rounded-xl border border-olive/50 shadow-sm">
+          <p class="text-xs uppercase font-bold text-muted tracking-wider">Quantité collectée</p>
+          <p class="text-2xl font-bold text-forest mt-1">
+            {{ event.collected_quantity|default:"Non renseignée" }}
+          </p>
+        </div>
+        <div class="bg-paper p-4 rounded-xl border border-olive/50 shadow-sm">
+          <p class="text-xs uppercase font-bold text-muted tracking-wider">Participants confirmés</p>
+          <p class="text-2xl font-bold text-forest mt-1">
+            {{ event.actual_participants_count|default:event.confirmed_attendees_count }} citoyen{{ event.actual_participants_count|pluralize }}
+          </p>
+        </div>
+        <div class="bg-paper p-4 rounded-xl border border-olive/50 shadow-sm">
+          <p class="text-xs uppercase font-bold text-muted tracking-wider flex items-center gap-1">
+            <span>CO₂ évité estimé (IA)</span>
+            <span class="text-forest">{% include "ui/icon.html" with name="spark" %}</span>
+          </p>
+          <p class="text-2xl font-bold text-forest mt-1">
+            {% if event.co2_avoided %}
+              {{ event.co2_avoided }} kg CO₂
+            {% else %}
+              Calcul en cours
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Équivalences concrètes calculées par l'IA -->
+      {% if event.impact_analysis_dict %}
+        <div class="bg-paper p-4 rounded-xl border border-olive/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-xs uppercase font-bold text-muted tracking-wider flex items-center gap-1.5">
+              <span>Analyse d'impact environnemental certifiée IA</span>
+              <span class="text-xs bg-olive/30 text-forest px-2 py-0.5 rounded-full font-bold">Smart Carbon</span>
+            </p>
+            {% if can_manage %}
+              <form method="post" action="{% url 'events:ai_impact' event.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="text-xs text-forest underline font-semibold hover:text-palm">
+                  Réactualiser l'analyse IA
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if event.impact_analysis_dict.analysis_summary %}
+            <p class="text-carbon text-sm leading-relaxed">
+              {{ event.impact_analysis_dict.analysis_summary }}
+            </p>
+          {% endif %}
+
+          {% if event.impact_analysis_dict.equivalences %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-line">
+              {% for eq in event.impact_analysis_dict.equivalences %}
+                <div class="flex items-start gap-2 text-xs text-forest font-semibold bg-mist/60 p-2.5 rounded-lg">
+                  <span class="shrink-0 mt-0.5">{% include "ui/icon.html" with name="check" %}</span>
+                  <span>{{ eq }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if event.result_summary %}
+        <div class="bg-paper p-4 rounded-xl border border-olive/50 space-y-1">
+          <p class="text-xs uppercase font-bold text-muted tracking-wider">Compte-rendu de l'organisateur</p>
+          <p class="text-carbon text-sm leading-relaxed whitespace-pre-line mt-1">{{ event.result_summary }}</p>
+        </div>
+      {% endif %}
+
+      <!-- Bouton Kit Réseaux Sociaux IA pour l'organisateur -->
+      {% if can_manage %}
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="loadSocialKit()" class="ui-button ui-button-secondary ui-button-small inline-flex items-center gap-1.5">
+            {% include "ui/icon.html" with name="spark" %}
+            <span>Générer le Kit Réseaux Sociaux & Presse (IA)</span>
+          </button>
+          <p class="text-xs text-muted">
+            Clôturé le {{ event.closed_at|date:"d/m/Y à H:i" }}. Points crédités.
+          </p>
+        </div>
+
+        <!-- Boîte de dialogue Kit Réseaux Sociaux -->
+        <div id="social-kit-box" class="hidden bg-paper p-5 rounded-2xl border-2 border-sun/60 space-y-4">
+          <div class="flex items-center justify-between border-b border-line pb-2">
+            <h3 class="text-base font-bold text-forest flex items-center gap-2">
+              {% include "ui/icon.html" with name="spark" %}
+              <span>Kit de Communication IA pour Réseaux Sociaux</span>
+            </h3>
+            <button type="button" onclick="document.getElementById('social-kit-box').classList.add('hidden')" class="text-muted text-xs hover:text-carbon font-bold">✕ Fermer</button>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between text-xs font-bold text-forest mb-1">
+                <span>Post Instagram / Facebook</span>
+                <button type="button" class="text-xs text-forest underline" onclick="copyText('social-insta')">Copier</button>
+              </div>
+              <textarea id="social-insta" readonly rows="4" class="w-full text-xs p-2.5 rounded-lg border border-line bg-mist/30 text-carbon font-mono"></textarea>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs font-bold text-forest mb-1">
+                <span>Post court (X / Twitter)</span>
+                <button type="button" class="text-xs text-forest underline" onclick="copyText('social-x')">Copier</button>
+              </div>
+              <textarea id="social-x" readonly rows="2" class="w-full text-xs p-2.5 rounded-lg border border-line bg-mist/30 text-carbon font-mono"></textarea>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs font-bold text-forest mb-1">
+                <span>Communiqué de presse court</span>
+                <button type="button" class="text-xs text-forest underline" onclick="copyText('social-press')">Copier</button>
+              </div>
+              <textarea id="social-press" readonly rows="3" class="w-full text-xs p-2.5 rounded-lg border border-line bg-mist/30 text-carbon font-mono"></textarea>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <!-- Objectif de l'événement -->
+  <section class="ui-card ui-card-pad space-y-3 bg-paper">
+    <h2 class="text-xl font-bold text-forest">Objectif de l'action</h2>
+    <div class="text-carbon text-base leading-relaxed whitespace-pre-line">
+      {{ event.objective }}
+    </div>
+  </section>
+
+  <!-- Éco-Checklist IA & Consignes Terrain -->
+  {% if event.checklist_items %}
+    <section class="ui-card ui-card-pad space-y-3 bg-mist/60 border border-line">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-forest flex items-center gap-2">
+          <span>{% include "ui/icon.html" with name="check" %}</span>
+          <span>Éco-Checklist & Matériel recommandé (IA)</span>
+        </h2>
+        <span class="text-xs bg-olive/30 text-forest px-2.5 py-0.5 rounded-full font-bold">Consignes utiles</span>
+      </div>
+      <p class="text-xs text-muted">Préparez au mieux votre participation grâce aux conseils personnalisés générés par l'IA :</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+        {% for item in event.checklist_items %}
+          <div class="flex items-start gap-2 bg-paper p-3 rounded-xl border border-line/80 text-xs text-carbon">
+            <span class="text-forest mt-0.5 font-bold">✓</span>
+            <span>{{ item }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Bloc Capacité & Inscription Citoyenne (CA E-03) -->
+  <section class="ui-card ui-card-pad space-y-4 bg-mist/40 border border-line">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <h2 class="text-lg font-bold text-forest">Participation</h2>
+        <p class="text-sm text-muted">
+          {% if event.capacity %}
+            <strong>{{ event.registrations_count }}</strong> inscrit{{ event.registrations_count|pluralize }} sur <strong>{{ event.capacity }}</strong> places au total.
+            {% if event.is_full %}
+              <span class="text-brick font-bold ml-1">(Complet)</span>
+            {% else %}
+              <span class="text-forest font-semibold ml-1">({{ event.available_spots }} place{{ event.available_spots|pluralize }} restante{{ event.available_spots|pluralize }})</span>
+            {% endif %}
+          {% else %}
+            <strong>{{ event.registrations_count }}</strong> participant{{ event.registrations_count|pluralize }} inscrit{{ event.registrations_count|pluralize }} (Capacité sans limite).
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Boutons d'action Inscription / Désinscription -->
+      <div class="shrink-0">
+        {% if user.is_authenticated %}
+          {% if is_registered %}
+            <div class="flex items-center gap-3">
+              <span class="ui-badge bg-olive/40 text-forest text-sm font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                {% include "ui/icon.html" with name="check" %}
+                <span>Vous êtes inscrit</span>
+              </span>
+
+              {% if user_registration.present %}
+                <span class="bg-forest text-porcelain text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
+                  {% include "ui/icon.html" with name="check" %}
+                  Présence confirmée
+                </span>
+              {% endif %}
+
+              {% if can_unregister %}
+                <form method="post" action="{% url 'events:unregister' event.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="ui-button ui-button-danger ui-button-small" onclick="return confirm('Confirmez-vous votre désinscription ?')">
+                    Se désinscrire
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          {% else %}
+            {% if can_register %}
+              <form method="post" action="{% url 'events:register' event.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="ui-button ui-button-primary">
+                  S'inscrire à cet événement
+                </button>
+              </form>
+            {% elif event.status != "published" %}
+              <span class="text-muted text-sm italic">Inscriptions non ouvertes</span>
+            {% elif not event.is_upcoming %}
+              <span class="text-muted text-sm font-semibold">Événement passé</span>
+            {% elif event.is_full %}
+              <span class="bg-brick/15 text-brick text-sm font-bold px-4 py-2 rounded-xl">
+                Complet
+              </span>
+            {% endif %}
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path }}" class="ui-button ui-button-primary">
+            Connectez-vous pour vous inscrire
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Panneau Organisateur & Administrateur (CA E-02, E-04, E-05, E-06) -->
+  {% if can_manage %}
+    <section class="ui-card ui-card-pad bg-paper border-2 border-forest/20 space-y-6">
+      <div class="flex items-center justify-between border-b border-line pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-forest">{% include "ui/icon.html" with name="shield" %}</span>
+          <h2 class="text-xl font-bold text-forest">Gestion de l'événement</h2>
+        </div>
+        <span class="text-xs text-muted uppercase font-bold tracking-wider">
+          {% if is_organizer %}Organisateur{% else %}Administrateur{% endif %}
+        </span>
+      </div>
+
+      <!-- Assistance IA de modération pour Admin (E-02) -->
+      {% if is_admin and event.status == "pending" %}
+        <div class="p-4 rounded-xl bg-sun/15 border border-sun/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-forest uppercase tracking-wider flex items-center gap-1.5">
+              {% include "ui/icon.html" with name="spark" %}
+              <span>Aide IA à la modération</span>
+            </span>
+            <button type="button" onclick="loadAdminAIModeration()" class="text-xs text-forest underline font-semibold">
+              Lancer l'analyse de conformité
+            </button>
+          </div>
+          <div id="ai-mod-content" class="text-xs text-carbon space-y-2">
+            {% if event.moderation_dict %}
+              <p><strong>Avis IA :</strong> {{ event.moderation_dict.commentary }}</p>
+              {% if event.moderation_dict.safety_tips %}
+                <p class="font-bold text-forest">Conseils sécurité :</p>
+                <ul class="list-disc list-inside text-muted">
+                  {% for tip in event.moderation_dict.safety_tips %}
+                    <li>{{ tip }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% else %}
+              <p class="text-muted">Cliquez sur « Lancer l'analyse de conformité » pour obtenir l'avis d'impact et de sécurité de l'IA.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Actions rapides d'état -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Modération admin (E-02) -->
+        {% if is_admin and event.status == "pending" %}
+          <form method="post" action="{% url 'events:admin_validate' event.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="ui-button ui-button-primary ui-button-small">
+              Valider et publier immédiatement
+            </button>
+          </form>
+          <form method="post" action="{% url 'events:admin_refuse' event.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="ui-button ui-button-danger ui-button-small">
+              Refuser l'événement
+            </button>
+          </form>
+        {% endif %}
+
+        <!-- Confirmer présences (E-04) -->
+        {% if can_confirm_attendance %}
+          <a href="{% url 'events:attendance' event.pk %}" class="ui-button ui-button-secondary ui-button-small inline-flex items-center gap-1.5">
+            {% include "ui/icon.html" with name="check" %}
+            <span>Confirmer la présence des inscrits</span>
+          </a>
+        {% endif %}
+
+        <!-- Clôturer et publier le résultat (E-05, E-06) -->
+        {% if can_close %}
+          <a href="{% url 'events:close' event.pk %}" class="ui-button ui-button-primary ui-button-small inline-flex items-center gap-1.5">
+            {% include "ui/icon.html" with name="spark" %}
+            <span>Clôturer & publier le résultat</span>
+          </a>
+        {% endif %}
+
+        <!-- Annuler l'événement -->
+        {% if event.is_upcoming and event.status != "cancelled" and event.status != "refused" %}
+          <form method="post" action="{% url 'events:cancel' event.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="ui-button ui-button-danger ui-button-small" onclick="return confirm('Êtes-vous sûr de vouloir annuler cet événement ?')">
+              Annuler l'événement
+            </button>
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Liste des inscrits pour l'organisateur -->
+      <div class="space-y-3 pt-2">
+        <h3 class="text-base font-bold text-forest">
+          Participants inscrits ({{ registrations.count }})
+        </h3>
+
+        {% if registrations %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="border-b border-line text-xs uppercase text-muted">
+                  <th class="py-2 font-semibold">Participant</th>
+                  <th class="py-2 font-semibold">Email</th>
+                  <th class="py-2 font-semibold">Inscrit le</th>
+                  <th class="py-2 font-semibold">Présence</th>
+                  <th class="py-2 font-semibold">Points</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-line/60">
+                {% for reg in registrations %}
+                  <tr>
+                    <td class="py-2.5 font-medium text-carbon">
+                      {{ reg.user.first_name }} {{ reg.user.last_name|default:reg.user.username }}
+                    </td>
+                    <td class="py-2.5 text-muted">{{ reg.user.email }}</td>
+                    <td class="py-2.5 text-muted">{{ reg.registered_at|date:"d/m/Y H:i" }}</td>
+                    <td class="py-2.5">
+                      {% if reg.present %}
+                        <span class="text-forest font-bold inline-flex items-center gap-1">
+                          {% include "ui/icon.html" with name="check" %}
+                          Présent
+                        </span>
+                      {% else %}
+                        <span class="text-muted">Non pointé</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-2.5">
+                      {% if reg.points_awarded %}
+                        <span class="bg-sun/40 text-forest text-xs font-bold px-2 py-0.5 rounded-full">
+                          +{{ reg.points_amount }} pts
+                        </span>
+                      {% else %}
+                        <span class="text-muted text-xs">—</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-sm text-muted">Aucun inscrit pour le moment.</p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+<script>
+async function loadEventWeather() {
+  const status = document.getElementById("event-weather-status");
+  if (!status) return;
+
+  try {
+    const response = await fetch("{% url 'events:weather' event.pk %}");
+    const data = await response.json();
+    if (!response.ok || !data.available) {
+      status.textContent = data.message || "La prévision météo est indisponible.";
+      return;
+    }
+
+    document.getElementById("event-weather-description").textContent = data.description;
+    document.getElementById("event-weather-temperature").textContent =
+      `${data.temperature_c} °C (ressenti ${data.feels_like_c} °C)`;
+    document.getElementById("event-weather-rain").textContent =
+      `${data.precipitation_probability}%`;
+    document.getElementById("event-weather-wind").textContent =
+      `${data.wind_speed_kmh} km/h`;
+    document.getElementById("event-weather-details").classList.remove("hidden");
+    document.getElementById("event-weather-source").textContent =
+      `Prévision pour ${data.location}, le ${data.forecast_time}.`;
+    document.getElementById("event-weather-source").classList.remove("hidden");
+    status.textContent = "Prévision estimée à l'heure prévue de l'événement.";
+  } catch (error) {
+    console.error("Unable to load event weather:", error);
+    status.textContent = "Impossible de charger la météo pour le moment. Réessayez plus tard.";
+  }
+}
+
+loadEventWeather();
+
+async function loadSocialKit() {
+  const box = document.getElementById("social-kit-box");
+  box.classList.remove("hidden");
+  try {
+    const res = await fetch("{% url 'events:ai_social_kit' event.pk %}");
+    const data = await res.json();
+    document.getElementById("social-insta").value = data.instagram_post || "";
+    document.getElementById("social-x").value = data.x_post || "";
+    document.getElementById("social-press").value = data.press_snippet || "";
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.select();
+  navigator.clipboard.writeText(el.value);
+  alert("Texte copié dans le presse-papier !");
+}
+
+async function loadAdminAIModeration() {
+  const box = document.getElementById("ai-mod-content");
+  box.innerHTML = "<em>Analyse en cours par Gemini...</em>";
+  try {
+    const res = await fetch("{% url 'events:ai_moderate' event.pk %}");
+    const data = await res.json();
+    let tipsHtml = "";
+    if (data.safety_tips && data.safety_tips.length) {
+      tipsHtml = "<p class='font-bold text-forest mt-1'>Conseils sécurité :</p><ul class='list-disc list-inside text-muted'>" +
+        data.safety_tips.map(t => `<li>${t}</li>`).join("") + "</ul>";
+    }
+    box.innerHTML = `<p><strong>Recommandation :</strong> <span class="font-bold text-forest">${data.recommendation} (Score: ${data.score}%)</span></p>` +
+      `<p class="mt-1">${data.commentary}</p>` + tipsHtml;
+  } catch (e) {
+    box.innerHTML = "<span class='text-brick'>Échec de l'analyse IA.</span>";
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Mes événements · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="space-y-10">
+  <div class="ui-page-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <p class="ui-eyebrow"><span class="ui-dot"></span> Tableau de bord</p>
+      <h1 class="text-3xl md:text-4xl font-bold text-forest">Mes événements</h1>
+      <p class="text-muted mt-1 text-base">Suivez vos inscriptions et gérez les événements que vous organisez.</p>
+    </div>
+    <div>
+      <a href="{% url 'events:create' %}" class="ui-button ui-button-primary inline-flex items-center gap-2">
+        {% include "ui/icon.html" with name="plus" %}
+        <span>Proposer un événement</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Section Admin: Modération en attente -->
+  {% if pending_events %}
+    <section class="space-y-4 rounded-2xl border-2 border-sun/60 bg-sun/10 p-6">
+      <div class="flex items-center gap-2">
+        <span class="text-forest font-bold">{% include "ui/icon.html" with name="shield" %}</span>
+        <h2 class="text-xl font-bold text-forest">Événements en attente de modération (Admin)</h2>
+      </div>
+      <p class="text-sm text-muted">Ces propositions ont été soumises par des citoyens et attendent votre validation.</p>
+
+      <div class="grid gap-4 mt-3">
+        {% for event in pending_events %}
+          <div class="ui-card ui-card-pad flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-paper">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="bg-sun/40 text-forest text-xs font-bold px-2 py-0.5 rounded-full">En attente</span>
+                <span class="text-xs text-muted">{{ event.date|date:"d/m/Y à H:i" }} · {{ event.location }}</span>
+              </div>
+              <h3 class="text-lg font-bold text-forest">
+                <a href="{% url 'events:detail' event.pk %}">{{ event.title }}</a>
+              </h3>
+              <p class="text-xs text-muted">
+                Proposé par <strong>{{ event.organizer.first_name|default:event.organizer.username }}</strong> ({{ event.organizer.email }})
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <form method="post" action="{% url 'events:admin_validate' event.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="ui-button ui-button-primary ui-button-small">
+                  Valider et publier
+                </button>
+              </form>
+              <form method="post" action="{% url 'events:admin_refuse' event.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="ui-button ui-button-danger ui-button-small">
+                  Refuser
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Section 1 : Événements que j'organise -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-forest">Événements que j'organise</h2>
+      <span class="text-sm text-muted">{{ organized_events.count }} événement{{ organized_events.count|pluralize }}</span>
+    </div>
+
+    {% if organized_events %}
+      <div class="grid gap-4">
+        {% for event in organized_events %}
+          <article class="ui-card ui-card-pad flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                {% if event.status == "pending" %}
+                  <span class="bg-sun/40 text-forest text-xs font-bold px-2.5 py-1 rounded-full">En attente de validation</span>
+                {% elif event.status == "published" %}
+                  <span class="bg-olive/40 text-forest text-xs font-bold px-2.5 py-1 rounded-full">Publié</span>
+                {% elif event.status == "closed" %}
+                  <span class="bg-mist text-muted text-xs font-bold px-2.5 py-1 rounded-full">Clôturé</span>
+                {% elif event.status == "cancelled" %}
+                  <span class="bg-brick/15 text-brick text-xs font-bold px-2.5 py-1 rounded-full">Annulé</span>
+                {% elif event.status == "refused" %}
+                  <span class="bg-brick/15 text-brick text-xs font-bold px-2.5 py-1 rounded-full">Refusé</span>
+                {% endif %}
+                <span class="text-xs text-muted flex items-center gap-1">
+                  {% include "ui/icon.html" with name="event" %}
+                  {{ event.date|date:"d M Y · H:i" }}
+                </span>
+                <span class="text-xs text-muted flex items-center gap-1">
+                  {% include "ui/icon.html" with name="place" %}
+                  {{ event.location }}
+                </span>
+              </div>
+
+              <h3 class="text-xl font-bold text-forest">
+                <a href="{% url 'events:detail' event.pk %}">{{ event.title }}</a>
+              </h3>
+
+              <div class="text-xs text-muted flex items-center gap-4">
+                <span>Inscrits : <strong class="text-carbon">{{ event.registrations_count }}</strong>{% if event.capacity %} / {{ event.capacity }}{% endif %}</span>
+                {% if event.is_past %}
+                  <span>Présences confirmées : <strong class="text-forest">{{ event.confirmed_attendees_count }}</strong></span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Actions organisateur -->
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <a href="{% url 'events:detail' event.pk %}" class="ui-button ui-button-secondary ui-button-small">
+                Voir
+              </a>
+              {% if event.is_past and event.status == "published" or event.status == "closed" %}
+                <a href="{% url 'events:attendance' event.pk %}" class="ui-button ui-button-secondary ui-button-small inline-flex items-center gap-1">
+                  {% include "ui/icon.html" with name="check" %}
+                  <span>Présences</span>
+                </a>
+              {% endif %}
+              {% if event.is_past and event.status == "published" %}
+                <a href="{% url 'events:close' event.pk %}" class="ui-button ui-button-primary ui-button-small">
+                  Clôturer & publier
+                </a>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="ui-empty p-8 rounded-2xl bg-mist/40 border border-line text-center space-y-2">
+        <p class="text-muted text-sm">Vous n'avez pas encore proposé d'événement.</p>
+        <a href="{% url 'events:create' %}" class="ui-button ui-button-primary ui-button-small inline-block mt-2">
+          Organiser une action
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Section 2 : Mes inscriptions -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-forest">Mes inscriptions</h2>
+      <span class="text-sm text-muted">{{ my_registrations.count }} inscription{{ my_registrations.count|pluralize }}</span>
+    </div>
+
+    {% if my_registrations %}
+      <div class="grid gap-4">
+        {% for reg in my_registrations %}
+          <article class="ui-card ui-card-pad flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs text-muted flex items-center gap-1">
+                  {% include "ui/icon.html" with name="event" %}
+                  {{ reg.event.date|date:"d M Y · H:i" }}
+                </span>
+                <span class="text-xs text-muted flex items-center gap-1">
+                  {% include "ui/icon.html" with name="place" %}
+                  {{ reg.event.location }}
+                </span>
+                {% if reg.present %}
+                  <span class="bg-olive/40 text-forest text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    {% include "ui/icon.html" with name="check" %}
+                    Présence confirmée
+                  </span>
+                {% elif reg.event.is_past %}
+                  <span class="bg-mist text-muted text-xs font-semibold px-2 py-0.5 rounded-full">
+                    Événement passé
+                  </span>
+                {% else %}
+                  <span class="bg-sky/40 text-forest text-xs font-semibold px-2 py-0.5 rounded-full">
+                    Inscrit
+                  </span>
+                {% endif %}
+
+                {% if reg.points_awarded %}
+                  <span class="bg-sun/50 text-forest text-xs font-bold px-2 py-0.5 rounded-full">
+                    +{{ reg.points_amount }} pts
+                  </span>
+                {% endif %}
+              </div>
+
+              <h3 class="text-xl font-bold text-forest">
+                <a href="{% url 'events:detail' reg.event.pk %}">{{ reg.event.title }}</a>
+              </h3>
+
+              <p class="text-xs text-muted">
+                Organisé par <strong>{{ reg.event.organizer.first_name|default:reg.event.organizer.username }}</strong>
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <a href="{% url 'events:detail' reg.event.pk %}" class="ui-button ui-button-secondary ui-button-small">
+                Détails
+              </a>
+              {% if reg.event.is_upcoming %}
+                <form method="post" action="{% url 'events:unregister' reg.event.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="ui-button ui-button-danger ui-button-small" onclick="return confirm('Confirmer votre désinscription ?')">
+                    Se désinscrire
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="ui-empty p-8 rounded-2xl bg-mist/40 border border-line text-center space-y-2">
+        <p class="text-muted text-sm">Vous n'êtes inscrit à aucun événement pour le moment.</p>
+        <a href="{% url 'events:upcoming' %}" class="ui-button ui-button-secondary ui-button-small inline-block mt-2">
+          Découvrir les événements à venir
+        </a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

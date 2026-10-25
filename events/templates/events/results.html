@@ -1,0 +1,85 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Résultats des événements · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <div class="ui-page-header">
+    <p class="ui-eyebrow"><span class="ui-dot"></span> Bilan & Impact</p>
+    <h1 class="text-3xl md:text-4xl font-bold text-forest">Résultats des actions écologiques</h1>
+    <p class="text-muted mt-1 text-base">Mesurez le résultat concret des événements clôturés : déchets collectés, arbres plantés et mobilisation citoyenne.</p>
+  </div>
+
+  {% if closed_events %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {% for event in closed_events %}
+        <article class="ui-card ui-card-pad flex flex-col justify-between space-y-5 bg-paper hover:shadow-md transition-shadow">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="bg-olive/40 text-forest text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                {% include "ui/icon.html" with name="check" %}
+                Événement clôturé
+              </span>
+              <span class="text-xs text-muted">{{ event.date|date:"d M Y" }}</span>
+            </div>
+
+            <div>
+              <h2 class="text-xl font-bold text-forest hover:text-palm transition-colors">
+                <a href="{% url 'events:detail' event.pk %}">{{ event.title }}</a>
+              </h2>
+              <p class="text-xs text-muted mt-1 flex items-center gap-1">
+                {% include "ui/icon.html" with name="place" %}
+                <span>{{ event.location }}</span>
+              </p>
+            </div>
+
+            <!-- Impact / Résultats chiffrés (E-06) -->
+            <div class="grid grid-cols-2 gap-3 p-4 rounded-xl bg-mist/60 border border-line">
+              <div class="space-y-1">
+                <span class="text-xs uppercase font-bold text-muted tracking-wider">Quantité collectée</span>
+                <p class="text-lg font-bold text-forest">
+                  {{ event.collected_quantity|default:"Non renseignée" }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <span class="text-xs uppercase font-bold text-muted tracking-wider">Participants</span>
+                <p class="text-lg font-bold text-forest">
+                  {{ event.actual_participants_count|default:event.confirmed_attendees_count }} citoyen{{ event.actual_participants_count|pluralize }}
+                </p>
+              </div>
+            </div>
+
+            {% if event.result_summary %}
+              <div class="text-sm text-carbon/80 bg-porcelain p-3.5 rounded-xl border border-line/70">
+                <p class="font-semibold text-xs text-muted uppercase tracking-wide mb-1">Compte-rendu</p>
+                <p class="italic text-sm">{{ event.result_summary|truncatewords:40 }}</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="pt-4 border-t border-line flex items-center justify-between text-xs text-muted">
+            <span>Organisé par <strong class="text-carbon">{{ event.organizer.first_name|default:event.organizer.username }}</strong></span>
+            <a href="{% url 'events:detail' event.pk %}" class="ui-button ui-button-secondary ui-button-small inline-flex items-center gap-1">
+              <span>Voir le détail</span>
+              {% include "ui/icon.html" with name="arrow" %}
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="ui-empty text-center py-12 px-6 rounded-2xl bg-mist/60 border border-line space-y-4">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-paper text-forest mx-auto shadow-sm">
+        {% include "ui/icon.html" with name="spark" %}
+      </div>
+      <h3 class="text-xl font-bold text-forest">Aucun résultat publié pour l'instant</h3>
+      <p class="text-muted max-w-md mx-auto text-sm">
+        Les résultats apparaîtront ici dès que les organisateurs auront clôturé leurs événements et renseigné les bilans.
+      </p>
+      <div class="pt-2">
+        <a href="{% url 'events:upcoming' %}" class="ui-button ui-button-secondary">Consulter les événements à venir</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
