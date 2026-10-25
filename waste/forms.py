@@ -96,3 +96,16 @@ class ConfirmWeightForm(forms.Form):
                 f"({self.waste_request.estimated_weight} kg)."
             )
         return weight
+
+
+class WasteAnalysisForm(forms.Form):
+    description = forms.CharField(
+        label="Description du déchet",
+        max_length=500,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 5,
+                "placeholder": "Ex. : deux bouteilles en plastique de 1 litre",
+            }
+        ),
+    )

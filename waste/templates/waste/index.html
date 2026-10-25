@@ -6,12 +6,42 @@
 <h1 class="font-heading text-h1 font-bold text-forest">Mes déchets</h1>
 <div class="mt-6 flex flex-wrap gap-3">
     <a href="{% url 'waste:create' %}" class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain no-underline hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Déclarer un déchet</a>
+    <a href="{% url 'waste:assistant' %}" class="rounded-md-ui border-2 border-sky bg-sky px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Demander à l'assistant de tri</a>
     <a href="{% url 'waste:market' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Collecter un déchet</a>
     <a href="{% url 'waste:my_offers' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Mes propositions</a>
 </div>
 {% if has_pending_offers %}
     <div class="mt-5 flex items-start gap-3 rounded-md-ui bg-sky p-4 text-forest" role="alert">Vous avez des propositions de collecte à examiner.</div>
 {% endif %}
+
+<section class="mt-8 rounded-lg-ui border border-olive bg-olive/25 p-5" aria-labelledby="eco-advice-title">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h2 id="eco-advice-title" class="font-heading text-h2 font-bold text-forest">Mon bilan éco</h2>
+            {% if eco_advice %}
+                <p class="mt-2 text-carbon">{{ eco_advice.payload.summary }}</p>
+            {% else %}
+                <p class="mt-2 text-carbon">Générez un bilan personnalisé à partir de vos collectes confirmées.</p>
+            {% endif %}
+        </div>
+        <button id="refresh-eco-advice" type="button" class="rounded-md-ui border-2 border-forest bg-forest px-4 py-2 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
+            Actualiser
+        </button>
+    </div>
+    <p id="eco-advice-error" class="mt-3 hidden rounded-md-ui border-2 border-brick bg-porcelain p-3 text-carbon" role="alert"></p>
+    <p id="eco-advice-loading" class="mt-3 hidden text-forest" aria-live="polite">Génération du bilan en cours…</p>
+    <form class="hidden">{% csrf_token %}</form>
+    <div id="eco-advice-tips" class="mt-4 grid gap-3 sm:grid-cols-3">
+        {% if eco_advice %}
+            {% for tip in eco_advice.payload.tips %}
+                <article class="rounded-md-ui bg-porcelain p-4">
+                    <h3 class="font-bold text-forest">{{ tip.title }}</h3>
+                    <p class="mt-2 text-sm">{{ tip.text }}</p>
+                </article>
+            {% endfor %}
+        {% endif %}
+    </div>
+</section>
 
 <div class="mt-8 grid gap-4">
 {% for r in requests %}
@@ -47,4 +77,38 @@
 {% endfor %}
 </div>
 </div>
+<script>
+(() => {
+    const button = document.getElementById("refresh-eco-advice");
+    const error = document.getElementById("eco-advice-error");
+    const loading = document.getElementById("eco-advice-loading");
+    const summary = document.querySelector("#eco-advice-title + p");
+    const tips = document.getElementById("eco-advice-tips");
+    const csrf = document.querySelector("[name=csrfmiddlewaretoken]");
+    const csrfToken = csrf ? csrf.value : document.cookie.split("; ").find(row => row.startsWith("csrftoken="))?.split("=")[1];
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        loading.classList.remove("hidden");
+        error.classList.add("hidden");
+        try {
+            const response = await fetch("{% url 'waste:advice' %}", {
+                method: "POST",
+                headers: {"X-CSRFToken": csrfToken || "", "Accept": "application/json"}
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Impossible de générer le bilan.");
+            summary.textContent = data.payload.summary;
+            tips.innerHTML = data.payload.tips.map(tip =>
+                `<article class="rounded-md-ui bg-porcelain p-4"><h3 class="font-bold text-forest">${tip.title}</h3><p class="mt-2 text-sm">${tip.text}</p></article>`
+            ).join("");
+        } catch (requestError) {
+            error.textContent = requestError.message || "Une erreur est survenue. Réessayez.";
+            error.classList.remove("hidden");
+        } finally {
+            button.disabled = false;
+            loading.classList.add("hidden");
+        }
+    });
+})();
+</script>
 {% endblock %}

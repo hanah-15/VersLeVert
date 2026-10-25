@@ -30,6 +30,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("challenges/", include("challenges.urls")),
     path("waste/", include("waste.urls")),
+    path("api/waste/", include("waste.api_urls")),
     path("events/", include("events.urls")),
     path("places/", include("places.urls")),
     path("rewards/", include("gamification.urls")),

@@ -8,8 +8,18 @@ from django.views.generic import CreateView, DetailView, ListView, TemplateView,
 
 from accounts.utils import distance_km
 
-from .forms import DeclineForm, MarketFilterForm, OfferForm, WasteRequestForm,ConfirmWeightForm
-from .models import CollectionOffer, Status, WasteRequest
+from .ai.service import AIInvalidResponseError, AIUnavailableError, analyze_description
+from .ai.weight import estimate_weight
+from .forms import (
+    ConfirmWeightForm,
+    DeclineForm,
+    MarketFilterForm,
+    OfferForm,
+    WasteAnalysisForm,
+    WasteRequestForm,
+)
+from .ai.advice import get_or_create_advice
+from .models import CollectionOffer, EcoAdvice, Status, WasteRequest
 
 
 class MyRequestsView(LoginRequiredMixin, ListView):
@@ -28,7 +38,35 @@ class MyRequestsView(LoginRequiredMixin, ListView):
         context["has_pending_offers"] = self.get_queryset().filter(
             pending_offers__gt=0
         ).exists()
+        context["eco_advice"] = EcoAdvice.objects.filter(user=self.request.user).first()
         return context
+
+
+class WasteAssistantView(LoginRequiredMixin, TemplateView):
+    template_name = "waste/assistant.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.setdefault("form", WasteAnalysisForm())
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = WasteAnalysisForm(request.POST)
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+
+        try:
+            analysis = analyze_description(form.cleaned_data["description"])
+        except (AIUnavailableError, AIInvalidResponseError) as error:
+            form.add_error(None, str(error))
+            return self.render_to_response(self.get_context_data(form=form))
+
+        context = self.get_context_data(form=form)
+        context["analysis"] = analysis
+        context["estimated_weight"] = estimate_weight(
+            analysis["waste_type"], analysis["quantity"]
+        )
+        return self.render_to_response(context)
 
 
 class WasteCreateView(LoginRequiredMixin, CreateView):
