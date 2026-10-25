@@ -117,6 +117,6 @@ class AdminModuleView(AdminRequiredMixin, TemplateView):
             "events": "events:mine",
             "places": "places:moderation",
             "waste": "waste:index",
-            "gamification": "gamification:admin-proof-queue",
+            "gamification": "admin:gamification_ecoproof_changelist",
         }
         return redirect(destinations[self.kwargs["module"]])

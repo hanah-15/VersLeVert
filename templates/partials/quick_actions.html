@@ -2,7 +2,7 @@
     <summary class="flex h-16 w-16 cursor-pointer list-none items-center justify-center rounded-full bg-palm text-forest shadow-xl transition-all duration-500 ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus:outline-none focus:ring-4 focus:ring-palm/40 [&::-webkit-details-marker]:hidden" aria-label="Actions rapides">{% include "partials/icon.html" with name="plus" %}</summary>
     <div class="absolute bottom-full right-0 z-50 mb-3 w-64 rounded-md-ui border border-olive bg-porcelain p-2 shadow-lg">
         <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'waste-create' %}">Publier un déchet</a>
-        <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'proof-create' %}">Ajouter une preuve</a>
+        <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'proofs:new' %}">Ajouter une preuve</a>
         <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'personal-challenge-create' %}">Nouveau défi personnel</a>
     </div>
 </details>

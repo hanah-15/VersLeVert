@@ -12,12 +12,10 @@ urlpatterns = [
 
     # Proof sub-section
     path("preuves/",              views.MyProofsView.as_view(),      name="my-proofs"),
-    path("preuves/ajouter/",      views.ProofSubmitView.as_view(),   name="proof-submit"),
+    path("preuves/ajouter/",      views.ProofNewView.as_view(),      name="proof-submit"),
     path("preuves/<int:pk>/",     views.ProofDetailView.as_view(),   name="proof-detail"),
 
     # ── Admin pages ─────────────────────────────────────────────────────────
-    path("admin/preuves/",         views.AdminProofQueueView.as_view(),    name="admin-proof-queue"),
-    path("admin/preuves/<int:pk>/", views.AdminProofReviewView.as_view(),  name="admin-proof-review"),
     path("admin/bareme/",          views.AdminImpactFactorListView.as_view(), name="admin-impact-factors"),
     path("admin/badges/",          views.AdminBadgeListView.as_view(),     name="admin-badges"),
 ]

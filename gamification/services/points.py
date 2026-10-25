@@ -35,7 +35,7 @@ class PointsService:
         We read the most recent ``balance_after`` from the ledger.
         Returns 0 if the user has no transactions yet.
         """
-        from .models import PointsTransaction  # local import to avoid circular deps
+        from ..models import PointsTransaction  # local import to avoid circular deps
         tx = (
             PointsTransaction.objects
             .filter(user=user)
@@ -68,7 +68,7 @@ class PointsService:
             source_id:   PK of the originating object.
             reason:      Short label for the ledger (e.g. "Collecte confirmée").
         """
-        from .models import ImpactFactor, PointsTransaction
+        from ..models import ImpactFactor, PointsTransaction
         from accounts.models import Notification
 
         if Decimal(str(quantity)) <= 0:
@@ -110,7 +110,7 @@ class PointsService:
         reason="", factor_snapshot=None, deduplicate_source=False,
     ):
         """Record points already calculated by another module, without rescaling."""
-        from .models import PointsTransaction
+        from ..models import PointsTransaction
 
         amount = int(amount)
         if amount <= 0:
@@ -154,7 +154,7 @@ class PointsService:
 
         Returns ``None`` if the balance is insufficient.
         """
-        from .models import PointsTransaction
+        from ..models import PointsTransaction
 
         if amount < 0:
             raise ValueError("A debit amount cannot be negative.")
@@ -197,7 +197,7 @@ class PointsService:
         *delta* may be positive or negative.
         The balance will never go below 0.
         """
-        from .models import PointsTransaction
+        from ..models import PointsTransaction
 
         PointsService._lock_user(user)
         current = PointsService.balance(user)
@@ -245,7 +245,7 @@ class PointsService:
 
         Evaluated entirely from PointsTransaction — never reads other models.
         """
-        from .models import Badge, PointsTransaction, UserBadge
+        from ..models import Badge, PointsTransaction, UserBadge
 
         already_earned = set(
             UserBadge.objects.filter(user=user).values_list("badge_id", flat=True)

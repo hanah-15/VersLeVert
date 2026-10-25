@@ -12,3 +12,12 @@ google-genai==2.33.0
 httpx==0.28.1
 cloudinary==1.46.3
 django-cloudinary-storage==0.3.0
+
+# OCR and background processing
+pytesseract==0.3.13
+opencv-python-headless==4.11.0.86
+numpy==2.3.1
+pillow-heif==0.22.0
+PyMuPDF==1.26.1
+celery==5.5.3
+redis==6.2.0

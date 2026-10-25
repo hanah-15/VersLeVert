@@ -4,6 +4,7 @@ from decimal import Decimal
 from threading import Barrier
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.db import close_old_connections
 from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
@@ -15,8 +16,9 @@ from events.models import Event, EventRegistration
 from sponsor.models import Offer, RewardCode
 from waste.models import EmissionFactor, Status, WasteRequest, WasteType
 
-from .models import Badge, EcoProof, ImpactFactor, PointsTransaction, UserBadge
+from .models import Badge, EcoProof, ImpactFactor, PointsTransaction, ProofType, UserBadge
 from .services import PointsService, award_points
+from .services.pipeline import approve_proof
 
 
 @override_settings(GEMINI_API_KEY="", GROQ_API_KEY="")
@@ -26,6 +28,9 @@ class SharedPointsTests(TestCase):
         users = get_user_model()
         cls.user = users.objects.create_user(username="points-citizen", email="points@example.test")
         cls.staff = users.objects.create_user(username="points-staff", email="points-staff@example.test", is_staff=True)
+        cls.staff.user_permissions.add(Permission.objects.get(
+            content_type__app_label="gamification", codename="view_ecoproof",
+        ))
         cls.partner_user = users.objects.create_user(username="points-partner", email="points-partner@example.test")
         cls.partner = SponsorAccount.objects.create(
             user=cls.partner_user, business_name="Test partner", activity=SponsorAccount.Activity.REPAIR_REUSE,
@@ -75,14 +80,19 @@ class SharedPointsTests(TestCase):
         self.assertEqual(UserBadge.objects.filter(user=self.user).count(), 1)
 
         ImpactFactor.objects.create(action_type="OTHER", label="Other proof", unit="proof", points_per_unit=20)
-        proof = EcoProof.objects.create(
-            user=self.user, proof_type=EcoProof.ProofType.OTHER, file="test-proof.pdf",
-            file_hash="a" * 64, proof_date=timezone.localdate(),
+        proof_type = ProofType.objects.create(
+            code="OTHER", category=ProofType.Category.ENGAGEMENT,
+            label_fr="Other proof", action_type="OTHER", cap_count=5,
+            cap_period=ProofType.CapPeriod.MONTH, requires_date=False,
         )
-        self.client.force_login(self.staff)
+        proof = EcoProof.objects.create(
+            user=self.user, proof_type=proof_type,
+            cloudinary_public_id="local/points-test/proof", file_sha256="a" * 64,
+        )
         for _ in range(2):
-            response = self.client.post(reverse("gamification:admin-proof-review", args=[proof.pk]), {"action": "approve"})
-            self.assertEqual(response.status_code, 302)
+            approved = approve_proof(proof.pk)
+            self.assertEqual(approved.status, EcoProof.Status.APPROVED)
+        self.assertEqual(PointsTransaction.objects.filter(source_type="eco_proof", source_id=proof.pk).count(), 1)
         self.assertEqual(PointsService.balance(self.user), 138)
 
         self.client.force_login(self.user)
@@ -114,7 +124,7 @@ class SharedPointsTests(TestCase):
 
     def test_staff_reward_pages_and_shared_quick_actions_render(self):
         self.client.force_login(self.staff)
-        for name in ("gamification:admin-proof-queue", "gamification:admin-impact-factors", "gamification:admin-badges",
+        for name in ("admin:gamification_ecoproof_changelist", "gamification:admin-impact-factors", "gamification:admin-badges",
                      "admin_dashboard:dashboard", "admin_dashboard:users_list", "admin_dashboard:sponsors_list"):
             with self.subTest(name=name):
                 self.assertEqual(self.client.get(reverse(name)).status_code, 200)
@@ -127,7 +137,7 @@ class SharedPointsTests(TestCase):
         destinations = {
             "challenges": "challenges:admin-stats", "events": "events:mine",
             "places": "places:moderation", "waste": "waste:index",
-            "gamification": "gamification:admin-proof-queue",
+            "gamification": "admin:gamification_ecoproof_changelist",
         }
         self.client.force_login(self.user)
         self.assertEqual(self.client.get(reverse("admin_dashboard:module_challenges")).status_code, 403)

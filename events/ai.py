@@ -26,8 +26,8 @@ def generate_text(prompt: str, *, max_output_tokens: int = 1024) -> str:
     if not prompt.strip():
         raise ValueError("Le prompt ne peut pas être vide.")
 
-    timeout = getattr(settings, "GEMINI_TIMEOUT_SECONDS", 20)
-    model = getattr(settings, "GEMINI_MODEL", "gemini-3.1-flash-lite")
+    timeout = getattr(settings, "EVENTS_GEMINI_TIMEOUT_SECONDS", 0) or settings.GEMINI_TIMEOUT_SECONDS
+    model = getattr(settings, "EVENTS_GEMINI_MODEL", "") or settings.GEMINI_MODEL
 
     try:
         with genai.Client(

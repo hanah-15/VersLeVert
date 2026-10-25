@@ -149,3 +149,26 @@ les détails et `places/evaluation/` pour les jeux fictifs et les mesures réell
 - Pages de tous les modules : étendre `ui/base.html`, réutiliser `templates/ui/`
   et le design fourni par Hana. Conserver les fonctions et parcours de chaque module.
 - `git pull` avant de commencer à travailler
+
+## Preuves écologiques et OCR
+
+Le nouveau parcours est disponible sur `/preuves/nouvelle/` et conserve aussi
+les liens historiques `/rewards/preuves/ajouter/`. Il utilise Gemini avec repli
+OCR.space, consentement, fichiers privés, contrôles anti-doublon et décision
+automatique. La gestion des points reste commune aux cinq modules.
+
+Installer les dépendances, appliquer les migrations et lancer
+`python manage.py seed_proof_types` sans `--reset` pour ajouter les barèmes
+manquants sans écraser ceux de l’équipe. Voir [PROOFS.md](./PROOFS.md) pour
+le parcours et [AI_INTEGRATION.md](./AI_INTEGRATION.md) pour les fournisseurs.
+
+`PROOF_TASK_BACKEND=thread` suffit en local. Pour Celery :
+`docker compose up -d --wait redis`, puis
+`.\venv\Scripts\celery.exe -A config worker --pool=solo --loglevel=info`
+dans un second terminal Windows. Les URLs Redis restent configurables.
+
+Les clés partagées sont locales ; `.env.example` ne contient aucun secret.
+Les paramètres `PLACES_GEMINI_*`, `EVENTS_GEMINI_*` et `GROQ_*` restent indépendants. Avec un
+compte Cloudinary configuré, `PROOF_STORAGE_BACKEND=cloudinary` active les
+fichiers privés. `PUBLIC_MEDIA_BACKEND=local` conserve les images publiques
+déjà présentes dans `media/` ; `auto` utilise Cloudinary si configuré.

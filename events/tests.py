@@ -518,11 +518,9 @@ class EventWeatherTests(TestCase):
     @patch("events.weather.httpx.get")
     def test_weather_endpoint_returns_forecast_for_event_time(self, mock_get):
         event_local_time = self.event.date.astimezone(ZoneInfo("Africa/Tunis"))
-        forecast_time = event_local_time.replace(minute=0,second=0,microsecond=0,)
-
-        if event_local_time.minute >= 30:
-             forecast_time += timedelta(hours=1)        
-             mock_get.side_effect = [
+        forecast_time = event_local_time.replace(minute=0, second=0, microsecond=0)
+        next_forecast_time = forecast_time + timedelta(hours=1)
+        mock_get.side_effect = [
             self._provider_response(
                 {
                     "results": [
@@ -539,12 +537,12 @@ class EventWeatherTests(TestCase):
                 {
                     "timezone": "Africa/Tunis",
                     "hourly": {
-                        "time": [forecast_time.strftime("%Y-%m-%dT%H:%M")],
-                        "temperature_2m": [24.5],
-                        "apparent_temperature": [25.1],
-                        "precipitation_probability": [10],
-                        "weather_code": [1],
-                        "wind_speed_10m": [12.0],
+                        "time": [forecast_time.strftime("%Y-%m-%dT%H:%M"), next_forecast_time.strftime("%Y-%m-%dT%H:%M")],
+                        "temperature_2m": [24.5, 24.5],
+                        "apparent_temperature": [25.1, 25.1],
+                        "precipitation_probability": [10, 10],
+                        "weather_code": [1, 1],
+                        "wind_speed_10m": [12.0, 12.0],
                     },
                 }
             ),

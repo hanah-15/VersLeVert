@@ -1,0 +1,32 @@
+filename,claimed_type,true_type,expected_decision,true_date,true_amount,true_merchant,notes
+transport_ticket_valid.png,TRANSPORT_TICKET,TRANSPORT_TICKET,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+transport_ticket_negative.png,TRANSPORT_TICKET,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+transport_pass_valid.png,TRANSPORT_PASS,TRANSPORT_PASS,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+transport_pass_negative.png,TRANSPORT_PASS,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+bike_purchase_valid.png,BIKE_PURCHASE,BIKE_PURCHASE,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+bike_purchase_negative.png,BIKE_PURCHASE,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+electricity_bill_valid.png,ELECTRICITY_BILL,ELECTRICITY_BILL,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+electricity_bill_negative.png,ELECTRICITY_BILL,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+gas_bill_valid.png,GAS_BILL,GAS_BILL,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+gas_bill_negative.png,GAS_BILL,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+small_efficient_equipment_valid.png,SMALL_EFFICIENT_EQUIPMENT,SMALL_EFFICIENT_EQUIPMENT,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+small_efficient_equipment_negative.png,SMALL_EFFICIENT_EQUIPMENT,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+energy_renovation_valid.png,ENERGY_RENOVATION,ENERGY_RENOVATION,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+energy_renovation_negative.png,ENERGY_RENOVATION,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+water_bill_valid.png,WATER_BILL,WATER_BILL,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+water_bill_negative.png,WATER_BILL,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+secondhand_or_refurbished_valid.png,SECONDHAND_OR_REFURBISHED,SECONDHAND_OR_REFURBISHED,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+secondhand_or_refurbished_negative.png,SECONDHAND_OR_REFURBISHED,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+repair_receipt_valid.png,REPAIR_RECEIPT,REPAIR_RECEIPT,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+repair_receipt_negative.png,REPAIR_RECEIPT,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+responsible_shopping_valid.png,RESPONSIBLE_SHOPPING,RESPONSIBLE_SHOPPING,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+responsible_shopping_negative.png,RESPONSIBLE_SHOPPING,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+textile_label_valid.png,TEXTILE_LABEL,TEXTILE_LABEL,APPROVED,,,,synthetic positive sample
+textile_label_negative.png,TEXTILE_LABEL,OTHER,REJECTED,,,,synthetic mismatched or non-ecological sample
+workshop_attestation_valid.png,WORKSHOP_ATTESTATION,WORKSHOP_ATTESTATION,APPROVED,2026-10-25,42.500,SAMPLE STORE,synthetic positive sample
+workshop_attestation_negative.png,WORKSHOP_ATTESTATION,OTHER,REJECTED,2026-10-24,42.500,SAMPLE STORE,synthetic mismatched or non-ecological sample
+eco_action_photo_valid.png,ECO_ACTION_PHOTO,ECO_ACTION_PHOTO,APPROVED,,,,synthetic positive sample
+eco_action_photo_negative.png,ECO_ACTION_PHOTO,OTHER,REJECTED,,,,synthetic mismatched or non-ecological sample
+other_non_document_1.png,ECO_ACTION_PHOTO,OTHER,REJECTED,,,,synthetic non-document
+other_non_document_2.png,ECO_ACTION_PHOTO,OTHER,REJECTED,,,,synthetic non-document
+eco_action_tree_valid.png,ECO_ACTION_PHOTO,ECO_ACTION_PHOTO,APPROVED,,,,synthetic positive photo showing planted tree
