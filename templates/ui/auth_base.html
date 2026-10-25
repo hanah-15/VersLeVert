@@ -1,0 +1,25 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+{% block body_class %}auth-page{% endblock %}
+{% block main_class %}min-h-screen w-full{% endblock %}
+{% block page_container_class %}w-full max-w-none{% endblock %}
+{% block navigation %}
+<header class="relative z-40 bg-transparent">
+  <div class="mx-auto flex min-h-[76px] w-full max-w-page items-center justify-between gap-4 px-4">
+    {% include "ui/brand.html" %}
+    <a class="rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 text-[13px] font-semibold text-forest backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20" href="{% url 'home' %}">Accueil</a>
+  </div>
+</header>
+{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block page_messages %}{% endblock %}
+{% block content %}
+<div class="mx-auto grid min-h-[calc(100vh-76px)] w-full max-w-page items-center gap-8 px-4 py-8">
+  <section class="vt-auth-card relative isolate flex w-full max-w-[520px] flex-col justify-self-start rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 md:p-10">
+    {% if messages %}<div class="mb-6 space-y-2">{% for message in messages %}<div class="ui-alert" role="alert">{% include "ui/icon.html" with name="info" %}<span>{{ message }}</span></div>{% endfor %}</div>{% endif %}
+    <div class="my-auto">{% language 'fr' %}{% block auth_content %}{% endblock %}{% endlanguage %}</div>
+    <p class="mt-8 text-center text-caption text-forest/70">Vers le Vert · Chaque geste compte.</p>
+  </section>
+</div>
+{% endblock %}

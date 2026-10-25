@@ -1,8 +1,8 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% block title %}Événements · Vers le Vert{% endblock %}
-
+{% block secondary_navigation %}{% endblock %}
 {% block content %}
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Événements</h1>
-<p>Découvrez les événements à venir dans votre région.</p>
-{% include "partials/alert.html" with variant="info" message="Module en cours de développement." %}
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Une énergie collective</p><h1>Ensemble, on va plus vert.</h1><p>Des rencontres et des actions locales pour faire bouger les choses, près de chez vous.</p></div><span class="ui-icon-box">{% include "ui/icon.html" with name="event" %}</span></header>
+{% include "ui/tabs.html" with tabs=space_tabs %}
+<section class="ui-content-panel"><div class="module-empty !mt-0"><span class="ui-icon-box">{% include "ui/icon.html" with name="event" %}</span><h2>Les prochaines rencontres se préparent.</h2><p>Le calendrier des événements sera disponible prochainement. En attendant, découvrez les bonnes adresses de votre quotidien.</p><a class="mt-5 inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'places:index' %}">Découvrir les lieux</a></div></section>
 {% endblock %}

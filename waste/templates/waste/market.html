@@ -11,7 +11,7 @@
     {% endfor %}
     {% for field in filter_form.hidden_fields %}{{ field }}{% endfor %}
     {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" %}
-    <button type="submit" class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Rechercher</button>
+    <button type="submit" class="w-full inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Rechercher</button>
 </form>
 
 <div class="mt-8 grid gap-4">
@@ -34,14 +34,14 @@
             {% if row.offer.status == "declined" %}
                 <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Proposition refusée</span>
             {% elif row.offer.status == "withdrawn" %}
-                <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
+                <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 min-w-[220px] inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
                     Proposer de collecter
                 </a>
             {% else %}
                 <span class="rounded-full bg-sky px-3 py-1 text-caption font-bold text-forest">Proposition envoyée</span>
             {% endif %}
         {% else %}
-            <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
+            <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 min-w-[220px] inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
                 Proposer de collecter
             </a>
         {% endif %}

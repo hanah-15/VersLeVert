@@ -1,25 +1,19 @@
-{% extends "base.html" %}
+{% extends "ui/auth_base.html" %}
 {% block title %}Connexion · Vers le Vert{% endblock %}
-
-{% block content %}
-<div class="mx-auto my-10 max-w-[440px] rounded-lg-ui border border-olive bg-porcelain p-8">
-    <h2 class="font-heading text-[28px] font-semibold leading-tight text-forest">Connexion</h2>
-
-    {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}
-            {% include "partials/alert.html" with variant="error" message=error %}
-        {% endfor %}
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            {% include "components/form_field.html" %}
-        {% endfor %}
-        <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-md-ui border-2 border-forest bg-forest px-[22px] py-2.5 text-base font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Se connecter</button>
-    </form>
-
-    <p class="mt-[18px] text-[15px]">Pas encore de compte ? <a href="{% url 'signup' %}">Inscris-toi</a></p>
+{% block auth_content %}
+<p class="ui-eyebrow text-palm-deep">Heureux de vous retrouver</p>
+<h1>Bienvenue.</h1>
+<p class="mb-6 mt-2 text-[13px] leading-relaxed text-forest/90">Retrouvez vos découvertes, vos envies et votre prochain petit pas.</p>
+{% if form.non_field_errors %}<div class="ui-alert ui-alert-error mb-4" role="alert">{% include "ui/icon.html" with name="info" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+<form method="post" class="space-y-4">
+  {% csrf_token %}
+  {% for field in form %}{% if field.name == 'username' %}{% include "ui/field.html" with label="Adresse e-mail" auth_field=True %}{% else %}{% include "ui/field.html" with label="Mot de passe" auth_field=True %}{% endif %}{% endfor %}
+  <input type="hidden" name="next" value="{{ next }}">
+  {% include "ui/button.html" with label="Se connecter" variant="primary" full=True button_type="submit" %}
+</form>
+<div class="my-4 flex items-center gap-3 text-caption text-forest/70">
+  <span class="h-px flex-1 bg-white/30"></span>ou<span class="h-px flex-1 bg-white/30"></span>
 </div>
+{% url 'signup' as signup_url %}
+{% include "ui/button.html" with href=signup_url label="S'inscrire" variant="secondary" full=True %}
 {% endblock %}

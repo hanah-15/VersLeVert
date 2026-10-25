@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
 <h1>Rejeter la demande de {{ account.business_name }}</h1>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit" class="default">Rejeter</button></form>
+<form method="post">{% csrf_token %}{{ form.as_p }}{% include "ui/button.html" with label="Rejeter" variant="danger" button_type="submit" %}</form>
 {% endblock %}

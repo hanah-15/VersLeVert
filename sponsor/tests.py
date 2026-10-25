@@ -10,11 +10,11 @@ class SponsorOwnershipTests(TestCase):
         self.user_a = User.objects.create_user(username="a", email="a@example.com", password="test-password-123")
         self.user_b = User.objects.create_user(username="b", email="b@example.com", password="test-password-123")
         self.sponsor_a = SponsorAccount.objects.create(
-            user=self.user_a, business_name="A", activity="Recyclage", description="A",
+            user=self.user_a, business_name="A", activity=SponsorAccount.Activity.REPAIR_REUSE, description="A",
             contact_email=self.user_a.email, status=SponsorAccount.Status.APPROVED,
         )
         self.sponsor_b = SponsorAccount.objects.create(
-            user=self.user_b, business_name="B", activity="Recyclage", description="B",
+            user=self.user_b, business_name="B", activity=SponsorAccount.Activity.REPAIR_REUSE, description="B",
             contact_email=self.user_b.email, status=SponsorAccount.Status.APPROVED,
         )
         self.offer_a = Offer.objects.create(sponsor=self.sponsor_a, title="Offre A", description="A")

@@ -1,0 +1,13 @@
+{% extends "places/base.html" %}
+{% block title %}Examiner {{ recommendation.product_name }} · Vers le Vert{% endblock %}
+{% block places_content %}
+<div class="mx-auto max-w-3xl space-y-6">
+  <header class="ui-title-panel space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">Modération · {{ recommendation.get_status_display }}</p><h1 class="break-words font-heading text-3xl font-bold text-forest">{{ recommendation.product_name }}</h1><p>Par {{ recommendation.user.first_name|default:recommendation.user.username }} · {{ recommendation.get_category_display }}</p></header>
+  {% include "ui/rewards_tabs.html" %}
+  {% include "places/_tools.html" %}
+  <section class="ui-content-panel space-y-5">
+    <div class="ui-card break-words p-6 leading-relaxed">{{ recommendation.description|linebreaks }}{% if recommendation.place %}<p class="mt-4 font-bold">Lieu associé : {{ recommendation.place.name }}</p>{% endif %}</div>
+    <form method="post" class="ui-content-panel space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "places/_field.html" %}{% endfor %}<div class="flex flex-wrap items-center gap-4"><button class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Enregistrer la décision</button><a href="{% url 'places:moderation' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Retour à la liste</a></div></form>
+  </section>
+</div>
+{% endblock %}

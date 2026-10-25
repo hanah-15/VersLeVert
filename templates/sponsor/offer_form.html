@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-{% block content %}
-<h1 class="font-heading text-h1 font-bold text-forest">Offre</h1>
-<form method="post" class="mt-6 flex max-w-2xl flex-col gap-4">{% csrf_token %}{{ form.as_p }}<button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" type="submit">Enregistrer</button></form>
-{% endblock %}
+{% extends "sponsor/base_sponsor.html" %}
+{% block title %}Mon offre · Vers le Vert{% endblock %}
+{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>{% if object %}Modifier l'offre{% else %}Créer une offre{% endif %}</h1><p>Décrivez votre offre, son coût en points et ajoutez une image (upload Cloudinary ou URL).</p></div></header><div class="ui-card ui-card-pad max-w-2xl"><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button><a class="ui-button ui-button-secondary" href="{% url 'sponsor-shop' %}">Annuler</a></div></form></div>{% endblock %}

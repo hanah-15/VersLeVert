@@ -1,16 +1,6 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% block title %}Récompenses · Vers le Vert{% endblock %}
-
 {% block content %}
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Récompenses</h1>
-<p>Échangez vos points contre des offres de nos partenaires.</p>
-
-<div class="mb-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-    {% include "components/stat_tile.html" with label="Points" value="1 240" %}
-    {% include "components/stat_tile.html" with label="Badges" value="7" %}
-</div>
-
-<div class="mb-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
-    {% include "components/offer_card.html" with title="[Nom de l'offre]" points=300 sponsor="[Nom du sponsor]" description="[Description de l'offre.]" %}
-</div>
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Chaque effort a de la valeur</p><h1>De bons gestes,<br>de belles récompenses.</h1><p>Échangez vos points contre des offres proposées par les partenaires de la communauté.</p></div><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span></header>
+<div class="grid gap-5 md:grid-cols-[1fr_2fr]"><article class="ui-stat"><span class="ui-stat-label">Vos points disponibles</span><strong class="ui-stat-value">{{ points_balance|default:0 }} <span class="text-lg text-muted">pts</span></strong><a class="ui-link mt-auto" href="{% url 'profile-section' 'points' %}">Voir mon parcours {% include "ui/icon.html" with name="arrow" %}</a></article><section class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2>De belles découvertes arrivent.</h2><p>Le catalogue des offres partenaires est en préparation. Vos récompenses apparaîtront ici.</p></section></div>
 {% endblock %}

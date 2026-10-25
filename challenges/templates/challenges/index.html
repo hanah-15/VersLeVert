@@ -1,11 +1,8 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% block title %}Défis · Vers le Vert{% endblock %}
-
+{% block secondary_navigation %}{% endblock %}
 {% block content %}
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Défis</h1>
-<p>Relevez des défis écologiques personnels et gagnez des points.</p>
-
-<div class="mb-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
-    {% include "components/challenge_card.html" with title="Exemple de défi" points=50 percent=60 current=18 goal=30 unit="km" %}
-</div>
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> À votre rythme</p><h1>Une bonne habitude<br>commence par un défi.</h1><p>Relevez des défis écologiques personnels et avancez vers vos objectifs, un petit pas après l'autre.</p></div><span class="ui-icon-box">{% include "ui/icon.html" with name="challenge" %}</span></header>
+{% include "ui/tabs.html" with tabs=space_tabs %}
+<section class="ui-content-panel space-y-5"><div class="ui-section-heading"><h2>Un aperçu de votre prochain défi</h2><span class="ui-badge">Exemple</span></div><article class="ui-card ui-card-pad max-w-xl"><div class="flex items-center justify-between gap-4"><span class="ui-icon-box">{% include "ui/icon.html" with name="challenge" %}</span><span class="ui-badge">50 points</span></div><h3 class="mt-6 text-2xl">Exemple de défi</h3><p class="mt-2 text-sm text-muted">Se déplacer autrement, trajet après trajet.</p><div class="mt-6 flex justify-between gap-3 text-xs font-bold text-forest"><span>18 / 30 km</span><span>60 %</span></div><div class="mt-3 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label="Progression du défi d'exemple" aria-valuenow="18" aria-valuemin="0" aria-valuemax="30"><span class="block h-full w-3/5 rounded-full bg-palm"></span></div><p class="mt-5 text-xs text-muted">Le catalogue interactif des défis est en préparation.</p></article></section>
 {% endblock %}

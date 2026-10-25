@@ -23,6 +23,18 @@ class User(AbstractUser):
 
 
 class SponsorAccount(models.Model):
+    class Activity(models.TextChoices):
+        FOOD_LOCAL = "food_local", "Alimentation et commerces locaux"
+        CLOTHING = "clothing", "Vêtements et mode"
+        FOOD_AND_BEVERAGES = "food_and_beverages", "Alimentation et boissons"
+        TECHNOLOGY = "technology", "Technologie et numérique"
+        REPAIR_REUSE = "repair_reuse", "Réparation et réemploi"
+        SUSTAINABLE_MOBILITY = "sustainable_mobility", "Mobilité durable"
+        ENERGY_ENVIRONMENT = "energy_environment", "Énergie et environnement"
+        AGRICULTURE_GREEN_SPACES = "agriculture_green_spaces", "Agriculture et espaces verts"
+        SOCIAL_ECONOMY = "social_economy", "Associations et économie sociale"
+        OTHER = "other", "Autre"
+
     class Status(models.TextChoices):
         PENDING = "PENDING", "En attente"
         APPROVED = "APPROVED", "Approuvé"
@@ -31,7 +43,7 @@ class SponsorAccount(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="sponsor_account")
     business_name = models.CharField(max_length=150)
-    activity = models.CharField(max_length=150)
+    activity = models.CharField(max_length=32, choices=Activity.choices)
     description = models.TextField()
     logo = models.ImageField(upload_to="sponsors/", blank=True, null=True)
     contact_email = models.EmailField()
@@ -41,6 +53,27 @@ class SponsorAccount(models.Model):
     validated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="validated_sponsors")
     validated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    activity__in=(
+                        "food_local",
+                        "clothing",
+                        "food_and_beverages",
+                        "technology",
+                        "repair_reuse",
+                        "sustainable_mobility",
+                        "energy_environment",
+                        "agriculture_green_spaces",
+                        "social_economy",
+                        "other",
+                    )
+                ),
+                name="accounts_sponsor_activity_valid",
+            ),
+        ]
 
     def approve(self, admin_user):
         self.status = self.Status.APPROVED

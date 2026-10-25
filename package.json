@@ -2,7 +2,9 @@
   "name": "verslevert",
   "private": true,
   "scripts": {
+    "build": "npm run build:css",
     "build:css": "tailwindcss -i ./static/css/tailwind.source.css -o ./static/css/tailwind.css --minify",
+    "dev": "npm run watch:css",
     "watch:css": "tailwindcss -i ./static/css/tailwind.source.css -o ./static/css/tailwind.css --watch"
   },
   "devDependencies": {

@@ -1,34 +1,202 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% load waste_stats %}
 {% block title %}Accueil · Vers le Vert{% endblock %}
-
+{% block body_class %}community-page{% endblock %}
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 {% block content %}
-{% if not user.is_authenticated %}
-<section class="mx-auto max-w-4xl py-12 text-center">
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Agissons ensemble pour un avenir plus vert.</h1>
-<p class="mx-auto mt-4 max-w-2xl">Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
-<a href="{% url 'signup' %}" class="mt-6 inline-flex rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain">Créer mon compte</a>
+<noscript><style>[data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
+
+<section class="relative mx-auto grid w-full max-w-page min-h-[80vh] items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr]" aria-labelledby="home-heading">
+  <div class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 md:p-12">
+    <p class="mb-6 flex items-center gap-2 font-ui text-caption font-semibold uppercase tracking-[0.14em] text-forest/70 motion-safe:animate-reveal [animation-delay:100ms]">
+      <span class="text-palm-deep [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="leaf" %}</span>
+      {% if user.is_authenticated %}Bonjour, {{ user.first_name|default:user.username }}. On fait un petit pas ?{% else %}Des petits gestes. Une belle énergie collective.{% endif %}
+    </p>
+    <h1 id="home-heading" class="!text-[38px] !font-[Fraunces,serif] !leading-[1.08] text-forest motion-safe:animate-reveal [animation-delay:200ms] md:!text-[56px]">Ensemble,<br>cultivons un<br><em class="text-palm-deep">quotidien plus vert.</em></h1>
+    <p class="mt-5 max-w-[46ch] font-[Nunito_Sans,sans-serif] text-lg text-forest/90 motion-safe:animate-reveal [animation-delay:350ms]">Un lieu à découvrir, une habitude à changer, une rencontre pour agir. Le changement commence tout près de vous.</p>
+    <div class="mt-8 flex flex-wrap gap-3 motion-safe:animate-reveal [animation-delay:500ms]">
+      {% url 'places:index' as places_url %}
+      {% if user.is_authenticated %}
+      {% if user.is_staff or user.is_superuser or user.is_admin_user %}
+      {% url 'admin_dashboard:dashboard' as dashboard_url %}
+      {% include "ui/button.html" with href=dashboard_url label="Accéder au tableau de bord" variant="primary" %}
+      {% include "ui/button.html" with href=places_url label="Explorer les lieux" variant="secondary" %}
+      {% else %}
+      {% url 'places:guide' as guide_url %}
+      {% include "ui/button.html" with href=places_url label="Explorer les lieux" variant="primary" %}
+      {% include "ui/button.html" with href=guide_url label="Trouver une idée" variant="secondary" %}
+      {% endif %}
+      {% else %}
+      {% url 'signup' as signup_url %}
+      {% include "ui/button.html" with href=signup_url label="Rejoindre l'aventure" variant="primary" %}
+      {% include "ui/button.html" with href="#nos-univers" label="Je découvre" variant="secondary" %}
+      {% endif %}
+    </div>
+  </div>
+
+</section>
+
+<section id="nos-univers" class="mx-auto w-full max-w-page py-20 md:py-28" aria-labelledby="explore-heading">
+  <div data-reveal class="relative isolate mb-8 flex flex-col gap-4 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 md:flex-row md:items-end md:justify-between md:p-12 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6">
+    <div>
+      <p class="mb-3 font-ui text-caption uppercase tracking-[0.14em] text-palm-deep">Il y a mille façons de faire sa part</p>
+      <h2 id="explore-heading" class="!text-h2 !font-[Fraunces,serif] text-forest md:!text-[36px] md:!leading-[1.15]">Et vous, quel sera<br>votre prochain petit pas ?</h2>
+    </div>
+    <p class="max-w-[26ch] font-[Nunito_Sans,sans-serif] text-sm text-forest/70">Suivez votre curiosité.<br>Le reste se construit en chemin.</p>
+  </div>
+  <div class="grid gap-6 md:grid-cols-3">
+    <a data-reveal data-reveal-index="0" href="{% url 'places:index' %}" class="group relative isolate flex flex-col overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 !transition-all !duration-500 !ease-out hover:-translate-y-1 hover:border-palm/70 hover:bg-white/35 hover:shadow-float focus-visible:outline-none focus-visible:ring-4 focus-visible:!ring-palm/40 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6 md:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <span class="flex h-14 w-14 items-center justify-center rounded-full border border-white/30 bg-white/25 text-palm-deep shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90 [&>svg]:h-6 [&>svg]:w-6">{% include "ui/icon.html" with name="place" %}</span>
+        <span class="font-[Fraunces,serif] text-5xl leading-none text-palm-deep">01</span>
+      </div>
+      <h3 class="mt-6 !text-h3 !font-[Fraunces,serif] text-forest">Consommer autrement</h3>
+      <p class="mt-3 mb-6 font-[Nunito_Sans,sans-serif] text-[13px] leading-relaxed text-forest/90">De bonnes adresses et des produits recommandés par la communauté.</p>
+      <span class="mt-auto inline-flex items-center gap-2 font-ui text-caption font-semibold text-palm-deep">Découvrir les lieux <span class="transition-transform duration-500 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="arrow" %}</span></span>
+    </a>
+    <a data-reveal data-reveal-index="1" href="{% url 'challenges:index' %}" class="group relative isolate flex flex-col overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 !transition-all !duration-500 !ease-out hover:-translate-y-1 hover:border-palm/70 hover:bg-white/35 hover:shadow-float focus-visible:outline-none focus-visible:ring-4 focus-visible:!ring-palm/40 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6 md:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <span class="flex h-14 w-14 items-center justify-center rounded-full border border-white/30 bg-white/25 text-palm-deep shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90 [&>svg]:h-6 [&>svg]:w-6">{% include "ui/icon.html" with name="challenge" %}</span>
+        <span class="font-[Fraunces,serif] text-5xl leading-none text-palm-deep">02</span>
+      </div>
+      <h3 class="mt-6 !text-h3 !font-[Fraunces,serif] text-forest">Changer une habitude</h3>
+      <p class="mt-3 mb-6 font-[Nunito_Sans,sans-serif] text-[13px] leading-relaxed text-forest/90">Un objectif à votre portée, pour faire grandir votre engagement.</p>
+      <span class="mt-auto inline-flex items-center gap-2 font-ui text-caption font-semibold text-palm-deep">Explorer les défis <span class="transition-transform duration-500 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="arrow" %}</span></span>
+    </a>
+    <a data-reveal data-reveal-index="2" href="{% url 'events:index' %}" class="group relative isolate flex flex-col overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 !transition-all !duration-500 !ease-out hover:-translate-y-1 hover:border-palm/70 hover:bg-white/35 hover:shadow-float focus-visible:outline-none focus-visible:ring-4 focus-visible:!ring-palm/40 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6 md:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <span class="flex h-14 w-14 items-center justify-center rounded-full border border-white/30 bg-white/25 text-palm-deep shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90 [&>svg]:h-6 [&>svg]:w-6">{% include "ui/icon.html" with name="event" %}</span>
+        <span class="font-[Fraunces,serif] text-5xl leading-none text-palm-deep">03</span>
+      </div>
+      <h3 class="mt-6 !text-h3 !font-[Fraunces,serif] text-forest">Faire bouger les choses</h3>
+      <p class="mt-3 mb-6 font-[Nunito_Sans,sans-serif] text-[13px] leading-relaxed text-forest/90">Des rencontres et des actions locales, parce qu'ensemble on avance.</p>
+      <span class="mt-auto inline-flex items-center gap-2 font-ui text-caption font-semibold text-palm-deep">Voir les événements <span class="transition-transform duration-500 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="arrow" %}</span></span>
+    </a>
+  </div>
+  <div data-reveal class="relative isolate mt-8 flex flex-wrap items-center gap-3 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6">
+    <span class="mr-auto font-ui text-caption font-semibold text-forest/70">Et si votre prochain geste était déjà là ?</span>
+    <a href="{% url 'waste:index' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
+      Valoriser mes déchets
+    </a>
+    <a href="{% url 'places:recommendations' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
+      Partager des découvertes
+    </a>
+    <a href="{% url 'gamification:index' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
+      Découvrir les récompenses
+    </a>
+  </div>
+</section>
+
+<section id="comment-ca-marche" class="mx-auto grid w-full max-w-page gap-8 py-20 md:py-28 lg:grid-cols-2" aria-labelledby="story-heading">
+  <div data-reveal class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 md:p-12 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6">
+    <p class="mb-3 font-ui text-caption uppercase tracking-[0.14em] text-palm-deep">L'esprit Vers le Vert</p>
+    <h2 id="story-heading" class="!text-h2 !font-[Fraunces,serif] text-forest md:!text-[36px] md:!leading-[1.15]">On ne change pas<br>tout en un jour.<br><em class="text-palm-deep">On commence<br>ensemble.</em></h2>
+  </div>
+  <div data-reveal data-reveal-index="1" class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 md:p-8 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6">
+    <p class="max-w-lg font-[Nunito_Sans,sans-serif] text-sm leading-relaxed text-forest/90">Un quotidien plus responsable se construit avec des choix simples. Vers le Vert vous aide à trouver les idées, les lieux et l'élan pour les faire vivre.</p>
+    <ol class="mt-7 space-y-5">
+      <li class="relative isolate flex items-start gap-4 overflow-hidden rounded-lg-ui border border
+      -white/30 bg-white/25 p-4 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90 [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:left-[19px] [&:not(:last-child)]:after:top-10 [&:not(:last-child)]:after:-bottom-5 [&:not(:last-child)]:after:w-px [&:not(:last-child)]:after:bg-white/50 [&:not(:last-child)]:after:content-['']">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/25 font-ui text-caption font-bold text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">01</span>
+        <div>
+          <h3 class="!text-h3 !font-[Fraunces,serif] text-forest">Découvrez ce qui vous inspire.</h3>
+          <p class="mt-1 font-[Nunito_Sans,sans-serif] text-[13px] text-forest/90">Une adresse, un défi, une action près de chez vous.</p>
+        </div>
+      </li>
+      <li class="relative isolate flex items-start gap-4 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-4 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90 [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:left-[19px] [&:not(:last-child)]:after:top-10 [&:not(:last-child)]:after:-bottom-5 [&:not(:last-child)]:after:w-px [&:not(:last-child)]:after:bg-white/50 [&:not(:last-child)]:after:content-['']">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/25 font-ui text-caption font-bold text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">02</span>
+        <div>
+          <h3 class="!text-h3 !font-[Fraunces,serif] text-forest">Faites un premier pas.</h3>
+          <p class="mt-1 font-[Nunito_Sans,sans-serif] text-[13px] text-forest/90">Choisissez une action qui vous ressemble.</p>
+        </div>
+      </li>
+      <li class="relative isolate flex items-start gap-4 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-4 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/25 font-ui text-caption font-bold text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">03</span>
+        <div>
+          <h3 class="!text-h3 !font-[Fraunces,serif] text-forest">Faites grandir le mouvement.</h3>
+          <p class="mt-1 font-[Nunito_Sans,sans-serif] text-[13px] text-forest/90">Partagez vos découvertes et avancez avec la communauté.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+{% if user.is_authenticated %}
+{% waste_impact user as impact %}
+<section data-reveal class="mx-auto w-full max-w-page py-10 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6" aria-label="Votre contribution">
+  <div class="relative isolate flex flex-col justify-between gap-7 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 lg:flex-row lg:items-center md:p-12">
+    <div>
+      <p class="mb-3 font-ui text-caption uppercase tracking-[0.14em] text-palm-deep">Votre contribution</p>
+      <h2 class="mb-4 !text-h2 !font-[Fraunces,serif] text-forest md:!text-[36px] md:!leading-[1.15]">Chaque geste laisse une trace.</h2>
+      <a class="group inline-flex items-center gap-2 font-ui text-caption font-semibold text-palm-deep !transition-all !duration-500 !ease-out hover:text-forest" href="{% url 'profile-section' 'points' %}">Retrouver mon parcours <span class="transition-transform duration-500 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="arrow" %}</span></a>
+    </div>
+    <dl class="grid w-full flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+      <div class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-5 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">
+        <dt class="font-ui text-caption uppercase text-forest/70">CO₂ évité</dt>
+        <dd class="mt-2 font-[Fraunces,serif] text-4xl text-forest">{{ impact.declared.co2|floatformat:1 }} <span class="font-[Nunito_Sans,sans-serif] text-lg text-palm-deep">kg</span></dd>
+      </div>
+      <div class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-5 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">
+        <dt class="font-ui text-caption uppercase text-forest/70">Déchets triés</dt>
+        <dd class="mt-2 font-[Fraunces,serif] text-4xl text-forest">{{ impact.declared.kg }} <span class="font-[Nunito_Sans,sans-serif] text-lg text-palm-deep">kg</span></dd>
+      </div>
+      <div class="relative isolate overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-5 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">
+        <dt class="font-ui text-caption uppercase text-forest/70">Collectes réalisées</dt>
+        <dd class="mt-2 font-[Fraunces,serif] text-4xl text-forest">{{ impact.collected.count }}</dd>
+      </div>
+    </dl>
+  </div>
 </section>
 {% else %}
-<h1 class="font-heading text-[32px] font-bold leading-tight text-forest sm:text-[44px]">Bonjour, {{ user.username }}</h1>
-<p>Chaque geste du quotidien devient mesurable, valorisé et collectif.</p>
-
-{% waste_impact user as impact %}
-<section class="mt-6 grid gap-4 sm:grid-cols-3">
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">CO₂ évité</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.co2|floatformat:1 }} kg</strong>
+<section data-reveal class="mx-auto w-full max-w-page py-10 motion-reduce:opacity-100 motion-reduce:translate-y-0 opacity-0 translate-y-6">
+  <div class="relative isolate flex flex-col items-start gap-6 overflow-hidden rounded-lg-ui border border-white/30 bg-white/25 p-6 text-forest shadow-glass backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/85 sm:flex-row sm:items-center md:p-12">
+    <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/25 text-palm-deep shadow-glass backdrop-blur-xl [&>svg]:h-6 [&>svg]:w-6">{% include "ui/icon.html" with name="leaf" %}</span>
+    <div>
+      <p class="mb-3 font-ui text-caption uppercase tracking-[0.14em] text-palm-deep">Votre histoire commence ici</p>
+      <h2 class="!text-h2 !font-[Fraunces,serif] text-forest md:!text-[36px] md:!leading-[1.15]">Un petit pas pour vous.<br>Un nouvel élan pour tous.</h2>
     </div>
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">Déchets triés</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.declared.kg }} kg</strong>
-    </div>
-    <div class="flex flex-col rounded-lg-ui border border-olive bg-porcelain p-5">
-        <span class="text-[13px] font-bold text-carbon">Collectes réalisées</span>
-        <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ impact.collected.count }}</strong>
-    </div>
+    <div class="sm:ml-auto">{% url 'signup' as signup_url %}{% include "ui/button.html" with href=signup_url label="Je rejoins l'aventure" variant="primary" %}</div>
+  </div>
 </section>
-
-<section class="card mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><h2 class="font-heading text-h2 text-forest">Derniers mouvements de points</h2><p class="mt-3">Aucun mouvement pour le moment. TODO(points) : connecter l'historique.</p></section>
 {% endif %}
+
+<script>
+(function(){
+  var els = document.querySelectorAll("[data-reveal]");
+  if (!("IntersectionObserver" in window) || !els.length) {
+    els.forEach(function(el){ el.classList.add("motion-safe:animate-reveal"); el.classList.add("animate-reveal"); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      el.classList.add("motion-safe:animate-reveal");
+      el.classList.add("animate-reveal");
+      io.unobserve(el);
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+  els.forEach(function(el){
+    var i = parseInt(el.getAttribute("data-reveal-index") || "0", 10);
+    el.style.animationDelay = (i * 120) + "ms";
+    io.observe(el);
+  });
+})();
+</script>
+{% endblock %}
+
+{% block footer %}
+<footer class="mx-auto w-full max-w-page px-5 pb-10 pt-6 sm:px-0">
+  <div class="relative isolate flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-full border border-white/30 bg-white/25 px-5 py-3 font-ui text-caption text-forest/70 shadow-glass backdrop-blur-xl supports-[not(backdrop-filter:blur(1px))]:bg-porcelain/90">
+    <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-forest !transition-all !duration-500 !ease-out hover:text-palm-deep">
+      <span class="text-palm-deep [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="leaf" %}</span>
+      <strong>Vers le Vert</strong>
+    </a>
+    <span>Un petit geste. Un nouvel élan.</span>
+    <span>© {% now "Y" %} · Chaque geste compte.</span>
+  </div>
+</footer>
 {% endblock %}

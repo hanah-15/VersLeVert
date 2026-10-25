@@ -10,3 +10,7 @@ staticfiles/
 mariedarft.md
 node_modules/
 static/css/tailwind.css
+.coverage
+htmlcov/
+coverage.xml
+.local/

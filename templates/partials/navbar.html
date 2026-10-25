@@ -19,9 +19,11 @@
                 {% include "partials/avatar_menu.html" %}
             </div>
         {% else %}
-            <div class="flex items-center gap-2">
-                <a href="{% url 'login' %}" class="rounded-md-ui border-2 border-forest bg-transparent px-4 py-2 font-bold text-forest no-underline focus:outline-none focus:ring-4 focus:ring-sky">Se connecter</a>
-                <a href="{% url 'signup' %}" class="rounded-md-ui border-2 border-forest bg-forest px-4 py-2 font-bold text-porcelain no-underline focus:outline-none focus:ring-4 focus:ring-sky">S'inscrire</a>
+            {% url 'login' as login_url %}
+            {% url 'signup' as signup_url %}
+            <div class="ml-auto flex items-center gap-3">
+                {% include "ui/button.html" with href=login_url label="Se connecter" variant="secondary" size="sm" %}
+                {% include "ui/button.html" with href=signup_url label="S'inscrire" variant="primary" size="sm" %}
             </div>
         {% endif %}
     </nav>

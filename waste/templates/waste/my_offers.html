@@ -5,9 +5,9 @@
 <div class="mx-auto max-w-page">
 <h1 class="font-heading text-h1 font-bold text-forest">Mes propositions</h1>
 <div class="mt-6 flex flex-wrap gap-2">
-    <a href="{% url 'waste:my_offers' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Toutes</a>
+    <a href="{% url 'waste:my_offers' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Toutes</a>
     {% for value, label in offer_statuses %}
-        <a href="?status={{ value }}" class="rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">{{ label }}</a>
+        <a href="?status={{ value }}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">{{ label }}</a>
     {% endfor %}
 </div>
 <div class="mt-8 grid gap-4">
@@ -31,10 +31,10 @@
             {% if offer.waste_request.status == "planned" %}
                 <div class="mt-4 flex flex-wrap gap-3">
                     <a href="{% url 'waste:confirm' offer.waste_request.pk %}"
-                       class="inline-flex items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain no-underline hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Confirmer la collecte</a>
+                       class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Confirmer la collecte</a>
                     <form method="post" action="{% url 'waste:offer_release' offer.pk %}">
                         {% csrf_token %}
-                        <button type="submit" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Se désister</button>
+                        <button type="submit" class="w-full inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Se désister</button>
                     </form>
                 </div>
             {% endif %}
@@ -48,7 +48,7 @@
         {% elif offer.status == "pending" %}
             <form method="post" action="{% url 'waste:offer_withdraw' offer.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="mt-4 rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Retirer la proposition</button>
+                <button type="submit" class="w-full mt-4 inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-brick backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-brick hover:bg-brick/10 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Retirer la proposition</button>
             </form>
         {% endif %}
     </article>

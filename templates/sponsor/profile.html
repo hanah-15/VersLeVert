@@ -1,7 +1,3 @@
-{% extends "base.html" %}
-{% block content %}
-<h1 class="font-heading text-h1 font-bold text-forest">Profil entreprise</h1>
-<article class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
-    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-4">{% csrf_token %}{{ form.as_p }}<button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" type="submit">Enregistrer</button></form>
-</article>
-{% endblock %}
+{% extends "sponsor/base_sponsor.html" %}
+{% block title %}Profil entreprise · Vers le Vert{% endblock %}
+{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Mon entreprise</h1><p>Présentez votre activité à la communauté.</p></div></header><div class="ui-card ui-card-pad max-w-2xl"><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button></div></form></div>{% endblock %}

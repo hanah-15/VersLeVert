@@ -1,0 +1,84 @@
+<header class="eco-header !bg-transparent !border-transparent !shadow-none backdrop-blur-none">
+  <div class="eco-header-inner">
+    {% if user.is_authenticated %}
+    <details class="mobile-drawer" data-menu>
+      <summary aria-label="Ouvrir la navigation">{% include "ui/icon.html" with name="menu" %}</summary>
+      <nav class="dropdown" aria-label="Navigation compacte">
+        {% for item in nav_items %}<a href="{{ item.url }}" {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+      </nav>
+    </details>
+    {% endif %}
+    {% include "ui/brand.html" %}
+    {% if user.is_authenticated %}
+    <nav class="eco-navigation" aria-label="Navigation principale">
+      {% if user.is_staff or user.is_superuser or user.is_admin_user %}
+      <a href="{% url 'admin_dashboard:dashboard' %}">Tableau de bord</a>
+      <a href="{% url 'admin_dashboard:users_list' %}">Utilisateurs</a>
+      <a href="{% url 'admin_dashboard:sponsors_list' %}">Sponsors</a>
+      {% elif is_sponsor %}
+      {% for item in nav_items %}<a href="{{ item.url }}" {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+      <a href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>
+      {% else %}
+      {% for item in nav_items %}<a href="{{ item.url }}" {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+      {% endif %}
+    </nav>
+    <div class="eco-header-actions">
+      {% if user.is_staff or user.is_superuser or user.is_admin_user or is_sponsor %}
+      <a href="{% url 'notifications' %}" class="icon-button" aria-label="Notifications, {{ unread_notifications }} non lues">
+        {% include "ui/icon.html" with name="bell" %}
+        {% if unread_notifications %}<span class="notification-count">{% if unread_notifications > 9 %}9+{% else %}{{ unread_notifications }}{% endif %}</span>{% endif %}
+      </a>
+      {% include "ui/avatar.html" %}
+      {% else %}
+      <a href="{% url 'notifications' %}" class="icon-button" aria-label="Notifications, {{ unread_notifications }} non lues">
+        {% include "ui/icon.html" with name="bell" %}
+        {% if unread_notifications %}<span class="notification-count">{% if unread_notifications > 9 %}9+{% else %}{{ unread_notifications }}{% endif %}</span>{% endif %}
+      </a>
+      <details class="relative" data-menu>
+        <summary class="icon-button cursor-pointer" aria-label="Actions rapides">{% include "ui/icon.html" with name="plus" %}</summary>
+        <div class="dropdown">
+          <a href="{% url 'waste:create' %}">Publier un déchet</a>
+          <a href="{% url 'proof-create' %}">Ajouter une preuve</a>
+          <a href="{% url 'personal-challenge-create' %}">Nouveau défi personnel</a>
+          <a href="{% url 'places:recommendation-create' %}">Recommander un produit</a>
+        </div>
+      </details>
+      {% include "ui/avatar.html" %}
+      {% endif %}
+    </div>
+    {% else %}
+    {% url 'login' as login_url %}
+    {% url 'signup' as signup_url %}
+    <nav class="eco-visitor-links" aria-label="Découvrir Vers le Vert">
+      <a href="{% url 'home' %}#comment-ca-marche">L'esprit Vers le Vert</a>
+      <a href="{% url 'home' %}#nos-univers">Les façons d'agir</a>
+    </nav>
+    <div class="ml-auto flex shrink-0 items-center gap-3">
+      {% include "ui/button.html" with href=login_url label="Se connecter" variant="secondary" size="sm" %}
+      {% include "ui/button.html" with href=signup_url label="S'inscrire" variant="primary" size="sm" %}
+    </div>
+    {% endif %}
+  </div>
+</header>
+{% if user.is_authenticated %}
+{% if user.is_staff or user.is_superuser or user.is_admin_user %}
+<nav class="mobile-tabs" aria-label="Navigation mobile">
+  <a href="{% url 'admin_dashboard:dashboard' %}">{% include "ui/icon.html" with name="home" %}<span>Dashboard</span></a>
+  <a href="{% url 'admin_dashboard:users_list' %}">{% include "ui/icon.html" with name="user" %}<span>Utilisateurs</span></a>
+  <a href="{% url 'admin_dashboard:sponsors_list' %}">{% include "ui/icon.html" with name="award" %}<span>Sponsors</span></a>
+  <a href="{% url 'home' %}">{% include "ui/icon.html" with name="leaf" %}<span>Site</span></a>
+</nav>
+{% elif is_sponsor %}
+<nav class="mobile-tabs" aria-label="Navigation mobile">
+  <a href="{% url 'sponsor-dashboard' %}">{% include "ui/icon.html" with name="home" %}<span>Dashboard</span></a>
+  <a href="{% url 'sponsor-shop' %}">{% include "ui/icon.html" with name="shop" %}<span>Offres</span></a>
+  <a href="{% url 'sponsor-stats' %}">{% include "ui/icon.html" with name="spark" %}<span>Stats</span></a>
+  <a href="{% url 'sponsor-profile' %}">{% include "ui/icon.html" with name="profile" %}<span>Entreprise</span></a>
+</nav>
+{% else %}
+<nav class="mobile-tabs" aria-label="Navigation mobile">
+  {% for item in mobile_nav_items %}<a href="{{ item.url }}" {% if request.resolver_match.namespace == item.namespace and item.namespace or not item.namespace and request.resolver_match.url_name == item.url_name %}aria-current="page"{% endif %}>{% include "ui/icon.html" with name=item.icon %}<span>{{ item.label }}</span></a>{% endfor %}
+  <details class="relative" data-menu><summary>{% include "ui/icon.html" with name="more" %}<span>Plus</span></summary><div class="dropdown"><a href="{% url 'events:index' %}">Événements</a><a href="{% url 'places:index' %}">Lieux</a><a href="{% url 'profile-overview' %}">Profil</a>{% if is_sponsor %}<a href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}</div></details>
+</nav>
+{% endif %}
+{% endif %}

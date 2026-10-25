@@ -1,0 +1,15 @@
+<div class="inline-flex w-fit max-w-full overflow-hidden rounded-[20px] border border-line bg-porcelain shadow-card">
+  <div class="mat-tabs-wrapper !static !w-fit !max-w-full !border-0 !bg-transparent">
+    <nav class="mat-tabs !mx-0 !w-max !max-w-full !px-2" aria-label="{{ tabs_label|default:'Navigation secondaire' }}">
+    <span class="mat-tab-indicator" aria-hidden="true"></span>
+    {% for tab in tabs %}
+      {% url tab.url_name as tab_url %}
+      <a href="{{ tab_url }}"
+         class="mat-tab-link"
+         {% if request.path == tab_url %}aria-current="page"{% endif %}>
+        {{ tab.label }}
+      </a>
+    {% endfor %}
+    </nav>
+  </div>
+</div>

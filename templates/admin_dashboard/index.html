@@ -1,0 +1,42 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block title %}Tableau de bord administrateur · Vers le Vert{% endblock %}
+{% block content %}
+<header class="ui-page-header">
+  <div>
+    <p class="ui-eyebrow">Administration</p>
+    <h1>Tableau de bord</h1>
+    <p>Gérer les utilisateurs, les demandes sponsor et l'ensemble du site.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin:index' %}">Django Admin</a>
+    <a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin_dashboard:users_list' %}">Utilisateurs</a>
+    <a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin_dashboard:sponsors_list' %}">Sponsors</a>
+  </div>
+</header>
+
+<div class="grid gap-4 md:grid-cols-4">
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Utilisateurs</p><p class="mt-2 text-3xl font-semibold text-forest">{{ users_count }}</p><a class="ui-link mt-4" href="{% url 'admin_dashboard:users_list' %}">Voir tous</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Sponsors en attente</p><p class="mt-2 text-3xl font-semibold text-forest">{{ pending_sponsors }}</p><a class="ui-link mt-4" href="{% url 'admin_dashboard:sponsors_list' %}?status=PENDING">Voir</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Sponsors approuvés</p><p class="mt-2 text-3xl font-semibold text-forest">{{ approved_sponsors }}</p><a class="ui-link mt-4" href="{% url 'admin_dashboard:sponsors_list' %}?status=APPROVED">Voir</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-brick"><p class="ui-eyebrow">Sponsors rejetés</p><p class="mt-2 text-3xl font-semibold text-forest">{{ rejected_sponsors }}</p><a class="ui-link mt-4" href="{% url 'admin_dashboard:sponsors_list' %}?status=REJECTED">Voir</a></article>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Derniers utilisateurs</h2><a class="ui-link" href="{% url 'admin_dashboard:users_list' %}">Tout voir</a></header>
+    <div class="divide-y divide-line">
+      {% for u in recent_users %}
+      <a class="flex items-center justify-between py-3" href="{% url 'admin_dashboard:user_detail' u.pk %}"><div><p class="font-semibold text-forest">{{ u.get_full_name|default:u.username }}</p><p class="text-sm text-muted">{{ u.email }}</p></div><span class="text-xs text-muted">{{ u.date_joined|date:"d/m/Y H:i" }}</span></a>
+      {% empty %}<p class="text-sm text-muted">Aucun utilisateur.</p>{% endfor %}
+    </div>
+  </section>
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Demandes sponsor en attente</h2><a class="ui-link" href="{% url 'admin_dashboard:sponsors_list' %}?status=PENDING">Tout voir</a></header>
+    <div class="divide-y divide-line">
+      {% for s in recent_pending %}
+      <a class="flex items-center justify-between py-3" href="{% url 'admin_dashboard:sponsor_detail' s.pk %}"><div><p class="font-semibold text-forest">{{ s.business_name }}</p><p class="text-sm text-muted">{{ s.user.email }}</p></div><span class="text-xs text-muted">{{ s.created_at|date:"d/m/Y H:i" }}</span></a>
+      {% empty %}<p class="text-sm text-muted">Aucune demande en attente.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

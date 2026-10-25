@@ -1,0 +1,16 @@
+<details class="relative" data-menu>
+  <summary class="avatar-button" aria-label="Menu de {{ user.get_username }}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" class="h-full w-full object-cover">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</summary>
+  <div class="dropdown">
+    <div class="mb-1 border-b border-line px-3 py-3"><strong class="block truncate text-sm text-forest">{{ user.first_name|default:user.username }}</strong><span class="block truncate text-xs text-muted">{{ user.email }}</span></div>
+    {% if not is_admin_user %}
+    <a href="{% url 'profile-overview' %}">Mon profil</a>
+    <a href="{% url 'profile-section' 'points' %}">Mes points · {{ points_balance }} pts</a>
+    {% if not is_sponsor %}<a href="{% url 'profile-section' 'sponsor' %}">Devenir sponsor</a>{% endif %}
+    {% if is_sponsor %}<a href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
+    {% else %}
+    <a href="{% url 'admin_dashboard:dashboard' %}">Tableau de bord admin</a>
+    <a href="{% url 'admin:index' %}">Django Administration</a>
+    {% endif %}
+    <form method="post" action="{% url 'logout' %}" class="mt-1 border-t border-line pt-1">{% csrf_token %}<button type="submit" class="dropdown-danger">Déconnexion</button></form>
+  </div>
+</details>

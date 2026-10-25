@@ -1,16 +1,28 @@
-{% extends "base.html" %}
-{% block title %}Espace sponsor | Vers le Vert{% endblock %}
+{% extends "sponsor/base_sponsor.html" %}
+{% block title %}Tableau de bord · Espace sponsor{% endblock %}
 {% block content %}
-<section>
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <h1 class="font-heading text-h1 font-bold text-forest">Espace sponsor</h1>
-        <span class="rounded-full bg-olive px-3 py-1 text-sm font-bold text-forest">{{ sponsor.get_status_display }}</span>
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Bonjour, {{ sponsor.business_name }}.</h1><p>Gérez vos offres, suivez vos échanges et présentez votre entreprise.</p></div><span class="ui-badge"><span class="ui-dot"></span>{{ sponsor.get_status_display }}</span></header>
+<div class="grid gap-4 md:grid-cols-3">
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres</p><p class="mt-2 text-3xl font-semibold text-forest">{{ offers.count }}</p><a class="ui-link mt-4" href="{% url 'sponsor-shop' %}">Gérer la boutique</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Mes statistiques</p><p class="mt-2 text-lg text-forest">Voir l'activité</p><a class="ui-link mt-4" href="{% url 'sponsor-stats' %}">Accéder</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Mon entreprise</p><p class="mt-2 text-lg text-forest">Profil & informations</p><a class="ui-link mt-4" href="{% url 'sponsor-profile' %}">Mettre à jour</a></article>
+</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Mes offres</h2><a class="ui-button ui-button-primary ui-button-small" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a></header>
+    <div class="divide-y divide-line">
+      {% for offer in offers %}
+      <div class="flex items-center justify-between py-3"><div><p class="font-semibold text-forest">{{ offer.title }}</p><p class="text-sm text-muted">{{ offer.points_cost }} pts · {% if offer.active %}Active{% else %}Inactive{% endif %}</p></div><div class="flex gap-2"><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a></div></div>
+      {% empty %}<p class="text-sm text-muted">Aucune offre pour le moment.</p>{% endfor %}
     </div>
-    <p class="mt-2 text-carbon">{{ sponsor.business_name }}</p>
-    <div class="mt-6 flex flex-wrap gap-3">
-        <a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-shop' %}">Gérer la boutique</a>
-        <a class="rounded-md-ui border-2 border-forest px-5 py-2.5 font-bold text-forest" href="{% url 'sponsor-stats' %}">Voir les statistiques</a>
-        <a class="rounded-md-ui border-2 border-forest px-5 py-2.5 font-bold text-forest" href="{% url 'sponsor-profile' %}">Profil entreprise</a>
+  </section>
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Raccourcis</h2></header>
+    <div class="grid gap-3">
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-shop' %}"><div><p class="font-semibold text-forest">Boutique</p><p class="text-sm text-muted">Gérer toutes vos offres</p></div><span class="text-sky">→</span></a>
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-stats' %}"><div><p class="font-semibold text-forest">Statistiques</p><p class="text-sm text-muted">Suivre vos échanges</p></div><span class="text-sky">→</span></a>
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-profile' %}"><div><p class="font-semibold text-forest">Profil entreprise</p><p class="text-sm text-muted">Mettre à jour vos informations</p></div><span class="text-sky">→</span></a>
     </div>
-</section>
+  </section>
+</div>
 {% endblock %}

@@ -1,0 +1,93 @@
+{% extends "ui/base.html" %}
+{% block title %}Mes points · Vers le Vert{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block page_shell_class %}page-shell !max-w-none !px-0{% endblock %}
+{% block content %}
+<div class="mx-auto mt-4 w-full max-w-[1440px] space-y-4 px-4 sm:px-6 xl:px-10">
+  <section class="grid gap-5 rounded-[24px] border border-white/70 bg-olive/25 p-4 shadow-card backdrop-blur-sm md:grid-cols-[minmax(0,1fr)_280px] md:items-center md:p-6">
+    <div class="flex items-center gap-4">
+      <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-porcelain text-palm [&>svg]:h-7 [&>svg]:w-7">{% include "ui/icon.html" with name="spark" %}</span>
+      <div>
+        <h1 class="font-ui text-2xl font-semibold text-forest sm:text-3xl">Mes points</h1>
+        <p class="mt-1 text-sm leading-relaxed text-paper">Consultez votre solde et l'historique de vos transactions.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 rounded-2xl border border-olive bg-porcelain p-4 shadow-card">
+      <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky/20 text-sky [&>svg]:h-6 [&>svg]:w-6">{% include "ui/icon.html" with name="spark" %}</span>
+      <div>
+        <span class="block text-xs font-semibold text-muted">Solde actuel</span>
+        <strong class="mt-1 block text-3xl font-semibold leading-none text-forest">{{ points_balance|default:0 }} <span class="text-base font-medium text-muted">pts</span></strong>
+        <a class="mt-2 inline-flex text-xs font-semibold text-palm-deep underline-offset-4 hover:underline" href="{% url 'gamification:index' %}">Voir les récompenses</a>
+      </div>
+    </div>
+  </section>
+
+  {% include "ui/rewards_tabs.html" %}
+
+  <section class="ui-content-panel">
+    <div class="space-y-6">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="font-ui text-xl font-semibold text-porcelain">Historique</h2>
+          <p class="text-sm text-porcelain/80">Tous vos crédits, débits et ajustements.</p>
+        </div>
+        <form method="get" class="flex items-center gap-2">
+          <select name="direction" class="min-h-[42px] rounded-xl border border-palm/30 bg-paper px-3 py-2 text-sm text-carbon focus:border-palm focus:ring-4 focus:ring-olive/30">
+            {% for label, value in direction_choices %}
+            <option value="{{ value }}" {% if direction_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-sm font-semibold text-forest backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20">Filtrer</button>
+        </form>
+      </div>
+
+      {% if transactions %}
+      <div class="overflow-hidden rounded-[16px] border border-line bg-paper">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b border-line bg-mist/60">
+                <th class="px-4 py-3 text-xs font-bold text-muted">Date</th>
+                <th class="px-4 py-3 text-xs font-bold text-muted">Raison</th>
+                <th class="px-4 py-3 text-xs font-bold text-muted">Type</th>
+                <th class="px-4 py-3 text-right text-xs font-bold text-muted">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in transactions %}
+              <tr class="border-b border-line last:border-0">
+                <td class="px-4 py-3 text-carbon">{{ tx.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="px-4 py-3 text-carbon">{{ tx.reason|default:"-" }}</td>
+                <td class="px-4 py-3 text-muted">{{ tx.get_direction_display }}</td>
+                <td class="px-4 py-3 text-right font-semibold {% if tx.direction == 'CREDIT' %}text-palm-deep{% elif tx.direction == 'DEBIT' %}text-brick{% else %}text-carbon{% endif %}">
+                  {% if tx.direction == 'CREDIT' %}+{% elif tx.direction == 'DEBIT' %}-{% endif %}{{ tx.amount }} pts
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if page_obj.has_other_pages %}
+      <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if direction_filter %}&direction={{ direction_filter }}{% endif %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-sm font-semibold text-forest backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20">← Précédent</a>
+        {% endif %}
+        <span class="text-sm text-porcelain">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if direction_filter %}&direction={{ direction_filter }}{% endif %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-sm font-semibold text-forest backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20">Suivant →</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+      {% else %}
+      <div class="rounded-[16px] border border-dashed border-palm/40 bg-paper/60 p-10 text-center">
+        <span class="ui-icon-box mx-auto">{% include "ui/icon.html" with name="award" %}</span>
+        <h2 class="mt-4 text-xl font-semibold text-forest">Aucune transaction pour le moment</h2>
+        <p class="mt-2 text-sm text-muted">Vos gains et échanges apparaîtront ici.</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,32 +1,67 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
 {% block title %}{{ section_title }} · Vers le Vert{% endblock %}
 {% block content %}
-<div class="grid gap-6 md:grid-cols-[220px_1fr]">
-    <aside>{% include "partials/profile_sidebar.html" %}</aside>
-    <section class="min-w-0">
-        <h1 class="font-heading text-h1 font-bold text-forest">{{ section_title }}</h1>
-        {% if section == "profile" %}
-            <form method="post" enctype="multipart/form-data" class="card mt-6 flex flex-col gap-4 rounded-lg-ui border border-olive bg-olive/25 p-6">{% csrf_token %}{{ form.as_p }}<p class="text-sm text-carbon">E-mail : {{ email }} (non modifiable)</p><button class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky" type="submit">Enregistrer</button></form>
-        {% elif section == "sponsor" %}
-            {% if application.status == "APPROVED" %}<div class="alert-info mt-6 rounded-md-ui bg-olive/50 p-4 text-forest">Votre demande est approuvée. <a class="font-bold underline" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div>
-            {% elif application.status == "PENDING" %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Demande en cours de vérification.</div>
-            {% elif application.status == "REJECTED" %}<div class="alert-error mt-6 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">Demande rejetée : {{ application.rejection_reason }}. <a class="font-bold text-forest underline" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div>
-            {% else %}<div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'sponsor-apply' %}">Devenir sponsor</a></div>{% endif %}
-        {% elif section == "notifications" %}
-            <div class="mt-6 grid gap-3">{% for notification in user.notifications.all %}<div class="rounded-md-ui border border-olive p-4">{{ notification.message }}</div>{% empty %}<p class="mt-6">Aucune notification.</p>{% endfor %}</div>
-        {% elif section == "security" %}
-            <div class="mt-6 flex flex-wrap gap-3"><a class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="rounded-md-ui border-2 border-brick px-5 py-2.5 font-bold text-brick" type="submit">Se déconnecter</button></form></div>
-        {% elif section == "points" %}
-            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
-                <p class="text-[13px] font-bold uppercase tracking-[0.09em] text-forest">Solde actuel</p>
-                <strong class="font-heading text-[36px] font-bold leading-tight text-forest">{{ points_balance }} pts</strong>
-                <p class="mt-3 text-sm text-carbon">L'historique des points sera disponible prochainement (module dédié).</p>
-            </div>
-        {% elif section == "proofs" %}
-            <div class="mt-6 rounded-lg-ui border border-olive bg-olive/25 p-6">
-                <p class="text-carbon">Les actions prouvées (preuves validées) apparaîtront ici. Elles servent à valider des défis et générer des points.</p>
-            </div>
-        {% else %}<div class="alert-info mt-6 rounded-md-ui bg-sky p-4 text-forest">Bientôt disponible. TODO : données du module {{ section }}.</div>{% endif %}
-    </section>
+<div class="flex flex-col gap-1 pt-6 pb-4 border-b border-line mb-6">
+  <p class="ui-eyebrow">{% include "ui/icon.html" with name="user" %} Mon profil</p>
+  <h1 class="text-2xl font-semibold text-forest sm:text-3xl">{{ section_title }}</h1>
 </div>
+<div class="profile-layout"><aside>{% include "ui/profile_nav.html" %}</aside><section class="min-w-0 space-y-5">
+{% if section == "profile" %}
+  <div class="ui-card ui-card-pad"><div class="mb-7 flex items-center gap-4"><div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-olive/30 font-heading text-2xl text-forest">{% if user.avatar %}<img class="h-full w-full object-cover" src="{{ user.avatar.url }}" alt="Votre photo de profil">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</div><div><h2 class="text-xl">{{ user.first_name|default:user.username }}</h2><p class="text-sm text-muted">{{ user.email }}</p></div></div><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<p class="ui-help">Adresse e-mail : {{ email }} (non modifiable)</p><div class="ui-form-actions"><button class="w-full inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" type="submit">Enregistrer les modifications</button></div></form></div>
+{% elif section == "sponsor" %}
+  {% if application.status == "APPROVED" %}<div class="ui-alert ui-alert-success">{% include "ui/icon.html" with name="check" %}<div>Votre demande est approuvée. <a class="ui-link" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div></div>
+  {% elif application.status == "PENDING" %}<div class="ui-alert">{% include "ui/icon.html" with name="clock" %}Demande en cours de vérification.</div>
+  {% elif application.status == "REJECTED" %}<div class="ui-alert ui-alert-error"><div>Demande rejetée : {{ application.rejection_reason }}. <a class="ui-link" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div></div>
+  {% else %}<div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mt-5 text-2xl">Votre entreprise a sa place ici.</h2><p class="mb-6 mt-3 max-w-lg text-sm text-muted">Rejoignez les partenaires qui encouragent les gestes responsables et faites découvrir votre activité à la communauté.</p><a class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'sponsor-apply' %}">Devenir sponsor </a></div>{% endif %}
+{% elif section == "notifications" %}
+  <div class="ui-card ui-card-pad"><h2 class="mb-5 text-xl">Votre fil d'actualité</h2>{% for notification in user.notifications.all %}<div class="flex gap-3 border-b border-line py-4"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><p class="text-sm">{{ notification.message }}</p></div>{% empty %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><h3>Tout est calme.</h3><p>Aucune notification pour le moment. Les nouvelles de votre parcours apparaîtront ici.</p></div>{% endfor %}</div>
+{% elif section == "security" %}
+  <div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shield" %}</span><h2 class="mt-5 text-2xl">Votre compte, en toute sérénité.</h2><p class="mb-6 mt-3 text-sm text-muted">Gardez un mot de passe personnel et sécurisé.</p><div class="ui-form-actions"><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}{% include "ui/button.html" with label="Se déconnecter" variant="secondary" button_type="submit" %}</form></div></div>
+{% elif section == "points" %}
+  <div class="ui-card ui-card-pad"><p class="ui-eyebrow">Votre énergie récompensée</p><div class="flex items-center gap-4"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="spark" %}</span><div><p class="text-xs text-muted">Solde actuel</p><strong class="font-heading text-5xl text-forest">{{ points_balance }} <span class="text-lg text-muted">pts</span></strong></div></div>{% if recent_transactions %}<div class="mt-6 border-t border-line pt-5 space-y-2"><p class="mb-3 text-sm font-semibold text-forest">Derniers mouvements</p>{% for tx in recent_transactions %}<div class="flex items-center justify-between gap-3 py-2 border-b border-line last:border-0"><div><p class="text-sm font-medium text-forest truncate">{{ tx.reason|default:tx.action_type }}</p><p class="text-xs text-muted">{{ tx.created_at|date:"d M Y" }}</p></div><p class="shrink-0 font-semibold {% if tx.points >= 0 %}text-palm-deep{% else %}text-brick{% endif %}">{% if tx.points >= 0 %}+{% endif %}{{ tx.points }} pts</p></div>{% endfor %}</div>{% else %}<p class="mt-6 border-t border-line pt-5 text-sm text-muted">Aucun mouvement pour le moment.</p>{% endif %}<div class="mt-5"><a class="ui-link text-sm" href="{% url 'gamification:points-history' %}">Voir l'historique complet →</a></div></div>
+{% elif section == "proofs" %}
+  {% if recent_proofs %}<div class="space-y-3">{% for proof in recent_proofs %}<a href="{% url 'gamification:proof-detail' proof.pk %}" class="ui-card group flex items-center gap-4 p-4 transition-all hover:-translate-y-0.5 hover:shadow-float"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg {% if proof.status == 'APPROVED' %}bg-olive/30{% elif proof.status == 'REJECTED' %}bg-brick/15{% else %}bg-sand{% endif %}">{% if proof.status == 'APPROVED' %}✅{% elif proof.status == 'REJECTED' %}❌{% else %}⏳{% endif %}</div><div class="flex-1 min-w-0"><p class="text-sm font-semibold text-forest">{{ proof.get_proof_type_display }}</p><p class="text-xs text-muted">{{ proof.submitted_at|date:"d M Y" }} · {{ proof.get_status_display }}</p></div><span class="text-muted [&>svg]:h-4 [&>svg]:w-4 group-hover:translate-x-1 transition-transform">{% include "ui/icon.html" with name="arrow" %}</span></a>{% endfor %}</div><div class="mt-4 flex flex-wrap gap-3"><a href="{% url 'gamification:my-proofs' %}" class="ui-link text-sm">Toutes mes preuves →</a><a href="{% url 'gamification:proof-submit' %}" class="inline-flex items-center gap-2 rounded-full bg-palm px-5 py-2 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Nouvelle preuve</a></div>{% else %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="camera" %}</span><h3>Les preuves de vos petits pas.</h3><p>Vos actions prouvées apparaissent ici après validation.</p><a href="{% url 'gamification:proof-submit' %}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-palm px-6 py-3 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Soumettre une preuve</a></div>{% endif %}
+{% elif section == "badges" %}
+  {% if earned_badges %}
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% for ub in earned_badges %}
+    <div class="ui-card flex items-center gap-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-float
+      {% if ub.badge.tier == 'GOLD' %}border-sun/40 bg-sun/10
+      {% elif ub.badge.tier == 'SILVER' %}border-sky/30 bg-sky/10
+      {% else %}border-palm/30 bg-olive/10{% endif %}">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl
+        {% if ub.badge.tier == 'GOLD' %}bg-sun/30{% elif ub.badge.tier == 'SILVER' %}bg-sky/20{% else %}bg-olive/30{% endif %}">
+        {{ ub.badge.icon }}
+      </div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="font-semibold text-forest text-sm">{{ ub.badge.name }}</p>
+          <span class="rounded-full px-2 py-0.5 font-ui text-[10px] font-bold uppercase
+            {% if ub.badge.tier == 'GOLD' %}bg-sun/30 text-ink{% elif ub.badge.tier == 'SILVER' %}bg-sky/20 text-sky{% else %}bg-olive/30 text-palm-deep{% endif %}">
+            {{ ub.badge.get_tier_display }}
+          </span>
+        </div>
+        <p class="text-xs text-muted mt-0.5">Obtenu le {{ ub.awarded_at|date:"d M Y" }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mt-4">
+    <a href="{% url 'gamification:badges' %}" class="ui-link text-sm">Voir tous les badges et progressions →</a>
+  </div>
+  {% else %}
+  <div class="ui-empty border-0 shadow-none">
+    <span class="ui-icon-box text-2xl">🏅</span>
+    <h3>Vos badges apparaîtront ici.</h3>
+    <p>Gagnez des points et accomplissez des actions pour débloquer vos premiers badges.</p>
+    <div class="mt-4 flex flex-wrap gap-3 justify-center">
+      <a href="{% url 'gamification:badges' %}" class="ui-link text-sm">Voir les badges disponibles →</a>
+      <a href="{% url 'gamification:proof-submit' %}" class="inline-flex items-center gap-2 rounded-full bg-palm px-5 py-2 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Soumettre une preuve</a>
+    </div>
+  </div>
+  {% endif %}
+{% else %}
+  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h2>Votre parcours continue de grandir.</h2><p>Cet espace sera disponible prochainement.</p></div>
+{% endif %}
+</section></div>
 {% endblock %}

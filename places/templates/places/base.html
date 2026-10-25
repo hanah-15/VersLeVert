@@ -1,0 +1,6 @@
+{% extends "ui/base.html" %}
+{% load static %}
+{% block title %}Découvrir · Vers le Vert{% endblock %}
+{% block extra_head %}<script src="{% static 'places/places.js' %}" defer></script>{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block content %}<div class="space-y-7">{% block places_content %}{% endblock %}</div>{% endblock %}

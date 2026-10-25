@@ -1,0 +1,20 @@
+{% extends "places/base.html" %}
+{% block title %}Guide éco · Vers le Vert{% endblock %}
+{% block places_content %}
+<div class="mx-auto max-w-4xl space-y-6">
+  <header class="ui-title-panel space-y-4"><p class="text-xs font-bold uppercase tracking-widest text-forest">Le guide de vos prochaines découvertes</p><h1 class="font-heading text-3xl font-bold text-forest sm:text-[40px]">Une envie ?<br>Trouvez une piste plus verte.</h1><p>Décrivez ce que vous cherchez. Découvrez des lieux et des produits issus de notre catalogue publié.</p><p class="text-sm">Les suggestions sont générées par IA et peuvent être imparfaites. Consultez les fiches avant de faire votre choix.</p></header>
+  {% include "ui/rewards_tabs.html" %}
+  {% include "places/_tools.html" %}
+  <form method="post" data-guide-form class="ui-content-panel space-y-5">{% csrf_token %}
+    {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
+    {% include "places/_field.html" with field=form.query %}
+    {% if catalogue_empty %}<p class="rounded-xl bg-olive/25 p-4">Le catalogue est encore vide. Le guide sera disponible dès la publication de lieux ou de produits.</p>{% endif %}
+    <button {% if catalogue_empty %}disabled{% endif %} class="disabled:opacity-60 inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Trouver des idées ✦</button>
+    <p data-guide-status aria-live="polite" class="text-sm"></p>
+  </form>
+  <section data-guide-results aria-label="Suggestions du guide" class="space-y-4" {% if not result %}hidden{% endif %}>
+    {% if result %}<h2 class="font-heading text-2xl font-semibold text-forest">Vos pistes à explorer</h2><p class="break-words">{{ result.summary }}</p>{% for item in result.places %}<article class="ui-card rounded-lg-ui border border-olive bg-white p-6"><p class="text-xs font-bold uppercase text-forest">Lieu</p><h3 class="mt-2 font-heading text-xl font-semibold text-forest"><a class="underline focus:ring-4 focus:ring-sky" href="{{ item.url }}">{{ item.name }}</a></h3><p class="mt-2 break-words">{{ item.reason }}</p></article>{% endfor %}{% for item in result.products %}<article class="ui-card rounded-lg-ui border border-olive bg-white p-6"><p class="text-xs font-bold uppercase text-forest">Produit recommandé</p><h3 class="mt-2 font-heading text-xl font-semibold text-forest"><a class="underline focus:ring-4 focus:ring-sky" href="{{ item.url }}">{{ item.name }}</a></h3><p class="mt-2 break-words">{{ item.reason }}</p></article>{% endfor %}{% endif %}
+  </section>
+  <p class="text-sm">Vous préférez explorer ? <a class="rounded font-bold text-forest underline focus:ring-4 focus:ring-sky" href="{% url 'places:index' %}">Parcourir les lieux</a> ou <a class="rounded font-bold text-forest underline focus:ring-4 focus:ring-sky" href="{% url 'places:recommendations' %}">voir les produits</a>.</p>
+</div>
+{% endblock %}

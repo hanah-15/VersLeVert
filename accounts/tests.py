@@ -1,8 +1,10 @@
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 
 from core.navigation import NAVIGATION
 
+from .forms import SponsorApplicationForm
 from .models import Notification, SponsorAccount, User
 
 
@@ -13,6 +15,43 @@ class SponsorAccessTests(TestCase):
             email="citizen@example.com",
             password="test-password-123",
         )
+
+    def test_sponsor_application_activity_is_a_fixed_choice(self):
+        form = SponsorApplicationForm()
+        choices = [value for value, _ in form.fields["activity"].choices if value]
+        self.assertEqual(choices, list(SponsorAccount.Activity.values))
+
+    def test_database_rejects_unknown_sponsor_activity(self):
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                SponsorAccount.objects.create(
+                    user=self.user,
+                    business_name="Entreprise",
+                    activity="not_a_valid_activity",
+                    description="Description",
+                    contact_email=self.user.email,
+                )
+
+    def test_sponsor_application_form_loads_for_existing_pending_or_rejected_account(self):
+        self.client.force_login(self.user)
+        for status in (SponsorAccount.Status.PENDING, SponsorAccount.Status.REJECTED):
+            with self.subTest(status=status):
+                SponsorAccount.objects.update_or_create(
+                    user=self.user,
+                    defaults={
+                        "business_name": "Entreprise existante",
+                        "activity": SponsorAccount.Activity.FOOD_AND_BEVERAGES,
+                        "description": "Description existante",
+                        "contact_email": self.user.email,
+                        "status": status,
+                    },
+                )
+                response = self.client.get(reverse("sponsor-apply"))
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    response.context["form"].instance.business_name,
+                    "Entreprise existante",
+                )
 
     def test_visitor_is_redirected_to_login(self):
         response = self.client.get(reverse("sponsor-dashboard"))
@@ -26,7 +65,7 @@ class SponsorAccessTests(TestCase):
                     user=self.user,
                     defaults={
                         "business_name": "Entreprise",
-                        "activity": "Recyclage",
+                        "activity": SponsorAccount.Activity.REPAIR_REUSE,
                         "description": "Description",
                         "contact_email": self.user.email,
                         "status": status,
@@ -40,7 +79,7 @@ class SponsorAccessTests(TestCase):
         SponsorAccount.objects.create(
             user=self.user,
             business_name="Entreprise",
-            activity="Recyclage",
+            activity=SponsorAccount.Activity.REPAIR_REUSE,
             description="Description",
             contact_email=self.user.email,
             status=SponsorAccount.Status.APPROVED,
@@ -114,7 +153,7 @@ class SponsorAccessTests(TestCase):
         sponsor = SponsorAccount.objects.create(
             user=self.user,
             business_name="Entreprise",
-            activity="Recyclage",
+            activity=SponsorAccount.Activity.REPAIR_REUSE,
             description="Description",
             contact_email=self.user.email,
             status=SponsorAccount.Status.APPROVED,
