@@ -1,0 +1,64 @@
+{% extends "ui/base.html" %}
+{% block body_class %}community-page{% endblock %}
+{% block title %}Assistant de tri · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="mx-auto w-full max-w-2xl">
+    <header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Assistant de tri</p><h1>Quel type de déchet est-ce ?</h1><p>Décris ton déchet et obtenez une orientation simple pour le bon tri.</p></div></header>
+    <div class="ui-content-panel mt-6 p-6 sm:p-8">
+        <p class="mt-3 text-carbon">Décris ton déchet en français. L'assistant proposera une catégorie et indiquera la quantité seulement si elle est présente dans ta description.</p>
+
+        {% if form.non_field_errors %}
+            <div class="mt-5 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon" role="alert">
+                {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="mt-6 flex flex-col gap-4">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="font-bold text-forest">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% for error in form.description.errors %}
+                    <p class="mt-1 text-sm text-brick">{{ error }}</p>
+                {% endfor %}
+                <p class="mt-1 text-sm text-carbon">500 caractères maximum.</p>
+            </div>
+            <button type="submit" class="w-full rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus:outline-none focus:ring-4 focus:ring-palm/40">Analyser le déchet</button>
+        </form>
+    </div>
+
+    {% if analysis %}
+        <section class="ui-card mt-6 p-6" aria-labelledby="analysis-title">
+            <h2 id="analysis-title" class="font-heading text-h2 font-bold text-forest">Résultat</h2>
+            <dl class="mt-4 grid gap-3">
+                <div>
+                    <dt class="font-bold text-forest">Catégorie</dt>
+                    <dd>{{ analysis.waste_type }}</dd>
+                </div>
+                <div>
+                    <dt class="font-bold text-forest">Confiance</dt>
+                    <dd>{{ analysis.confidence|floatformat:2 }}</dd>
+                </div>
+                <div>
+                    <dt class="font-bold text-forest">Quantité détectée</dt>
+                    <dd>
+                        {% if analysis.quantity.value is not None %}
+                            {{ analysis.quantity.value }} {{ analysis.quantity.unit }}
+                        {% else %}
+                            Quantité inconnue
+                        {% endif %}
+                    </dd>
+                </div>
+                {% if estimated_weight %}
+                    <div>
+                        <dt class="font-bold text-forest">Poids estimé</dt>
+                        <dd>{{ estimated_weight.0|floatformat:2 }} à {{ estimated_weight.1|floatformat:2 }} kg</dd>
+                    </div>
+                {% endif %}
+            </dl>
+            <p class="mt-4 rounded-md-ui bg-sky p-4">{{ analysis.explanation }}</p>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

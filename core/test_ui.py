@@ -16,7 +16,8 @@ class PresentationContractTests(TestCase):
             username="ui-partner", email="partner-ui@example.test", password="Test-Password-2026!"
         )
         cls.partner = SponsorAccount.objects.create(
-            user=cls.partner_user, business_name="Entreprise test", activity="Commerce",
+            user=cls.partner_user, business_name="Entreprise test",
+            activity=SponsorAccount.Activity.FOOD_LOCAL,
             description="Test", contact_email="partner-ui@example.test",
             status=SponsorAccount.Status.APPROVED,
         )
@@ -68,11 +69,11 @@ class PresentationContractTests(TestCase):
             self.assertEqual(self.client.get(reverse(name, args=[self.offer.pk])).status_code, 200)
         self.assertTrue(Offer.objects.filter(pk=self.offer.pk).exists())
 
-    def test_waste_keeps_original_presentation(self):
+    def test_waste_uses_hanas_updated_presentation(self):
         self.client.force_login(self.user)
         for name in ("waste:index", "waste:create", "waste:market", "waste:my_offers"):
             with self.subTest(name=name):
                 response = self.client.get(reverse(name))
                 self.assertEqual(response.status_code, 200)
-                self.assertTemplateUsed(response, "base.html")
-                self.assertNotContains(response, 'class="site-body')
+                self.assertTemplateUsed(response, "ui/base.html")
+                self.assertContains(response, 'class="site-body')

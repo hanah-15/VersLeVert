@@ -1,0 +1,80 @@
+{% extends "ui/base.html" %}
+{% block title %}File des preuves · Admin{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+
+{% block content %}
+<header class="ui-page-header">
+  <div>
+    <p class="ui-eyebrow">Administration</p>
+    <h1>File des preuves écologiques</h1>
+    <p>Examinez et traitez les justificatifs soumis par les citoyens.</p>
+  </div>
+</header>
+{% include "ui/rewards_tabs.html" %}
+
+<section class="ui-content-panel">
+{# ── Status filter tabs ──────────────────────────────────────────────── #}
+<div class="mb-6 flex flex-wrap gap-2">
+  {% for val, label in status_choices %}
+  <a href="?status={{ val }}"
+     class="rounded-full px-4 py-1.5 font-ui text-sm font-medium transition-colors
+     {% if status_filter == val %}bg-palm text-forest shadow-card{% else %}bg-white/40 text-muted border border-line hover:bg-palm/10 hover:text-forest{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+{% if proofs %}
+<div class="space-y-3">
+  {% for proof in proofs %}
+  <a href="{% url 'gamification:admin-proof-review' proof.pk %}"
+     class="ui-card group flex flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:shadow-float sm:flex-row sm:items-center">
+    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl
+      {% if proof.status == 'APPROVED' %}bg-olive/30
+      {% elif proof.status == 'REJECTED' %}bg-brick/15
+      {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20
+      {% else %}bg-sand{% endif %}">
+      {% if proof.status == 'APPROVED' %}✅{% elif proof.status == 'REJECTED' %}❌{% elif proof.status == 'NEEDS_REVIEW' %}🔍{% else %}⏳{% endif %}
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-2">
+        <p class="font-semibold text-forest">{{ proof.get_proof_type_display }}</p>
+        <span class="rounded-full px-2.5 py-0.5 font-ui text-[11px] font-semibold
+          {% if proof.status == 'PENDING' %}bg-sand text-muted{% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky{% endif %}">
+          {{ proof.get_status_display }}
+        </span>
+      </div>
+      <p class="mt-0.5 text-xs text-muted">
+        Citoyen : <span class="font-medium text-forest">{{ proof.user.email }}</span>
+        · Date doc : {{ proof.proof_date|date:"d M Y" }}
+        · Soumise : {{ proof.submitted_at|date:"d M Y H:i" }}
+      </p>
+    </div>
+    <span class="shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">
+      {% include "ui/icon.html" with name="arrow" %}
+    </span>
+  </a>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-8 flex justify-center gap-2">
+  {% if page_obj.has_previous %}
+    <a href="?status={{ status_filter }}&page={{ page_obj.previous_page_number }}" class="ui-button ui-button-secondary ui-button-small px-4 py-2 text-sm">← Précédent</a>
+  {% endif %}
+  <span class="text-sm text-muted self-center">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?status={{ status_filter }}&page={{ page_obj.next_page_number }}" class="ui-button ui-button-secondary ui-button-small px-4 py-2 text-sm">Suivant →</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="ui-empty">
+  <span class="ui-icon-box">{% include "ui/icon.html" with name="check" %}</span>
+  <h2>File vide.</h2>
+  <p>Aucune preuve avec le statut « {{ status_filter|lower }} » pour le moment.</p>
+</div>
+{% endif %}
+</section>
+{% endblock %}

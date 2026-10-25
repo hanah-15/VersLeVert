@@ -1,0 +1,94 @@
+{% extends "ui/base.html" %}
+{% block title %}Mes badges · Vers le Vert{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block page_shell_class %}page-shell !max-w-none !px-0{% endblock %}
+{% block content %}
+<div class="mx-auto mt-4 w-full max-w-[1440px] space-y-4 px-4 sm:px-6 xl:px-10">
+  <section class="grid gap-5 rounded-[24px] border border-white/70 bg-olive/25 p-4 shadow-card backdrop-blur-sm md:grid-cols-[minmax(0,1fr)_360px] md:items-center md:p-6">
+    <div class="flex items-center gap-4">
+      <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-porcelain text-palm [&>svg]:h-7 [&>svg]:w-7">{% include "ui/icon.html" with name="award" %}</span>
+      <div>
+        <h1 class="font-ui text-2xl font-semibold text-forest sm:text-3xl">Mes badges</h1>
+        <p class="mt-1 text-sm leading-relaxed text-paper">Vos réussites et vos prochains objectifs.</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="rounded-2xl border border-olive bg-porcelain p-4 shadow-card">
+        <span class="block text-xs font-semibold text-muted">Badges obtenus</span>
+        <strong class="mt-1 block text-3xl font-semibold leading-none text-forest">{{ earned_count|default:0 }}</strong>
+      </div>
+      <div class="rounded-2xl border border-olive bg-porcelain p-4 shadow-card">
+        <span class="block text-xs font-semibold text-muted">Solde actuel</span>
+        <strong class="mt-1 block text-3xl font-semibold leading-none text-forest">{{ points_balance|default:0 }} <span class="text-sm font-medium text-muted">pts</span></strong>
+      </div>
+    </div>
+  </section>
+
+  {% include "ui/rewards_tabs.html" %}
+
+  <section class="ui-content-panel">
+    <div class="space-y-6">
+      <div>
+        <h2 class="font-ui text-xl font-semibold text-porcelain">Badges obtenus</h2>
+        <p class="text-sm text-porcelain/80">Félicitations pour vos actions !</p>
+      </div>
+      {% if earned_badges %}
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {% for ub in earned_badges %}
+        <article class="rounded-[16px] border border-line bg-paper p-5">
+          <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-olive/30 text-2xl">{{ ub.badge.icon|default:"🏅" }}</div>
+            <div>
+              <h3 class="font-semibold text-forest">{{ ub.badge.name }}</h3>
+              <p class="text-xs text-muted">Obtenu le {{ ub.awarded_at|date:"d M Y" }}</p>
+            </div>
+          </div>
+          <p class="mt-3 text-sm text-muted">{{ ub.badge.description }}</p>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rounded-[16px] border border-dashed border-palm/40 bg-paper/60 p-8 text-center">
+        <h3 class="text-lg font-semibold text-forest">Aucun badge pour l'instant</h3>
+        <p class="mt-1 text-sm text-muted">Continuez à agir pour débloquer vos premiers badges.</p>
+      </div>
+      {% endif %}
+
+      <div>
+        <h2 class="font-ui text-xl font-semibold text-porcelain">À débloquer</h2>
+        <p class="text-sm text-porcelain/80">Progressez pour obtenir ces badges.</p>
+      </div>
+      {% if locked_badges %}
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {% for item in locked_badges %}
+        <article class="rounded-[16px] border border-line bg-paper p-5 opacity-90">
+          <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-sand text-2xl grayscale">{{ item.badge.icon|default:"🏅" }}</div>
+            <div>
+              <h3 class="font-semibold text-forest">{{ item.badge.name }}</h3>
+              <p class="text-xs text-muted">Seuil : {{ item.badge.threshold }}{% if item.badge.criteria_type == 'TOTAL_POINTS' %} pts{% elif item.badge.criteria_type == 'ACTION_COUNT' %} actions{% elif item.badge.criteria_type == 'ACTION_QUANTITY' %} unités{% endif %}</p>
+            </div>
+          </div>
+          <p class="mt-3 text-sm text-muted">{{ item.badge.description }}</p>
+          <div class="mt-4">
+            <div class="flex items-center justify-between text-xs text-muted">
+              <span>Progression</span>
+              <span>{{ item.progress }} %</span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-mist">
+              <div class="h-full bg-palm" style="width: {{ item.progress }}%"></div>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rounded-[16px] border border-dashed border-palm/40 bg-paper/60 p-8 text-center">
+        <h3 class="text-lg font-semibold text-forest">Tous les badges débloqués</h3>
+        <p class="mt-1 text-sm text-muted">Bravo, vous avez atteint tous les badges disponibles.</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

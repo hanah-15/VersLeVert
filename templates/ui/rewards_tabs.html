@@ -1,0 +1,5 @@
+{% if rewards_tabs %}
+  {% include "ui/tabs.html" with tabs=rewards_tabs tabs_label="Navigation récompenses" %}
+{% elif space_tabs %}
+  {% include "ui/tabs.html" with tabs=space_tabs %}
+{% endif %}

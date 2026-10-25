@@ -1,0 +1,14 @@
+{% extends "ui/base.html" %}
+{% block content %}
+<div class="space-y-7">
+  <div class="inline-flex max-w-full overflow-hidden rounded-[20px] border border-line bg-porcelain shadow-card">
+    <nav class="mat-tabs !mx-0 !max-w-full !px-2" aria-label="Navigation des événements">
+      <span class="mat-tab-indicator" aria-hidden="true"></span>
+      <a class="mat-tab-link" href="{% url 'events:upcoming' %}" {% if request.resolver_match.url_name == 'upcoming' %}aria-current="page"{% endif %}>À venir</a>
+      <a class="mat-tab-link" href="{% url 'events:mine' %}" {% if request.resolver_match.url_name == 'mine' %}aria-current="page"{% endif %}>Mes événements</a>
+      <a class="mat-tab-link" href="{% url 'events:results' %}" {% if request.resolver_match.url_name == 'results' %}aria-current="page"{% endif %}>Résultats</a>
+    </nav>
+  </div>
+  {% block events_content %}{% endblock %}
+</div>
+{% endblock %}

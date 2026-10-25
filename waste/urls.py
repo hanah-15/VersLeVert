@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 from core.views import PlaceholderView
@@ -6,7 +6,9 @@ from core.views import PlaceholderView
 app_name = "waste"
 
 urlpatterns = [
+    path("api/", include("waste.api_urls")),
     path("", views.MyRequestsView.as_view(), name="index"),
+    path("assistant/", views.WasteAssistantView.as_view(), name="assistant"),
     path("new/", views.WasteCreateView.as_view(), name="create"),
     path("market/", views.MarketView.as_view(), name="market"),
     path("<int:pk>/", views.RequestDetailView.as_view(), name="detail"),

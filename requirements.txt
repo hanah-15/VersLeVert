@@ -10,3 +10,5 @@ typing_extensions==4.16.0
 tzdata==2026.5
 google-genai==2.33.0
 httpx==0.28.1
+cloudinary==1.46.3
+django-cloudinary-storage==0.3.0

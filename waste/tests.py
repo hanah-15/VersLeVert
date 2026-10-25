@@ -199,12 +199,12 @@ class WasteTestCase(TestCase):
         self.assertEqual(offer.status, CollectionOffer.Status.DECLINED)
         self.assertEqual(offer.decision_note, "La demande a été annulée.")
 
-    def test_market_hides_address_and_detail_hides_collector_position(self):
+    def test_market_shows_address_and_detail_hides_collector_position(self):
         request = self.make_request()
         offer = self.make_offer(request)
         self.client.force_login(self.collector)
         market = self.client.get(reverse("waste:market"))
-        self.assertNotContains(market, request.address)
+        self.assertContains(market, request.address)
         self.client.force_login(self.owner)
         detail = self.client.get(reverse("waste:detail", args=[request.pk]))
         self.assertContains(detail, "1.5")

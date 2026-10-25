@@ -59,17 +59,17 @@ def nav_context(request):
             {"label": "Recommandations", "url_name": "places:recommendations"},
         ],
         "gamification": [
-            {"label": "Catalogue", "url_name": "gamification:index"},
-            {"label": "Mes codes", "url_name": "gamification:my-codes"},
+            {"label": "Récompenses", "url_name": "gamification:index"},
+            {"label": "Mes points", "url_name": "gamification:points-history"},
+            {"label": "Mes preuves", "url_name": "gamification:my-proofs"},
+            {"label": "Mes badges", "url_name": "gamification:badges"},
         ],
     }
     context["space_tabs"] = tab_sets.get(namespace)
     try:
-        points_balance = 0
-        from points.services import PointsService
+        from gamification.services import PointsService
         points_balance = PointsService.balance(user)
-    except (ImportError, AttributeError, TypeError):
-        # TODO(points): replace with the team's points service when available.
+    except Exception:
         points_balance = 0
     try:
         unread_notifications = user.notifications.filter(is_read=False).count()

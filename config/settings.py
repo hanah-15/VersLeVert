@@ -42,7 +42,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-only')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-# Gemini is used by the places module. The credential stays on the server.
+# Gemini is shared by places, events and waste. Credentials stay on the server.
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.1-flash-lite')
 GEMINI_TIMEOUT_SECONDS = int(os.getenv('GEMINI_TIMEOUT_SECONDS', '20'))
@@ -72,9 +72,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #we added that .......
-     # Third-party
+    # Third-party
     'rest_framework',
+    'cloudinary',
+    'cloudinary_storage',
 
     # Nos apps (un module = une app)
     'accounts',
@@ -160,11 +161,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Cloudinary
+if os.getenv('CLOUDINARY_URL') or os.getenv('CLOUDINARY_CLOUD_NAME'):
+    CLOUDINARY_STORAGE = {} if os.getenv('CLOUDINARY_URL') else {
+        'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    }
+    STORAGES = {
+        'default': {'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -10,11 +10,11 @@ class SponsorOwnershipTests(TestCase):
         self.user_a = User.objects.create_user(username="a", email="a@example.com", password="test-password-123")
         self.user_b = User.objects.create_user(username="b", email="b@example.com", password="test-password-123")
         self.sponsor_a = SponsorAccount.objects.create(
-            user=self.user_a, business_name="A", activity="Recyclage", description="A",
+            user=self.user_a, business_name="A", activity=SponsorAccount.Activity.REPAIR_REUSE, description="A",
             contact_email=self.user_a.email, status=SponsorAccount.Status.APPROVED,
         )
         self.sponsor_b = SponsorAccount.objects.create(
-            user=self.user_b, business_name="B", activity="Recyclage", description="B",
+            user=self.user_b, business_name="B", activity=SponsorAccount.Activity.REPAIR_REUSE, description="B",
             contact_email=self.user_b.email, status=SponsorAccount.Status.APPROVED,
         )
         self.offer_a = Offer.objects.create(sponsor=self.sponsor_a, title="Offre A", description="A")
@@ -27,15 +27,17 @@ class SponsorOwnershipTests(TestCase):
         stats = self.client.get(reverse("sponsor-stats"))
         self.assertContains(stats, "1")
 
-    def test_sponsor_cannot_redeem_own_offer_but_can_redeem_other_offer(self):
-        own_code = RewardCode.objects.create(offer=self.offer_a, code="OWN")
-        other_code = RewardCode.objects.create(offer=self.offer_b, code="OTHER")
+    def test_redemption_requires_post_and_prevents_own_offer(self):
         self.client.force_login(self.user_a)
-        self.assertEqual(self.client.get(reverse("redeem-reward", args=[own_code.pk])).status_code, 403)
-        response = self.client.get(reverse("redeem-reward", args=[other_code.pk]))
-        self.assertRedirects(response, reverse("home"))
-        other_code.refresh_from_db()
-        self.assertEqual(other_code.redeemed_by, self.user_a)
+        self.assertEqual(self.client.post(reverse("redeem-reward", args=[self.offer_a.pk])).status_code, 403)
+        response = self.client.get(reverse("redeem-reward", args=[self.offer_b.pk]))
+        self.assertRedirects(response, reverse("gamification:index"))
+        self.assertFalse(RewardCode.objects.exists())
+        self.assertRedirects(
+            self.client.post(reverse("redeem-reward", args=[self.offer_b.pk])),
+            reverse("gamification:my-codes"),
+        )
+        self.assertEqual(RewardCode.objects.get().redeemed_by, self.user_a)
 
     def test_suspension_removes_access(self):
         self.client.force_login(self.user_a)

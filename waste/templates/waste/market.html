@@ -1,50 +1,59 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
+{% block body_class %}community-page{% endblock %}
 {% block title %}Collecter un déchet · Vers le Vert{% endblock %}
 {% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-page">
-<h1 class="font-heading text-h1 font-bold text-forest">Collecter un déchet</h1>
-<form method="get" class="mt-6 max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6">
+<div class="mx-auto w-full max-w-page">
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Engagement local</p><h1>Collecter un déchet</h1><p>Trouvez une demande proche et proposez votre aide.</p></div></header>
+<form method="get" class="ui-content-panel mt-6 max-w-3xl p-5">
     {% for field in filter_form.visible_fields %}
         {% include "components/form_field.html" %}
     {% endfor %}
     {% for field in filter_form.hidden_fields %}{{ field }}{% endfor %}
-    {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" %}
-    <button type="submit" class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Rechercher</button>
+    <p class="mb-2 text-xs text-muted">La distance sera calculée entre votre position et l'adresse de chaque demande.</p>
+    {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" map_height="h-40" %}
+    <button type="submit" class="w-full inline-flex items-center justify-center rounded-full bg-forest px-7 py-3.5 font-ui text-[14px] font-semibold text-porcelain shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-palm/40">Rechercher</button>
 </form>
 
-<div class="mt-8 grid gap-4">
+<div class="mt-7 grid gap-4 sm:grid-cols-2">
 {% for row in rows %}
-    <article class="rounded-lg-ui border border-olive bg-olive/25 p-5">
+    <article class="ui-card flex flex-col p-4 transition hover:-translate-y-0.5 hover:shadow-float">
         <div class="flex flex-wrap items-start justify-between gap-3">
-            <h3 class="font-heading text-h3 font-bold text-forest">{{ row.request.get_waste_type_display }} · {{ row.request.estimated_weight }} kg</h3>
+            <h3 class="font-heading text-xl font-bold text-forest">{{ row.request.get_waste_type_display }} · {{ row.request.estimated_weight }} kg</h3>
             {% if row.distance is not None %}
-                <span class="rounded-full bg-sky px-3 py-1 text-caption font-bold text-forest">{{ row.distance|floatformat:1 }} km</span>
+                <span class="rounded-full bg-sky px-3 py-1 text-caption font-bold text-forest" title="Distance depuis votre position">{{ row.distance|floatformat:1 }} km de vous</span>
+            {% else %}
+                <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Distance inconnue</span>
             {% endif %}
         </div>
-        <p class="mt-3 text-sm text-carbon">
+        <p class="mt-2 text-sm text-carbon">
             Déclaré le {{ row.request.created_at|date:"d/m/Y" }}
             par {{ row.request.user.username }}
         </p>
+        <p class="mt-2 rounded-md-ui bg-porcelain px-3 py-2 text-sm text-carbon">
+            <span class="font-bold text-forest">Adresse :</span> {{ row.request.address }}
+        </p>
         {% if row.request.image %}
-            <img src="{{ row.request.image.url }}" alt="Photo du déchet {{ row.request.get_waste_type_display|lower }}" class="mt-4 h-48 w-full rounded-md-ui border border-olive object-cover sm:max-w-md">
+            <img src="{{ row.request.image.url }}" alt="Photo du déchet {{ row.request.get_waste_type_display|lower }}" class="mt-3 h-32 w-full rounded-md-ui border border-olive object-cover">
         {% endif %}
+        <div class="mt-auto pt-3">
         {% if row.offer %}
             {% if row.offer.status == "declined" %}
                 <span class="rounded-full bg-olive px-3 py-1 text-caption font-bold text-forest">Proposition refusée</span>
             {% elif row.offer.status == "withdrawn" %}
-                <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
+                <a href="{% url 'waste:offer' row.request.pk %}" class="mt-3 inline-flex min-w-[190px] items-center justify-center rounded-full bg-palm px-5 py-2.5 font-ui text-[13px] font-semibold text-forest shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus:outline-none focus:ring-4 focus:ring-palm/40">
                     Proposer de collecter
                 </a>
             {% else %}
                 <span class="rounded-full bg-sky px-3 py-1 text-caption font-bold text-forest">Proposition envoyée</span>
             {% endif %}
         {% else %}
-            <a href="{% url 'waste:offer' row.request.pk %}" class="mt-4 inline-flex min-h-[46px] min-w-[220px] items-center justify-center rounded-md-ui border-2 border-forest bg-forest px-6 py-3 text-center font-bold text-porcelain no-underline shadow-sm transition hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">
+            <a href="{% url 'waste:offer' row.request.pk %}" class="mt-3 inline-flex min-w-[190px] items-center justify-center rounded-full bg-palm px-5 py-2.5 font-ui text-[13px] font-semibold text-forest shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus:outline-none focus:ring-4 focus:ring-palm/40">
                 Proposer de collecter
             </a>
         {% endif %}
+        </div>
     </article>
 {% empty %}
     <div class="rounded-md-ui bg-sky p-4 text-forest">Aucune demande ouverte pour le moment.</div>

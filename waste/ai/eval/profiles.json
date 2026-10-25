@@ -1,0 +1,17 @@
+[
+  {"profil": "vide", "co2_total_kg": 0, "kg_sorted": 0, "collections_count": 0, "organic_kg": 0, "plastic_kg": 0, "kg_last_30_days": 0},
+  {"profil": "plastique_dominant", "co2_total_kg": 3.2, "kg_sorted": 8.4, "collections_count": 4, "organic_kg": 1.4, "plastic_kg": 7.0, "kg_last_30_days": 2.1},
+  {"profil": "organique_dominant", "co2_total_kg": 2.8, "kg_sorted": 6.0, "collections_count": 3, "organic_kg": 4.5, "plastic_kg": 1.5, "kg_last_30_days": 1.0},
+  {"profil": "gros_volume", "co2_total_kg": 30.0, "kg_sorted": 100.0, "collections_count": 20, "organic_kg": 60.0, "plastic_kg": 40.0, "kg_last_30_days": 25.0},
+  {"profil": "recent", "co2_total_kg": 1.1, "kg_sorted": 2.5, "collections_count": 2, "organic_kg": 0.5, "plastic_kg": 2.0, "kg_last_30_days": 2.5},
+  {"profil": "ancien", "co2_total_kg": 5.0, "kg_sorted": 10.0, "collections_count": 5, "organic_kg": 5.0, "plastic_kg": 5.0, "kg_last_30_days": 0},
+  {"profil": "une_collecte", "co2_total_kg": 0.4, "kg_sorted": 1.0, "collections_count": 1, "organic_kg": 1.0, "plastic_kg": 0, "kg_last_30_days": 1.0},
+  {"profil": "plusieurs_collectes", "co2_total_kg": 10.0, "kg_sorted": 20.0, "collections_count": 10, "organic_kg": 8.0, "plastic_kg": 12.0, "kg_last_30_days": 4.0},
+  {"profil": "plastique_seul", "co2_total_kg": 2.5, "kg_sorted": 5.0, "collections_count": 2, "organic_kg": 0, "plastic_kg": 5.0, "kg_last_30_days": 5.0},
+  {"profil": "organique_seul", "co2_total_kg": 2.0, "kg_sorted": 4.0, "collections_count": 2, "organic_kg": 4.0, "plastic_kg": 0, "kg_last_30_days": 4.0},
+  {"profil": "equilibre", "co2_total_kg": 4.0, "kg_sorted": 8.0, "collections_count": 4, "organic_kg": 4.0, "plastic_kg": 4.0, "kg_last_30_days": 2.0},
+  {"profil": "progression", "co2_total_kg": 6.0, "kg_sorted": 12.0, "collections_count": 6, "organic_kg": 7.0, "plastic_kg": 5.0, "kg_last_30_days": 6.0},
+  {"profil": "faible_volume", "co2_total_kg": 0.5, "kg_sorted": 1.5, "collections_count": 2, "organic_kg": 1.0, "plastic_kg": 0.5, "kg_last_30_days": 0.5},
+  {"profil": "sans_plastique", "co2_total_kg": 3.0, "kg_sorted": 6.0, "collections_count": 3, "organic_kg": 6.0, "plastic_kg": 0, "kg_last_30_days": 3.0},
+  {"profil": "sans_organique", "co2_total_kg": 3.0, "kg_sorted": 6.0, "collections_count": 3, "organic_kg": 0, "plastic_kg": 6.0, "kg_last_30_days": 3.0}
+]

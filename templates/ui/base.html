@@ -14,17 +14,50 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body class="site-body {% if user.is_authenticated %}is-authenticated{% else %}is-visitor{% endif %} {% block body_class %}{% endblock %}">
+
+  {% include "ui/_background.html" %}
+
   <a href="#contenu" class="absolute left-3 top-3 z-[100] -translate-y-24 rounded-xl bg-forest px-5 py-3 font-bold text-porcelain focus:translate-y-0">Aller au contenu</a>
+
   <div class="site-shell">
+
+    {# ── Top navigation (transparent → blurs on scroll via JS) ─────── #}
     {% block navigation %}{% include "ui/navigation.html" %}{% endblock %}
-    <main id="contenu" class="app-main">
-      <div class="page-container">
-        {% if space_tabs %}{% block secondary_navigation %}{% include "ui/tabs.html" with tabs=space_tabs %}{% endblock %}{% endif %}
-        {% block page_messages %}{% if messages %}<div class="mb-6 space-y-3">{% for message in messages %}<div class="ui-alert {% if message.tags == 'error' or message.tags == 'warning' %}ui-alert-error{% elif message.tags == 'success' %}ui-alert-success{% endif %}" role="alert"><span class="shrink-0" aria-hidden="true">{% include "ui/icon.html" with name="info" %}</span><span>{{ message }}</span></div>{% endfor %}</div>{% endif %}{% endblock %}
+
+    {% block secondary_navigation %}{% endblock %}
+
+    {# ── Main content area ──────────────────────────────────────────── #}
+    <main id="contenu" class="{% block main_class %}app-main{% endblock %}">
+
+      {# Big porcelain content shell — no blur, solid readable bg #}
+      <div class="{% block page_shell_class %}page-shell{% endblock %}">
+
+        {# Flash messages #}
+        {% block page_messages %}
+          {% if messages %}
+          <div class="mb-5 space-y-3 pt-4">
+            {% for message in messages %}
+            <div class="ui-alert {% if message.tags == 'error' or message.tags == 'warning' %}ui-alert-error{% elif message.tags == 'success' %}ui-alert-success{% endif %}" role="alert">
+              <span class="shrink-0" aria-hidden="true">{% include "ui/icon.html" with name="info" %}</span>
+              <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endblock %}
+
+        {# Page content #}
         <div class="app-content">{% block content %}{% endblock %}</div>
       </div>
     </main>
-    {% block footer %}<footer class="community-footer"><a href="{% url 'home' %}">{% include "ui/icon.html" with name="leaf" %}<strong>Vers le Vert</strong></a><span>Un petit geste. Un nouvel élan.</span><span>© {% now "Y" %} · Chaque geste compte.</span></footer>{% endblock %}
+
+    {% block footer %}
+    <footer class="community-footer">
+      <a href="{% url 'home' %}">{% include "ui/icon.html" with name="leaf" %}<strong>Vers le Vert</strong></a>
+      <span>Un petit geste. Un nouvel élan.</span>
+      <span>© {% now "Y" %} · Chaque geste compte.</span>
+    </footer>
+    {% endblock %}
   </div>
 </body>
 </html>

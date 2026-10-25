@@ -213,7 +213,27 @@ class WasteRequest(models.Model):
             base_points=self.confirmed_weight * base,
             impact_factor=factor,
             description=f"Collecte confirmée : {self.confirmed_weight} kg",
+            action_type=f"WASTE_{self.waste_type.upper()}",
+            quantity=self.confirmed_weight,
         )
+
+
+class EcoAdvice(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="eco_advices",
+    )
+    payload = models.JSONField()
+    stats_hash = models.CharField(max_length=64)
+    source = models.CharField(max_length=8, choices=(("ai", "IA"), ("fallback", "Repli")))
+    grounded = models.BooleanField()
+    duration_ms = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "created_at"])]
+        ordering = ["-created_at"]
 
 
 class CollectionOffer(models.Model):

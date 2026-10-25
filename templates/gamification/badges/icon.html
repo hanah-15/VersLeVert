@@ -1,0 +1,8 @@
+{% if badge.code == 'FIRST_STEP' %}{% include "ui/icon.html" with name="sprout" %}
+{% elif badge.code == 'GREEN_50' %}{% include "ui/icon.html" with name="leaf" %}
+{% elif badge.code == 'EXPLORER_200' %}{% include "ui/icon.html" with name="compass" %}
+{% elif badge.code == 'CHAMPION_500' %}{% include "ui/icon.html" with name="trophy" %}
+{% elif badge.code == 'PROOF_1' %}{% include "ui/icon.html" with name="file-check" %}
+{% elif badge.code == 'PROOF_5' %}{% include "ui/icon.html" with name="clipboard-check" %}
+{% elif badge.code == 'TRANSPORT_PRO' %}{% include "ui/icon.html" with name="bus" %}
+{% else %}{% include "ui/icon.html" with name="award" %}{% endif %}

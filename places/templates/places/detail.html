@@ -2,25 +2,27 @@
 {% block title %}{{ place.name }} · Vers le Vert{% endblock %}
 {% block places_content %}
 <a href="{% url 'places:index' %}" class="inline-block rounded py-2 font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">← Tous les lieux</a>
-<article class="ui-card overflow-hidden rounded-lg-ui border border-olive bg-white">
+<article class="ui-content-panel overflow-hidden">
   <header class="ui-title-panel space-y-4">
     <span class="inline-block rounded-full bg-porcelain px-4 py-1.5 text-sm font-bold text-forest">{{ place.get_category_display }}</span>
     <h1 class="break-words font-heading text-3xl font-bold text-forest sm:text-[44px]">{{ place.name }}</h1>
     <p>{{ place.address }}</p>
   </header>
-  <div class="grid gap-8 p-6 sm:p-9 md:grid-cols-[2fr_1fr]">
+  {% include "ui/rewards_tabs.html" %}
+  {% include "places/_tools.html" %}
+  <div class="grid gap-8 rounded-[20px] bg-porcelain p-6 shadow-card sm:p-9 md:grid-cols-[2fr_1fr]">
     <div><h2 class="mb-3 font-heading text-2xl font-semibold text-forest">À propos de ce lieu</h2><div class="break-words leading-relaxed">{{ place.description|default:"Une adresse à découvrir pour vos habitudes éco-responsables."|linebreaks }}</div></div>
     <aside class="space-y-4 rounded-md-ui bg-porcelain p-5" aria-label="Informations pratiques">
       <h2 class="font-heading text-xl font-semibold text-forest">Préparer votre visite</h2>
       <p class="text-sm">{{ place.address }}</p>
-      <a href="{{ map_url }}" target="_blank" rel="noopener noreferrer" class="ui-button ui-button-secondary block rounded-xl border-2 border-forest px-4 py-3 text-center font-bold text-forest focus:outline-none focus:ring-4 focus:ring-sky">Voir sur OpenStreetMap <span class="sr-only">(nouvel onglet)</span>↗</a>
-      <a href="{% url 'places:recommendation-create' %}?place={{ place.pk }}" class="ui-button ui-button-primary block rounded-xl bg-forest px-4 py-3 text-center font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky">Recommander un produit ici</a>
+      <a href="{{ map_url }}" target="_blank" rel="noopener noreferrer" class="block rounded-xl px-4 py-3 text-center font-bold focus:outline-none focus:ring-4 focus:ring-sky inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Voir sur OpenStreetMap <span class="sr-only">(nouvel onglet)</span>↗</a>
+      <a href="{% url 'places:recommendation-create' %}?place={{ place.pk }}" class="block inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Recommander un produit ici</a>
       {% if request.user.is_staff %}<div class="flex flex-wrap gap-4 text-sm font-bold"><a class="rounded py-2 text-forest underline focus:ring-4 focus:ring-sky" href="{% url 'places:update' place.pk %}">Modifier</a><a class="rounded py-2 text-brick underline focus:ring-4 focus:ring-sky" href="{% url 'places:delete' place.pk %}">Supprimer</a></div>{% endif %}
     </aside>
   </div>
 </article>
-<section class="space-y-4" aria-labelledby="products-heading">
-  <h2 id="products-heading" class="font-heading text-2xl font-semibold text-forest">Les produits recommandés ici</h2>
+<section class="ui-content-panel space-y-4" aria-labelledby="products-heading">
+  <h2 id="products-heading" class="font-heading text-2xl font-semibold text-porcelain">Les produits recommandés ici</h2>
   <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{% for recommendation in recommendations %}{% include "places/_recommendation_card.html" %}{% empty %}<p class="ui-card rounded-lg-ui border border-olive p-6 md:col-span-2 xl:col-span-3">Aucune recommandation publiée pour ce lieu. Partagez votre première découverte.</p>{% endfor %}</div>
 </section>
 {% endblock %}

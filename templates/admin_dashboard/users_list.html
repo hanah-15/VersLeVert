@@ -1,0 +1,16 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block title %}Utilisateurs · Tableau de bord{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Administration</p><h1>Utilisateurs</h1><p>Liste des comptes inscrits.</p></div><div class="flex flex-wrap gap-2"><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin_dashboard:dashboard' %}">Retour au tableau de bord</a></div></header>
+<div class="ui-card ui-card-pad overflow-x-auto">
+  <table class="w-full text-left">
+    <thead><tr class="border-b border-line bg-porcelain/60 text-sm text-muted"><th class="px-2 pb-2">Utilisateur</th><th class="pb-2">Email</th><th class="pb-2">Rôle</th><th class="pb-2">Date d'inscription</th><th class="pb-2"></th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr class="border-b border-line hover:bg-porcelain/40"><td class="px-2 py-3 font-semibold text-forest">{{ u.get_full_name|default:u.username }}</td><td class="py-3 text-sm">{{ u.email }}</td><td class="py-3 text-sm">{% if u.is_superuser %}<span class="rounded-full bg-olive/20 px-2 py-0.5 text-forest">Superuser</span>{% elif u.is_staff %}<span class="rounded-full bg-palm/20 px-2 py-0.5 text-forest">Staff</span>{% else %}<span class="rounded-full bg-porcelain px-2 py-0.5 text-muted">Utilisateur</span>{% endif %}</td><td class="py-3 text-sm text-muted">{{ u.date_joined|date:"d/m/Y H:i" }}</td><td class="py-3 text-right"><a class="ui-link" href="{% url 'admin_dashboard:user_detail' u.pk %}">Voir</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if is_paginated %}<div class="flex items-center justify-between"><div class="text-sm text-muted">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</div><div class="flex gap-2">{% if page_obj.has_previous %}<a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-[13px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="?page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}{% if page_obj.has_next %}<a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-[13px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="?page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}</div></div>{% endif %}
+{% endblock %}

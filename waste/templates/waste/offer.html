@@ -1,10 +1,11 @@
-{% extends "base.html" %}
+{% extends "ui/base.html" %}
+{% block body_class %}community-page{% endblock %}
 {% block title %}Proposer une collecte · Vers le Vert{% endblock %}
 {% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
-{% include "components/position_status.html" with label="Votre position" %}
 {% block content %}
-<div class="mx-auto max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
-    <h2 class="font-heading text-h2 font-bold text-forest">Proposer une collecte</h2>
+<div class="mx-auto w-full max-w-2xl">
+    <header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Proposition de collecte</p><h1>Proposer une collecte</h1><p>Choisissez un créneau et indiquez votre position pour aider cette demande.</p></div></header>
+    <div class="ui-content-panel mt-6 p-6 shadow-card sm:p-8">
     <p class="mt-3 text-carbon">
         {{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg
         · Déposé par {{ waste_request.user.username }}
@@ -19,7 +20,8 @@
         {% endfor %}
         {% for field in form.hidden_fields %}{{ field }}{% endfor %}
         {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" %}
-        <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-3 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Envoyer ma proposition</button>
+        {% include "components/position_status.html" with label="Position sélectionnée" %}
+        <button type="submit" class="w-full inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Envoyer ma proposition</button>
     </form>
-</div>
+</div></div>
 {% endblock %}

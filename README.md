@@ -19,10 +19,12 @@ Tailwind CSS is compiled locally with the Tailwind CLI. After installing Node.js
 
 ```bash
 npm install
-npm run build:css
+npm run build
 ```
 
-During development, run `npm run watch:css` in a separate terminal. The generated
+During development, run `npm run dev` in a separate terminal to watch the CSS,
+and run Django separately with `python manage.py runserver`. The explicit
+`build:css` and `watch:css` commands remain available as well. The generated
 `static/css/tailwind.css` file is ignored because it is a build artifact. Design
 tokens are defined in `tailwind.config.js`; shared UI components are defined in
 `static/css/tailwind.source.css` and `templates/ui/`. See `DESIGN_SYSTEM.md` for
@@ -49,11 +51,13 @@ python manage.py createsuperuser
 
 Never commit `.env` or database credentials.
 
-## Intégration des défis et des événements
+## Intégration des cinq modules
 
-La branche `feature/team-integration` réunit la base Sofiene/Hana, les défis
-d'Aymen et les événements d'Oussema. La fusion de Mariem et l'harmonisation avec
-son design restent une étape séparée.
+La branche `feature/team-integration` réunit les lieux de Sofiene, les déchets
+de Hana, les défis d'Aymen, les événements d'Oussema et les preuves, points,
+badges et récompenses de Mariem. Le design commun provient de
+`feature/waste-hana`, y compris les nouvelles pages déchets de Hana.
+Les pages fonctionnelles des défis et événements utilisent cette base commune.
 
 - Défis : `/challenges/`, défis personnels, participation, progression, jalons,
   rappels, classement, administration et API REST.
@@ -62,11 +66,19 @@ son design restent une étape séparée.
 - Les recommandations de défis utilisent Groq : renseigner `GROQ_API_KEY` dans
   `.env` pour activer ce service. Les autres variables `GROQ_*` figurent dans
   `.env.example`. Les assistants de lieux et d'événements utilisent la
-  configuration `GEMINI_*` existante.
-- Le service `gamification.services.award_points` est encore un contrat
-  provisoire. Il renvoie un résultat descriptif lorsque le modèle de transactions
-  n'est pas disponible. La persistance du solde et le raccordement aux récompenses
-  devront être vérifiés lors de l'intégration du module de Mariem.
+  configuration `GEMINI_*` existante, également utilisée par les déchets.
+- `gamification.services.award_points` raccorde les montants calculés par les
+  déchets, défis, jalons et événements au vrai registre de Mariem. Le solde,
+  les notifications, les badges et les échanges de récompenses sont partagés.
+  Les crédits sont dédupliqués par utilisateur et source. Les changements de
+  solde sont verrouillés pour éviter les pertes de points et les doubles dépenses.
+- Les images sont stockées localement par défaut. Cloudinary est facultatif :
+  configurer `CLOUDINARY_URL` ou les trois variables `CLOUDINARY_*` dans `.env`.
+- Les données personnelles et les bases locales ne sont pas transférées par Git.
+  Les barèmes et badges initiaux peuvent être ajoutés sans écraser les existants :
+  `python manage.py shell < gamification/seed_impact_factors.py` puis
+  `python gamification/seed_badges.py` (pour PowerShell :
+  `Get-Content gamification/seed_impact_factors.py | python manage.py shell`).
 
 Après récupération de la branche, installer les dépendances, appliquer les
 migrations et reconstruire le CSS :
@@ -136,8 +148,6 @@ Les variables `GEMINI_API_KEY`, `GEMINI_MODEL` (par défaut `gemini-3.1-flash-li
 ## Règles d'équipe
 - Une app = un module = un responsable
 - Ne jamais pousser sur `main` / `develop` : passer par une Pull Request
-- Pages hors déchets : étendre `ui/base.html` et réutiliser `templates/ui/`
-  et les composants `ui-*` décrits dans `DESIGN_SYSTEM.md`
-- Module déchets (Hana) : conserver `base.html`, les anciens partials et son UI
-  actuelle ; la refonte commune ne s'applique pas à ce module
+- Pages de tous les modules : étendre `ui/base.html`, réutiliser `templates/ui/`
+  et le design fourni par Hana. Conserver les fonctions et parcours de chaque module.
 - `git pull` avant de commencer à travailler

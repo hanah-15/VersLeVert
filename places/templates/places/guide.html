@@ -3,11 +3,13 @@
 {% block places_content %}
 <div class="mx-auto max-w-4xl space-y-6">
   <header class="ui-title-panel space-y-4"><p class="text-xs font-bold uppercase tracking-widest text-forest">Le guide de vos prochaines découvertes</p><h1 class="font-heading text-3xl font-bold text-forest sm:text-[40px]">Une envie ?<br>Trouvez une piste plus verte.</h1><p>Décrivez ce que vous cherchez. Découvrez des lieux et des produits issus de notre catalogue publié.</p><p class="text-sm">Les suggestions sont générées par IA et peuvent être imparfaites. Consultez les fiches avant de faire votre choix.</p></header>
-  <form method="post" data-guide-form class="ui-card space-y-5 rounded-lg-ui border border-olive bg-white p-6">{% csrf_token %}
+  {% include "ui/rewards_tabs.html" %}
+  {% include "places/_tools.html" %}
+  <form method="post" data-guide-form class="ui-content-panel space-y-5">{% csrf_token %}
     {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
     {% include "places/_field.html" with field=form.query %}
     {% if catalogue_empty %}<p class="rounded-xl bg-olive/25 p-4">Le catalogue est encore vide. Le guide sera disponible dès la publication de lieux ou de produits.</p>{% endif %}
-    <button {% if catalogue_empty %}disabled{% endif %} class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-6 py-3 font-bold text-porcelain disabled:opacity-60 focus:outline-none focus:ring-4 focus:ring-sky">Trouver des idées ✦</button>
+    <button {% if catalogue_empty %}disabled{% endif %} class="disabled:opacity-60 inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Trouver des idées ✦</button>
     <p data-guide-status aria-live="polite" class="text-sm"></p>
   </form>
   <section data-guide-results aria-label="Suggestions du guide" class="space-y-4" {% if not result %}hidden{% endif %}>

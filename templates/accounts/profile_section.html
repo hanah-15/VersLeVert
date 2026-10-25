@@ -1,23 +1,65 @@
 {% extends "ui/base.html" %}
 {% block title %}{{ section_title }} · Vers le Vert{% endblock %}
 {% block content %}
-<header class="ui-page-header"><div><p class="ui-eyebrow">Un espace à votre image</p><h1>{{ section_title }}</h1><p>Vos informations, vos préférences et les étapes de votre parcours.</p></div></header>
+<div class="flex flex-col gap-1 pt-6 pb-4 border-b border-line mb-6">
+  <p class="ui-eyebrow">{% include "ui/icon.html" with name="user" %} Mon profil</p>
+  <h1 class="text-2xl font-semibold text-forest sm:text-3xl">{{ section_title }}</h1>
+</div>
 <div class="profile-layout"><aside>{% include "ui/profile_nav.html" %}</aside><section class="min-w-0 space-y-5">
 {% if section == "profile" %}
-  <div class="ui-card ui-card-pad"><div class="mb-7 flex items-center gap-4"><div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-olive/30 font-heading text-2xl text-forest">{% if user.avatar %}<img class="h-full w-full object-cover" src="{{ user.avatar.url }}" alt="Votre photo de profil">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</div><div><h2 class="text-xl">{{ user.first_name|default:user.username }}</h2><p class="text-sm text-muted">{{ user.email }}</p></div></div><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<p class="ui-help">Adresse e-mail : {{ email }} (non modifiable)</p><div class="ui-form-actions"><button class="ui-button ui-button-primary" type="submit">Enregistrer les modifications</button></div></form></div>
+  <div class="ui-card ui-card-pad"><div class="mb-7 flex items-center gap-4"><div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-olive/30 font-heading text-2xl text-forest">{% if user.avatar %}<img class="h-full w-full object-cover" src="{{ user.avatar.url }}" alt="Votre photo de profil">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</div><div><h2 class="text-xl">{{ user.first_name|default:user.username }}</h2><p class="text-sm text-muted">{{ user.email }}</p></div></div><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<p class="ui-help">Adresse e-mail : {{ email }} (non modifiable)</p><div class="ui-form-actions"><button class="w-full inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" type="submit">Enregistrer les modifications</button></div></form></div>
 {% elif section == "sponsor" %}
   {% if application.status == "APPROVED" %}<div class="ui-alert ui-alert-success">{% include "ui/icon.html" with name="check" %}<div>Votre demande est approuvée. <a class="ui-link" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div></div>
   {% elif application.status == "PENDING" %}<div class="ui-alert">{% include "ui/icon.html" with name="clock" %}Demande en cours de vérification.</div>
   {% elif application.status == "REJECTED" %}<div class="ui-alert ui-alert-error"><div>Demande rejetée : {{ application.rejection_reason }}. <a class="ui-link" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div></div>
-  {% else %}<div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mt-5 text-2xl">Votre entreprise a sa place ici.</h2><p class="mb-6 mt-3 max-w-lg text-sm text-muted">Rejoignez les partenaires qui encouragent les gestes responsables et faites découvrir votre activité à la communauté.</p><a class="ui-button ui-button-primary" href="{% url 'sponsor-apply' %}">Devenir sponsor {% include "ui/icon.html" with name="arrow" %}</a></div>{% endif %}
+  {% else %}<div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mt-5 text-2xl">Votre entreprise a sa place ici.</h2><p class="mb-6 mt-3 max-w-lg text-sm text-muted">Rejoignez les partenaires qui encouragent les gestes responsables et faites découvrir votre activité à la communauté.</p><a class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'sponsor-apply' %}">Devenir sponsor </a></div>{% endif %}
 {% elif section == "notifications" %}
   <div class="ui-card ui-card-pad"><h2 class="mb-5 text-xl">Votre fil d'actualité</h2>{% for notification in user.notifications.all %}<div class="flex gap-3 border-b border-line py-4"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><p class="text-sm">{{ notification.message }}</p></div>{% empty %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><h3>Tout est calme.</h3><p>Aucune notification pour le moment. Les nouvelles de votre parcours apparaîtront ici.</p></div>{% endfor %}</div>
 {% elif section == "security" %}
-  <div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shield" %}</span><h2 class="mt-5 text-2xl">Votre compte, en toute sérénité.</h2><p class="mb-6 mt-3 text-sm text-muted">Gardez un mot de passe personnel et sécurisé.</p><div class="ui-form-actions"><a class="ui-button ui-button-primary" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ui-button ui-button-danger" type="submit">Se déconnecter</button></form></div></div>
+  <div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shield" %}</span><h2 class="mt-5 text-2xl">Votre compte, en toute sérénité.</h2><p class="mb-6 mt-3 text-sm text-muted">Gardez un mot de passe personnel et sécurisé.</p><div class="ui-form-actions"><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}{% include "ui/button.html" with label="Se déconnecter" variant="secondary" button_type="submit" %}</form></div></div>
 {% elif section == "points" %}
-  <div class="ui-card ui-card-pad"><p class="ui-eyebrow">Votre énergie récompensée</p><div class="flex items-center gap-4"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="spark" %}</span><div><p class="text-xs text-muted">Solde actuel</p><strong class="font-heading text-5xl text-forest">{{ points_balance }} <span class="text-lg text-muted">pts</span></strong></div></div><p class="mt-6 border-t border-line pt-5 text-sm text-muted">L'historique des points sera disponible prochainement.</p></div>
+  <div class="ui-card ui-card-pad"><p class="ui-eyebrow">Votre énergie récompensée</p><div class="flex items-center gap-4"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="spark" %}</span><div><p class="text-xs text-muted">Solde actuel</p><strong class="font-heading text-5xl text-forest">{{ points_balance }} <span class="text-lg text-muted">pts</span></strong></div></div>{% if recent_transactions %}<div class="mt-6 border-t border-line pt-5 space-y-2"><p class="mb-3 text-sm font-semibold text-forest">Derniers mouvements</p>{% for tx in recent_transactions %}<div class="flex items-center justify-between gap-3 py-2 border-b border-line last:border-0"><div><p class="text-sm font-medium text-forest truncate">{{ tx.reason|default:tx.action_type }}</p><p class="text-xs text-muted">{{ tx.created_at|date:"d M Y" }}</p></div><p class="shrink-0 font-semibold {% if tx.points >= 0 %}text-palm-deep{% else %}text-brick{% endif %}">{% if tx.points >= 0 %}+{% endif %}{{ tx.points }} pts</p></div>{% endfor %}</div>{% else %}<p class="mt-6 border-t border-line pt-5 text-sm text-muted">Aucun mouvement pour le moment.</p>{% endif %}<div class="mt-5"><a class="ui-link text-sm" href="{% url 'gamification:points-history' %}">Voir l'historique complet →</a></div></div>
 {% elif section == "proofs" %}
-  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="camera" %}</span><h2>Les preuves de vos petits pas.</h2><p>Vos actions prouvées apparaîtront ici après leur validation. Elles permettent de suivre vos défis et vos points.</p></div>
+  {% if recent_proofs %}<div class="space-y-3">{% for proof in recent_proofs %}<a href="{% url 'gamification:proof-detail' proof.pk %}" class="ui-card group flex items-center gap-4 p-4 transition-all hover:-translate-y-0.5 hover:shadow-float"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg {% if proof.status == 'APPROVED' %}bg-olive/30{% elif proof.status == 'REJECTED' %}bg-brick/15{% else %}bg-sand{% endif %}">{% if proof.status == 'APPROVED' %}✅{% elif proof.status == 'REJECTED' %}❌{% else %}⏳{% endif %}</div><div class="flex-1 min-w-0"><p class="text-sm font-semibold text-forest">{{ proof.get_proof_type_display }}</p><p class="text-xs text-muted">{{ proof.submitted_at|date:"d M Y" }} · {{ proof.get_status_display }}</p></div><span class="text-muted [&>svg]:h-4 [&>svg]:w-4 group-hover:translate-x-1 transition-transform">{% include "ui/icon.html" with name="arrow" %}</span></a>{% endfor %}</div><div class="mt-4 flex flex-wrap gap-3"><a href="{% url 'gamification:my-proofs' %}" class="ui-link text-sm">Toutes mes preuves →</a><a href="{% url 'gamification:proof-submit' %}" class="inline-flex items-center gap-2 rounded-full bg-palm px-5 py-2 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Nouvelle preuve</a></div>{% else %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="camera" %}</span><h3>Les preuves de vos petits pas.</h3><p>Vos actions prouvées apparaissent ici après validation.</p><a href="{% url 'gamification:proof-submit' %}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-palm px-6 py-3 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Soumettre une preuve</a></div>{% endif %}
+{% elif section == "badges" %}
+  {% if earned_badges %}
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% for ub in earned_badges %}
+    <div class="ui-card flex items-center gap-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-float
+      {% if ub.badge.tier == 'GOLD' %}border-sun/40 bg-sun/10
+      {% elif ub.badge.tier == 'SILVER' %}border-sky/30 bg-sky/10
+      {% else %}border-palm/30 bg-olive/10{% endif %}">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl
+        {% if ub.badge.tier == 'GOLD' %}bg-sun/30{% elif ub.badge.tier == 'SILVER' %}bg-sky/20{% else %}bg-olive/30{% endif %}">
+        {{ ub.badge.icon }}
+      </div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="font-semibold text-forest text-sm">{{ ub.badge.name }}</p>
+          <span class="rounded-full px-2 py-0.5 font-ui text-[10px] font-bold uppercase
+            {% if ub.badge.tier == 'GOLD' %}bg-sun/30 text-ink{% elif ub.badge.tier == 'SILVER' %}bg-sky/20 text-sky{% else %}bg-olive/30 text-palm-deep{% endif %}">
+            {{ ub.badge.get_tier_display }}
+          </span>
+        </div>
+        <p class="text-xs text-muted mt-0.5">Obtenu le {{ ub.awarded_at|date:"d M Y" }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mt-4">
+    <a href="{% url 'gamification:badges' %}" class="ui-link text-sm">Voir tous les badges et progressions →</a>
+  </div>
+  {% else %}
+  <div class="ui-empty border-0 shadow-none">
+    <span class="ui-icon-box text-2xl">🏅</span>
+    <h3>Vos badges apparaîtront ici.</h3>
+    <p>Gagnez des points et accomplissez des actions pour débloquer vos premiers badges.</p>
+    <div class="mt-4 flex flex-wrap gap-3 justify-center">
+      <a href="{% url 'gamification:badges' %}" class="ui-link text-sm">Voir les badges disponibles →</a>
+      <a href="{% url 'gamification:proof-submit' %}" class="inline-flex items-center gap-2 rounded-full bg-palm px-5 py-2 font-ui text-sm font-semibold text-forest shadow-card hover:-translate-y-0.5 transition-all">+ Soumettre une preuve</a>
+    </div>
+  </div>
+  {% endif %}
 {% else %}
   <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h2>Votre parcours continue de grandir.</h2><p>Cet espace sera disponible prochainement.</p></div>
 {% endif %}

@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 from accounts.views import SponsorApplicationView
 from core.views import NotificationsView, PlaceholderView
 from accounts.views import ProfileOverviewView, ProfileSectionView
@@ -28,9 +28,11 @@ from sponsor.views import redeem_reward
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("dashboard/", include("core.urls_admin")),
     path("accounts/", include("accounts.urls")),
     path("challenges/", include("challenges.urls")),
     path("waste/", include("waste.urls")),
+    path("api/waste/", include("waste.api_urls")),
     path("events/", include("events.urls")),
     path("places/", include("places.urls")),
     path("rewards/", include("gamification.urls")),
@@ -38,8 +40,8 @@ urlpatterns = [
     path("sponsor/", include("sponsor.urls")),
     path("rewards/redeem/<int:pk>/", redeem_reward, name="redeem-reward"),
     path("notifications/", NotificationsView.as_view(), name="notifications"),
-    path("actions/waste/new/", PlaceholderView.as_view(placeholder_title="Publier un déchet", placeholder_owner="module déchets"), name="waste-create"),
-    path("actions/proof/new/", PlaceholderView.as_view(placeholder_title="Ajouter une preuve", placeholder_owner="module preuves"), name="proof-create"),
+    path("actions/waste/new/", RedirectView.as_view(pattern_name="waste:create"), name="waste-create"),
+    path("actions/proof/new/", RedirectView.as_view(pattern_name="gamification:proof-submit"), name="proof-create"),
     path("actions/challenge/new/", PersonalChallengeCreateView.as_view(), name="personal-challenge-create"),
     path("profil/", ProfileOverviewView.as_view(), name="profile-overview"),
     path("profil/<slug:section>/", ProfileSectionView.as_view(), name="profile-section"),

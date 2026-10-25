@@ -6,19 +6,17 @@ conservent exactement leurs valeurs. La police DM Sans apporte une lecture
 simple, sans empattements. Les surfaces translucides vertes, les contours clairs
 et un flou discret donnent de la profondeur sans gêner les formulaires.
 
-## Périmètre et exception déchets
+## Périmètre commun
 
-Les pages hors déchets étendent `ui/base.html`. Les écrans de connexion et
-d'inscription étendent `ui/auth_base.html`. Les composants sont dans
-`templates/ui/`, les styles dans `static/css/tailwind.source.css` et les petits
-comportements de présentation dans `static/js/ui.js`.
+Le design de référence est celui de `feature/waste-hana`, qui intègre le travail
+de Mariem et les nouvelles pages déchets de Hana. Tous les modules étendent
+`ui/base.html`. Les écrans de connexion et d'inscription utilisent
+`ui/auth_base.html`. Les composants sont dans `templates/ui/`, les styles dans
+`static/css/tailwind.source.css` et les comportements dans `static/js/ui.js`.
 
-**Le module déchets de Hana conserve son UI actuelle.** Ses templates continuent
-d'étendre `base.html` et d'utiliser les anciens `templates/partials/` et
-  `templates/components/`. Ces fichiers sont conservés sans modification. Les
-nouveaux styles généraux sont limités à `.site-body`, classe ajoutée uniquement
-par `ui/base.html`. Les composants nouveaux utilisent des classes distinctes.
-Ne pas appliquer la nouvelle base au module déchets sans accord de Hana.
+Les défis et événements conservent leurs pages fonctionnelles. Les classes
+`ui-button`, `ui-button-primary`, `ui-button-secondary`, `ui-button-danger` et
+`ui-input` reprennent les styles communs pour ces pages.
 
 ## Compilation
 
@@ -61,7 +59,7 @@ La navigation est horizontale, dans un en-tête palm translucide. À partir de
 1280 px, les sept destinations sont affichées directement. En dessous, un menu
 compact conserve tous les liens. Une barre inférieure complète la navigation
 sur téléphone. Les menus se ferment au clic extérieur et avec Échap. Le contenu
-utilise un maximum de 1280 px.
+utilise généralement un maximum de 1200 px, avec des variantes par page.
 
 L'accueil est une page de découverte commune aux visiteurs et aux membres :
 photographie, façons d'agir, présentation de la communauté. Les statistiques
@@ -73,9 +71,8 @@ Les aides de saisie peuvent être ouvertes à la demande ; elles ne sont pas
 supprimées. Les erreurs restent visibles et la page peut grandir si nécessaire,
 sans masquer un champ ou un bouton pour forcer la hauteur de l'écran.
 
-La nouvelle typographie utilise le token `font-ui`. Les anciens tokens
-`font-heading` et `font-body` gardent leurs polices d'origine pour Hana. Leur
-apparence est remplacée uniquement à l'intérieur de `.site-body`.
+La typographie commune utilise le token `font-ui`. Les classes historiques
+`font-heading` et `font-body` adoptent aussi cette police dans `.site-body`.
 
 Le contexte et les liens proviennent toujours de la configuration de navigation
 existante. Les URLs, formulaires POST, CSRF et champs métier sont conservés.
@@ -99,7 +96,7 @@ backend. Les modules encore incomplets présentent un état vide explicite.
 | `ui/field.html` | Champ Django, label, aide et erreurs |
 | `ui/icon.html` | Icône SVG, avec paramètre `name` |
 
-Exemple de nouvelle page hors déchets :
+Exemple de nouvelle page :
 
 ```django
 {% extends "ui/base.html" %}
@@ -143,6 +140,6 @@ python manage.py test
 ```
 
 `core/test_ui.py` contrôle le rendu des pages et formulaires, le parcours de
-connexion et le maintien de la base d'origine pour les pages déchets. Vérifier
+connexion et la base commune des nouvelles pages déchets de Hana. Vérifier
 également le rendu au téléphone, au clavier et sur écran de bureau après un
 changement de structure.

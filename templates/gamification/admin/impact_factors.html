@@ -1,0 +1,10 @@
+{% extends "ui/base.html" %}
+{% block title %}Barème des points · Vers le Vert{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Administration</p><h1>Barème des points</h1><p>Les facteurs utilisés pour calculer les points des actions.</p></div><a class="ui-button ui-button-primary" href="{% url 'admin:gamification_impactfactor_add' %}">Ajouter un facteur</a></header>
+<div class="ui-card ui-card-pad overflow-x-auto">
+  <table><thead><tr><th>Action</th><th>Points par unité</th><th>Statut</th><th>Gestion</th></tr></thead><tbody>
+    {% for factor in factors %}<tr><td>{{ factor.label }}</td><td>{{ factor.points_per_unit }} / {{ factor.get_unit_display }}</td><td>{{ factor.is_active|yesno:"Actif,Inactif" }}</td><td><a class="ui-link" href="{% url 'admin:gamification_impactfactor_change' factor.pk %}">Modifier</a></td></tr>{% empty %}<tr><td colspan="4">Aucun facteur configuré.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "ui/base.html" %}
+{% block title %}Gestion des badges · Vers le Vert{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Administration</p><h1>Gestion des badges</h1><p>Les badges décernés aux citoyens pour leurs actions.</p></div><a class="ui-button ui-button-primary" href="{% url 'admin:gamification_badge_add' %}">Ajouter un badge</a></header>
+<div class="ui-card ui-card-pad overflow-x-auto">
+  <table><thead><tr><th>Badge</th><th>Critère</th><th>Seuil</th><th>Gestion</th></tr></thead><tbody>
+    {% for badge in badges %}<tr><td>{{ badge.icon }} {{ badge.name }}</td><td>{{ badge.get_criteria_type_display }}</td><td>{{ badge.threshold }}</td><td><a class="ui-link" href="{% url 'admin:gamification_badge_change' badge.pk %}">Modifier</a></td></tr>{% empty %}<tr><td colspan="4">Aucun badge configuré.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}
