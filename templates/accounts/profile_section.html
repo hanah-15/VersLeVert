@@ -1,0 +1,25 @@
+{% extends "ui/base.html" %}
+{% block title %}{{ section_title }} · Vers le Vert{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Un espace à votre image</p><h1>{{ section_title }}</h1><p>Vos informations, vos préférences et les étapes de votre parcours.</p></div></header>
+<div class="profile-layout"><aside>{% include "ui/profile_nav.html" %}</aside><section class="min-w-0 space-y-5">
+{% if section == "profile" %}
+  <div class="ui-card ui-card-pad"><div class="mb-7 flex items-center gap-4"><div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-olive/30 font-heading text-2xl text-forest">{% if user.avatar %}<img class="h-full w-full object-cover" src="{{ user.avatar.url }}" alt="Votre photo de profil">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}</div><div><h2 class="text-xl">{{ user.first_name|default:user.username }}</h2><p class="text-sm text-muted">{{ user.email }}</p></div></div><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<p class="ui-help">Adresse e-mail : {{ email }} (non modifiable)</p><div class="ui-form-actions"><button class="ui-button ui-button-primary" type="submit">Enregistrer les modifications</button></div></form></div>
+{% elif section == "sponsor" %}
+  {% if application.status == "APPROVED" %}<div class="ui-alert ui-alert-success">{% include "ui/icon.html" with name="check" %}<div>Votre demande est approuvée. <a class="ui-link" href="{% url 'sponsor-dashboard' %}">Accéder à l'espace sponsor</a>.</div></div>
+  {% elif application.status == "PENDING" %}<div class="ui-alert">{% include "ui/icon.html" with name="clock" %}Demande en cours de vérification.</div>
+  {% elif application.status == "REJECTED" %}<div class="ui-alert ui-alert-error"><div>Demande rejetée : {{ application.rejection_reason }}. <a class="ui-link" href="{% url 'sponsor-apply' %}">Déposer une nouvelle demande</a>.</div></div>
+  {% else %}<div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mt-5 text-2xl">Votre entreprise a sa place ici.</h2><p class="mb-6 mt-3 max-w-lg text-sm text-muted">Rejoignez les partenaires qui encouragent les gestes responsables et faites découvrir votre activité à la communauté.</p><a class="ui-button ui-button-primary" href="{% url 'sponsor-apply' %}">Devenir sponsor {% include "ui/icon.html" with name="arrow" %}</a></div>{% endif %}
+{% elif section == "notifications" %}
+  <div class="ui-card ui-card-pad"><h2 class="mb-5 text-xl">Votre fil d'actualité</h2>{% for notification in user.notifications.all %}<div class="flex gap-3 border-b border-line py-4"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><p class="text-sm">{{ notification.message }}</p></div>{% empty %}<div class="ui-empty border-0 shadow-none"><span class="ui-icon-box">{% include "ui/icon.html" with name="bell" %}</span><h3>Tout est calme.</h3><p>Aucune notification pour le moment. Les nouvelles de votre parcours apparaîtront ici.</p></div>{% endfor %}</div>
+{% elif section == "security" %}
+  <div class="ui-card ui-card-pad"><span class="ui-icon-box">{% include "ui/icon.html" with name="shield" %}</span><h2 class="mt-5 text-2xl">Votre compte, en toute sérénité.</h2><p class="mb-6 mt-3 text-sm text-muted">Gardez un mot de passe personnel et sécurisé.</p><div class="ui-form-actions"><a class="ui-button ui-button-primary" href="{% url 'password_change' %}">Changer mon mot de passe</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ui-button ui-button-danger" type="submit">Se déconnecter</button></form></div></div>
+{% elif section == "points" %}
+  <div class="ui-card ui-card-pad"><p class="ui-eyebrow">Votre énergie récompensée</p><div class="flex items-center gap-4"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="spark" %}</span><div><p class="text-xs text-muted">Solde actuel</p><strong class="font-heading text-5xl text-forest">{{ points_balance }} <span class="text-lg text-muted">pts</span></strong></div></div><p class="mt-6 border-t border-line pt-5 text-sm text-muted">L'historique des points sera disponible prochainement.</p></div>
+{% elif section == "proofs" %}
+  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="camera" %}</span><h2>Les preuves de vos petits pas.</h2><p>Vos actions prouvées apparaîtront ici après leur validation. Elles permettent de suivre vos défis et vos points.</p></div>
+{% else %}
+  <div class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h2>Votre parcours continue de grandir.</h2><p>Cet espace sera disponible prochainement.</p></div>
+{% endif %}
+</section></div>
+{% endblock %}

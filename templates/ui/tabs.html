@@ -1,0 +1,3 @@
+<nav class="ui-subnav" aria-label="{{ tabs_label|default:'Navigation secondaire' }}">
+  {% for tab in tabs %}{% url tab.url_name as tab_url %}<a href="{{ tab_url }}" {% if request.path == tab_url %}aria-current="page"{% endif %}>{{ tab.label }}</a>{% endfor %}
+</nav>

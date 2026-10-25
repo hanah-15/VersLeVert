@@ -1,0 +1,15 @@
+{% extends "ui/auth_base.html" %}
+{% block title %}Connexion · Vers le Vert{% endblock %}
+{% block auth_content %}
+<p class="ui-eyebrow">Heureux de vous retrouver</p>
+<h1>Bienvenue.</h1>
+<p class="auth-intro">Retrouvez vos découvertes, vos envies et votre prochain petit pas.</p>
+{% if form.non_field_errors %}<div class="ui-alert ui-alert-error mb-4" role="alert">{% include "ui/icon.html" with name="info" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+<form method="post" class="auth-form">
+  {% csrf_token %}
+  {% for field in form %}{% if field.name == 'username' %}{% include "ui/field.html" with label="Adresse e-mail" %}{% else %}{% include "ui/field.html" with label="Mot de passe" %}{% endif %}{% endfor %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit" class="ui-button ui-button-primary">Se connecter {% include "ui/icon.html" with name="arrow" %}</button>
+</form>
+<p class="auth-switch">Pas encore dans l'aventure ? <a href="{% url 'signup' %}">Créer un compte</a></p>
+{% endblock %}

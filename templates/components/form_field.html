@@ -1,0 +1,9 @@
+<div class="flex flex-col gap-1.5">
+    <label class="text-sm font-bold text-carbon" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    <div class="[&_input]:min-h-[46px] [&_input]:w-full [&_input]:rounded-md-ui [&_input]:border-2 [&_input]:border-palm [&_input]:bg-porcelain [&_input]:px-3.5 [&_input]:py-2.5 [&_input]:text-base [&_input]:text-carbon [&_input]:focus:border-forest [&_input]:focus:outline-none [&_input]:focus:ring-4 [&_input]:focus:ring-sky">{{ field }}</div>
+    {% if field.errors %}<span class="text-[13px] font-bold text-brick">Erreur de validation</span>{% endif %}
+    {% if field.help_text %}<div class="text-[13px] text-carbon">{{ field.help_text|safe }}</div>{% endif %}
+    {% for error in field.errors %}
+        <span class="text-[13px] font-bold text-brick">⚠ {{ error }}</span>
+    {% endfor %}
+</div>

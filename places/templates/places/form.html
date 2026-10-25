@@ -1,0 +1,17 @@
+{% extends "places/base.html" %}
+{% block title %}{{ page_title }} · Vers le Vert{% endblock %}
+{% block places_content %}
+<div class="mx-auto max-w-2xl space-y-6">
+  <header class="ui-title-panel space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">{% if form_kind == 'place' %}Le catalogue de lieux{% else %}Les découvertes de la communauté{% endif %}</p><h1 class="font-heading text-3xl font-bold text-forest">{{ page_title }}</h1>
+    {% if form_kind == 'recommendation' %}<p>Partagez un produit et expliquez ce qui le rend intéressant. Un administrateur vérifiera votre publication avant sa mise en ligne.</p>{% endif %}
+    {% if editing_recommendation %}<p class="rounded-xl border border-palm bg-olive/25 p-4 text-sm">Toute modification nécessite une nouvelle validation et réinitialise les mentions J’aime.</p>{% endif %}
+  </header>
+  <form method="post" class="ui-card space-y-5 rounded-lg-ui border border-olive bg-white p-5 sm:p-8">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}{% include "places/_field.html" %}{% endfor %}
+    <p class="text-sm">Les champs marqués * sont obligatoires.</p>
+    <div class="flex flex-wrap items-center gap-4 pt-2"><button class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-6 py-3 font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">{{ submit_label }}</button><a class="rounded px-3 py-3 font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky" href="{% if object %}{{ object.get_absolute_url }}{% elif form_kind == 'place' %}{% url 'places:index' %}{% else %}{% url 'places:recommendations' %}{% endif %}">Annuler</a></div>
+  </form>
+</div>
+{% endblock %}

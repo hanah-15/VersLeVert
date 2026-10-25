@@ -1,0 +1,62 @@
+{% extends "places/base.html" %}
+{% block title %}Lieux · Vers le Vert{% endblock %}
+{% block places_content %}
+<header class="ui-page-header">
+  <div><p class="ui-eyebrow"><span class="ui-dot"></span> Les bonnes adresses du quotidien</p><h1>Le vert est juste<br>au coin de la rue.</h1><p>Parcs, cafés responsables, boutiques zéro déchet : trouvez votre prochaine découverte.</p></div>
+  <div class="flex shrink-0 flex-col items-start gap-3 sm:items-end"><span class="ui-badge">{{ total_places }} adresse{{ total_places|pluralize }} à découvrir</span>{% if request.user.is_staff %}<a href="{% url 'places:create' %}" class="ui-button ui-button-primary">{% include "ui/icon.html" with name="plus" %} Ajouter un lieu</a>{% endif %}</div>
+</header>
+<section aria-label="Recherche de lieux" class="ui-card rounded-lg-ui border border-olive bg-white p-5 sm:p-6">
+  <form method="get" class="space-y-5" data-location-form>
+    {% if filter_form.non_field_errors %}<div class="text-sm font-bold text-brick" role="alert">{{ filter_form.non_field_errors }}</div>{% endif %}
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-[2fr_1fr_auto] lg:items-end">
+      {% include "places/_field.html" with field=filter_form.q %}
+      {% include "places/_field.html" with field=filter_form.category %}
+      <button class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-6 py-3 font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">Rechercher</button>
+    </div>
+    <div class="flex flex-wrap items-center gap-4">
+      <button type="button" data-use-location class="ui-button ui-button-secondary">Autour de moi</button>
+      <a href="{% url 'places:index' %}" class="rounded-lg px-2 py-3 text-sm font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">Réinitialiser</a>
+      <p data-location-status aria-live="polite" class="text-xs text-muted">Votre position est utilisée uniquement à votre demande.</p>
+    </div>
+    <details {% if filter_form.latitude.value or filter_form.longitude.value or filter_form.errors %}open{% endif %}>
+      <summary class="cursor-pointer rounded-lg py-2 text-sm font-bold text-forest focus:outline-none focus:ring-4 focus:ring-sky">Position et rayon de recherche</summary>
+      <div class="mt-3 grid gap-4 sm:grid-cols-3">
+        {% include "places/_field.html" with field=filter_form.latitude %}
+        {% include "places/_field.html" with field=filter_form.longitude %}
+        {% include "places/_field.html" with field=filter_form.radius %}
+      </div>
+    </details>
+  </form>
+</section>
+<section aria-labelledby="results-heading" class="space-y-4">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h2 id="results-heading" class="font-heading text-2xl font-semibold text-forest">Les adresses à découvrir</h2>
+    <p class="text-xs text-muted">{{ paginator.count }} résultat{{ paginator.count|pluralize }}{% if position_known %} · Du plus proche au plus éloigné{% endif %}</p>
+  </div>
+  <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    {% for place in places %}
+    <article class="ui-card flex flex-col overflow-hidden rounded-lg-ui border border-olive bg-white">
+      <div class="place-art" data-category="{{ place.category }}">
+        <span class="ui-badge bg-paper">{{ place.get_category_display }}</span>
+        <span class="flex h-14 w-14 items-center justify-center rounded-full border border-palm bg-porcelain" aria-hidden="true">{% if place.category == "park" %}{% include "ui/icon.html" with name="leaf" %}{% elif place.category == "zero_waste_shop" %}{% include "ui/icon.html" with name="shop" %}{% elif place.category == "recycling_point" %}{% include "ui/icon.html" with name="waste" %}{% else %}{% include "ui/icon.html" with name="place" %}{% endif %}</span>
+      </div>
+      <div class="flex flex-1 flex-col gap-3 p-6">
+        <h3 class="font-heading text-xl font-semibold text-forest"><a href="{{ place.get_absolute_url }}" class="rounded hover:underline focus:outline-none focus:ring-4 focus:ring-sky">{{ place.name }}</a></h3>
+        <p class="text-xs text-muted">{{ place.address }}</p>
+        {% if place.description %}<p class="line-clamp-2 text-sm leading-relaxed text-muted">{{ place.description }}</p>{% endif %}
+        <div class="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-olive pt-4 text-sm">
+          {% if position_known %}<span class="font-bold text-forest">{{ place.distance|floatformat:1 }} km</span>{% else %}<span>{{ place.product_count }} produit{{ place.product_count|pluralize }} recommandé{{ place.product_count|pluralize }}</span>{% endif %}
+          <a href="{{ place.get_absolute_url }}" class="rounded py-2 font-bold text-forest hover:underline focus:outline-none focus:ring-4 focus:ring-sky">Découvrir →</a>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="rounded-lg-ui border border-dashed border-palm p-9 text-center md:col-span-2 xl:col-span-3">
+      <h3 class="font-heading text-xl font-semibold text-forest">Aucun lieu pour le moment</h3>
+      <p class="mt-2 text-carbon">{% if total_places %}Essayez une autre catégorie, un autre mot-clé ou un rayon plus large.{% else %}Les premières adresses apparaîtront ici dès leur ajout par un administrateur.{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% include "places/_pagination.html" %}
+</section>
+{% endblock %}

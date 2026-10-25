@@ -1,0 +1,6 @@
+<nav class="flex gap-1 overflow-x-auto whitespace-nowrap md:flex-col md:overflow-visible" aria-label="Sections du profil">
+    {% for item in profile_sections %}
+        {% if item.url_arg %}<a href="{% url item.url_name item.url_arg %}" class="rounded-sm-ui px-3 py-2 font-bold text-forest no-underline focus:outline-none focus:ring-4 focus:ring-sky {% if section == item.key %}bg-olive{% endif %}">{{ item.label }}</a>
+        {% else %}<a href="{% url item.url_name %}" class="rounded-sm-ui px-3 py-2 font-bold text-forest no-underline focus:outline-none focus:ring-4 focus:ring-sky {% if section == item.key %}bg-olive{% endif %}">{{ item.label }}</a>{% endif %}
+    {% endfor %}
+</nav>

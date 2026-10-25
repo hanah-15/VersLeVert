@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Confirmer la collecte · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+<p><a href="{% url 'waste:my_offers' %}" class="font-bold text-forest underline">← Mes propositions</a></p>
+
+<div class="mt-4 rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
+    <h1 class="font-heading text-h2 font-bold text-forest">Confirmer la collecte</h1>
+    <p class="mt-2 text-carbon">Saisissez le poids réel que vous avez collecté. Le CO₂ évité et les points seront calculés à partir de ce poids, une seule fois.</p>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ waste_request.get_waste_type_display }}</span>
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">Estimé : {{ waste_request.estimated_weight }} kg</span>
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">Déposant : {{ waste_request.user.username }}</span>
+        <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">{{ waste_request.address }}</span>
+        {% if waste_request.planned_date %}
+            <span class="rounded-full border border-olive bg-porcelain px-3 py-1 text-caption font-bold text-forest">Passage : {{ waste_request.planned_date|date:"d/m/Y à H:i" }}</span>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="mt-4 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>
+    {% endif %}
+
+    <form method="post" class="mt-6 flex flex-col gap-5">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            {% include "components/form_field.html" %}
+        {% endfor %}
+
+        <p class="text-sm text-carbon">Le poids confirmé ne peut pas dépasser 3 fois le poids estimé. Cette action est définitive.</p>
+
+        <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-3 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Confirmer la collecte</button>
+    </form>
+</div>
+</div>
+{% endblock %}

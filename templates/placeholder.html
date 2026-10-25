@@ -1,0 +1,6 @@
+{% extends "ui/base.html" %}
+{% block title %}{{ title }} · Vers le Vert{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Votre espace Vers le Vert</p><h1>{{ title }}</h1></div></header>
+<section class="ui-empty"><span class="ui-icon-box h-16 w-16">{% include "ui/icon.html" with name="leaf" %}</span><h2>De nouvelles possibilités prennent racine.</h2><p>Cet espace est en préparation. En attendant, découvrez les lieux et les recommandations de la communauté.</p><a class="ui-button ui-button-primary mt-3" href="{% url 'places:index' %}">Explorer les lieux {% include "ui/icon.html" with name="arrow" %}</a></section>
+{% endblock %}

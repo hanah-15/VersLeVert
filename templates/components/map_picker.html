@@ -1,0 +1,10 @@
+<div class="map-picker flex flex-col gap-2" data-lat-input="{{ lat_id }}" data-lon-input="{{ lon_id }}">
+    <label class="text-sm font-bold text-carbon">{{ label|default:"Position sur la carte" }}</label>
+    <div class="map-tools flex flex-wrap gap-2">
+        <input type="text" class="map-search min-h-[42px] min-w-[200px] flex-1 rounded-md-ui border-2 border-palm bg-porcelain px-3 py-2 text-carbon focus:border-forest focus:outline-none focus:ring-4 focus:ring-sky" placeholder="Rechercher une adresse ou une ville">
+        <button type="button" class="map-search-btn rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Rechercher</button>
+        <button type="button" class="map-locate-btn rounded-md-ui border-2 border-forest bg-porcelain px-4 py-2 font-bold text-forest hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Ma position</button>
+    </div>
+    <div class="map-canvas relative z-0 h-80 rounded-md-ui border-2 border-palm"></div>
+    <div class="help text-[13px] text-carbon">Cliquez sur la carte ou déplacez le repère pour placer la position.</div>
+</div>

@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Vers le Vert{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logowhite.png' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-porcelain text-carbon font-body">
+    <a href="#contenu" class="absolute left-2 top-2 z-[100] -translate-y-20 rounded-md-ui bg-forest px-4 py-2 font-bold text-porcelain focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-sky">Aller au contenu</a>
+    {% include "partials/navbar.html" %}
+    <main id="contenu" class="w-full px-5 py-6 pb-24 md:pb-[60px]">
+        {% if space_tabs %}{% include "partials/tabs.html" with tabs=space_tabs %}{% endif %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flex items-start gap-3 rounded-md-ui p-3.5 px-4 text-[15px] {% if message.tags == 'success' %}bg-olive/50 text-forest{% elif message.tags == 'error' or message.tags == 'warning' %}border-2 border-brick bg-porcelain text-carbon{% else %}bg-sky text-forest{% endif %}" role="alert">
+                    {% if message.tags == 'error' or message.tags == 'warning' %}<span aria-hidden="true" class="font-bold text-brick">!</span>{% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

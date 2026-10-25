@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Proposer une collecte · Vers le Vert{% endblock %}
+{% block extra_head %}{% include "components/map_head.html" %}{% endblock %}
+{% include "components/position_status.html" with label="Votre position" %}
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-lg-ui border border-olive bg-olive/25 p-6 sm:p-8">
+    <h2 class="font-heading text-h2 font-bold text-forest">Proposer une collecte</h2>
+    <p class="mt-3 text-carbon">
+        {{ waste_request.get_waste_type_display }} · {{ waste_request.estimated_weight }} kg
+        · Déposé par {{ waste_request.user.username }}
+    </p>
+    {% if form.non_field_errors %}
+        <div class="mt-4 rounded-md-ui border-2 border-brick bg-porcelain p-4 text-carbon">{% for error in form.non_field_errors %}{{ error }} {% endfor %}</div>
+    {% endif %}
+    <form method="post" class="mt-6 flex flex-col gap-5">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            {% include "components/form_field.html" %}
+        {% endfor %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" label="Votre position" %}
+        <button type="submit" class="w-full rounded-md-ui border-2 border-forest bg-forest px-5 py-3 font-bold text-porcelain hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Envoyer ma proposition</button>
+    </form>
+</div>
+{% endblock %}

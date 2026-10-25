@@ -1,0 +1,5 @@
+{% extends "ui/base.html" %}
+{% block title %}Retirer une offre · Vers le Vert{% endblock %}
+{% block content %}
+<section class="ui-card ui-card-pad mx-auto max-w-xl space-y-5"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h1>Retirer cette offre ?</h1><p>Vous allez retirer <strong>{{ object.title }}</strong> de votre boutique.</p><form method="post" class="ui-form-actions">{% csrf_token %}<button class="ui-button ui-button-danger">Confirmer le retrait</button><a class="ui-button ui-button-secondary" href="{% url 'sponsor-shop' %}">Annuler</a></form></section>
+{% endblock %}

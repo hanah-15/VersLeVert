@@ -1,0 +1,6 @@
+{% extends "ui/base.html" %}
+{% block title %}Récompenses · Vers le Vert{% endblock %}
+{% block content %}
+<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Chaque effort a de la valeur</p><h1>De bons gestes,<br>de belles récompenses.</h1><p>Échangez vos points contre des offres proposées par les partenaires de la communauté.</p></div><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span></header>
+<div class="grid gap-5 md:grid-cols-[1fr_2fr]"><article class="ui-stat"><span class="ui-stat-label">Vos points disponibles</span><strong class="ui-stat-value">{{ points_balance|default:0 }} <span class="text-lg text-muted">pts</span></strong><a class="ui-link mt-auto" href="{% url 'profile-section' 'points' %}">Voir mon parcours {% include "ui/icon.html" with name="arrow" %}</a></article><section class="ui-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2>De belles découvertes arrivent.</h2><p>Le catalogue des offres partenaires est en préparation. Vos récompenses apparaîtront ici.</p></section></div>
+{% endblock %}

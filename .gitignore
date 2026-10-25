@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+media/
+.idea/
+.vscode/
+staticfiles/
+mariedarft.md
+node_modules/
+static/css/tailwind.css
+.coverage
+htmlcov/
+coverage.xml
+.local/

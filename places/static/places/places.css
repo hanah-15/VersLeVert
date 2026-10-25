@@ -1,0 +1,18 @@
+/* This layout adjustment is loaded only on places pages. The shared navbar
+   needs a second row at its desktop breakpoint to keep all seven links visible. */
+@media (min-width: 901px) {
+  body > header > nav[aria-label="Navigation principale"] {
+    width: 100%;
+    max-width: 1280px;
+    flex-wrap: wrap;
+  }
+  body > header > nav[aria-label="Navigation principale"] > a {
+    margin-right: auto;
+  }
+  body > header > nav[aria-label="Navigation principale"] > div:first-of-type {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+}

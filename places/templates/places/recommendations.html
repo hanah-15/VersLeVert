@@ -1,0 +1,15 @@
+{% extends "places/base.html" %}
+{% block title %}{% if mine %}Mes publications{% else %}Recommandations{% endif %} · Vers le Vert{% endblock %}
+{% block places_content %}
+<header class="ui-page-header">
+  <div class="max-w-2xl space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">Choisir mieux, ensemble</p><h1 class="font-heading text-3xl font-bold text-forest sm:text-[40px]">{% if mine %}Mes publications{% else %}De petites découvertes,<br>de meilleures habitudes.{% endif %}</h1><p>{% if mine %}Retrouvez vos produits proposés et suivez leur validation.{% else %}Des produits conseillés par la communauté, pour rendre vos choix du quotidien plus responsables.{% endif %}</p></div>
+  <a href="{% url 'places:recommendation-create' %}" class="ui-button ui-button-primary shrink-0 rounded-xl bg-forest px-5 py-3 text-center font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">+ Recommander un produit</a>
+</header>
+<form method="get" class="ui-card grid gap-4 rounded-lg-ui border border-olive bg-white p-5 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+  {% include "places/_field.html" with field=filter_form.q %}{% include "places/_field.html" with field=filter_form.category %}{% include "places/_field.html" with field=filter_form.sort %}<button class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-5 py-3 font-bold text-porcelain focus:outline-none focus:ring-4 focus:ring-sky">Filtrer</button>
+</form>
+<p class="text-sm">{{ paginator.count }} recommandation{{ paginator.count|pluralize }}{% if not mine %} publiée{{ paginator.count|pluralize }} · Avis de la communauté, sans certification environnementale.{% endif %}</p>
+<h2 class="sr-only">{% if mine %}Mes produits proposés{% else %}Les recommandations publiées{% endif %}</h2>
+<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{% for recommendation in recommendations %}{% include "places/_recommendation_card.html" %}{% empty %}<div class="rounded-lg-ui border border-dashed border-palm p-9 text-center md:col-span-2 xl:col-span-3"><h3 class="font-heading text-xl font-semibold text-forest">Aucune recommandation à afficher</h3><p class="mt-2">{% if mine %}Partagez votre première découverte avec la communauté.{% else %}Essayez d’autres filtres ou proposez un produit que vous appréciez.{% endif %}</p></div>{% endfor %}</div>
+{% include "places/_pagination.html" %}
+{% endblock %}

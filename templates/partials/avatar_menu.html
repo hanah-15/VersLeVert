@@ -1,0 +1,12 @@
+<details class="relative">
+    <summary class="flex min-h-[46px] min-w-[46px] cursor-pointer list-none items-center justify-center rounded-full bg-olive font-bold text-forest focus:outline-none focus:ring-4 focus:ring-sky" aria-label="Menu de {{ user.get_username }}">
+        {% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" class="h-10 w-10 rounded-full object-cover">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}
+    </summary>
+    <div class="absolute right-0 z-50 mt-2 w-56 rounded-md-ui border border-olive bg-porcelain p-2 shadow-lg">
+        <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'profile-overview' %}">Profil</a>
+        {% if not is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'profile-section' 'sponsor' %}">Devenir sponsor</a>{% endif %}
+        {% if is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
+        {% if is_admin_user %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'admin:index' %}">Administration</a>{% endif %}
+        <form method="post" action="{% url 'logout' %}" class="mt-1 border-t border-olive pt-1">{% csrf_token %}<button type="submit" class="w-full rounded-sm-ui px-3 py-2 text-left font-bold text-brick hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Déconnexion</button></form>
+    </div>
+</details>
