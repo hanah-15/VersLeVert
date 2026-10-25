@@ -21,7 +21,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.views.generic import RedirectView, TemplateView
 from accounts.views import SponsorApplicationView
-from core.views import NotificationsView, PlaceholderView
+from core.views import HomeView, NotificationsView, PlaceholderView
 from accounts.views import ProfileOverviewView, ProfileSectionView
 from challenges.views import PersonalChallengeCreateView
 from sponsor.views import redeem_reward
@@ -48,7 +48,7 @@ urlpatterns = [
     path("profile/points/", ProfileSectionView.as_view(), name="profile-points-legacy"),
     path("profil/securite/mot-de-passe/", auth_views.PasswordChangeView.as_view(), name="password_change"),
     path("profil/securite/mot-de-passe/termine/", auth_views.PasswordChangeDoneView.as_view(), name="password_change_done"),
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("", HomeView.as_view(), name="home"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

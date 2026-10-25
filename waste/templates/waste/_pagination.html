@@ -1,0 +1,18 @@
+{% if paginator and paginator.count %}
+<nav class="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+        <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="inline-flex items-center rounded-full border border-palm/60 bg-white/40 px-4 py-2 text-sm font-semibold text-forest hover:bg-palm/20">Précédent</a>
+    {% else %}
+        <span class="inline-flex cursor-not-allowed items-center rounded-full border border-olive/60 bg-white/30 px-4 py-2 text-sm font-semibold text-muted" aria-disabled="true">Précédent</span>
+    {% endif %}
+    {% for number in paginator.page_range %}
+        <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ number }}" class="{% if page_obj.number == number %}bg-forest text-porcelain{% else %}border border-palm/60 bg-white/40 text-forest hover:bg-palm/20{% endif %} inline-flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-semibold" {% if page_obj.number == number %}aria-current="page"{% endif %}>{{ number }}</a>
+    {% endfor %}
+    {% if page_obj.has_next %}
+        <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="inline-flex items-center rounded-full border border-palm/60 bg-white/40 px-4 py-2 text-sm font-semibold text-forest hover:bg-palm/20">Suivant</a>
+    {% else %}
+        <span class="inline-flex cursor-not-allowed items-center rounded-full border border-olive/60 bg-white/30 px-4 py-2 text-sm font-semibold text-muted" aria-disabled="true">Suivant</span>
+    {% endif %}
+    <span class="basis-full text-center text-sm text-muted">Page {{ page_obj.number }} sur {{ paginator.num_pages }}</span>
+</nav>
+{% endif %}

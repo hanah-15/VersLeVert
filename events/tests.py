@@ -518,8 +518,11 @@ class EventWeatherTests(TestCase):
     @patch("events.weather.httpx.get")
     def test_weather_endpoint_returns_forecast_for_event_time(self, mock_get):
         event_local_time = self.event.date.astimezone(ZoneInfo("Africa/Tunis"))
-        forecast_time = event_local_time.replace(minute=0, second=0, microsecond=0)
-        mock_get.side_effect = [
+        forecast_time = event_local_time.replace(minute=0,second=0,microsecond=0,)
+
+        if event_local_time.minute >= 30:
+             forecast_time += timedelta(hours=1)        
+             mock_get.side_effect = [
             self._provider_response(
                 {
                     "results": [

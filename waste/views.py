@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView, View
 
 from accounts.utils import distance_km
 
@@ -17,6 +17,7 @@ from .forms import (
     OfferForm,
     WasteAnalysisForm,
     WasteRequestForm,
+    WasteRequestEditForm,
 )
 from .ai.advice import get_or_create_advice
 from .models import CollectionOffer, EcoAdvice, Status, WasteRequest
@@ -25,13 +26,15 @@ from .models import CollectionOffer, EcoAdvice, Status, WasteRequest
 class MyRequestsView(LoginRequiredMixin, ListView):
     template_name = "waste/index.html"
     context_object_name = "requests"
+    paginate_by = 3
 
     def get_queryset(self):
         return (WasteRequest.objects.filter(user=self.request.user)
                 .select_related("collector")
                 .annotate(pending_offers=Count(
                     "offers", filter=Q(offers__status=CollectionOffer.Status.PENDING)
-                )))
+                ))
+                .order_by("-created_at", "-pk"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -39,6 +42,9 @@ class MyRequestsView(LoginRequiredMixin, ListView):
             pending_offers__gt=0
         ).exists()
         context["eco_advice"] = EcoAdvice.objects.filter(user=self.request.user).first()
+        query = self.request.GET.copy()
+        query.pop("page", None)
+        context["pagination_query"] = query.urlencode()
         return context
 
 
@@ -84,9 +90,40 @@ class WasteCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
+class WasteUpdateView(LoginRequiredMixin, UpdateView):
+    model = WasteRequest
+    form_class = WasteRequestEditForm
+    template_name = "waste/request_form.html"
+    context_object_name = "waste_request"
+
+    def get_queryset(self):
+        return WasteRequest.objects.filter(user=self.request.user, status=Status.REQUESTED)
+
+    def get_success_url(self):
+        return reverse_lazy("waste:detail", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, "Demande modifiée.")
+        return super().form_valid(form)
+
+
+class WasteDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        waste_request = get_object_or_404(
+            WasteRequest,
+            pk=kwargs["pk"],
+            user=request.user,
+            status=Status.REQUESTED,
+        )
+        waste_request.delete()
+        messages.success(request, "Demande supprimée.")
+        return redirect("waste:index")
+
+
 class MarketView(LoginRequiredMixin, ListView):
     template_name = "waste/market.html"
     context_object_name = "rows"
+    paginate_by = 3
 
     def get_queryset(self):
         self.filter_form = MarketFilterForm(self.request.GET or None)
@@ -110,13 +147,28 @@ class MarketView(LoginRequiredMixin, ListView):
         ]
         latitude = self.filter_form.cleaned_data.get("latitude") if self.filter_form.is_valid() else None
         longitude = self.filter_form.cleaned_data.get("longitude") if self.filter_form.is_valid() else None
+        for row in rows:
+            offer = row["offer"]
+            origin_latitude = latitude
+            origin_longitude = longitude
+            if origin_latitude is None or origin_longitude is None:
+                if offer and offer.latitude is not None and offer.longitude is not None:
+                    origin_latitude = offer.latitude
+                    origin_longitude = offer.longitude
+            item = row["request"]
+            if (
+                origin_latitude is not None
+                and origin_longitude is not None
+                and item.latitude is not None
+                and item.longitude is not None
+            ):
+                row["distance"] = distance_km(
+                    origin_latitude,
+                    origin_longitude,
+                    item.latitude,
+                    item.longitude,
+                )
         if latitude is not None and longitude is not None:
-            for row in rows:
-                item = row["request"]
-                if item.latitude is not None and item.longitude is not None:
-                    row["distance"] = distance_km(
-                        latitude, longitude, item.latitude, item.longitude
-                    )
             rows.sort(key=lambda row: (row["distance"] is None, row["distance"] or 0))
         else:
             rows.sort(key=lambda row: row["request"].created_at, reverse=True)
@@ -125,6 +177,9 @@ class MarketView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["filter_form"] = self.filter_form
+        query = self.request.GET.copy()
+        query.pop("page", None)
+        context["pagination_query"] = query.urlencode()
         return context
 
 
@@ -279,11 +334,14 @@ class RequestCancelView(LoginRequiredMixin, View):
 class MyOffersView(LoginRequiredMixin, ListView):
     template_name = "waste/my_offers.html"
     context_object_name = "offers"
+    paginate_by = 3
 
     def get_queryset(self):
         queryset = CollectionOffer.objects.filter(
             collector=self.request.user
-        ).select_related("waste_request", "waste_request__user")
+        ).select_related("waste_request", "waste_request__user").order_by(
+            "-created_at", "-pk"
+        )
         status = self.request.GET.get("status")
         if status in CollectionOffer.Status.values:
             queryset = queryset.filter(status=status)
@@ -293,6 +351,9 @@ class MyOffersView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["selected_status"] = self.request.GET.get("status", "")
         context["offer_statuses"] = CollectionOffer.Status.choices
+        query = self.request.GET.copy()
+        query.pop("page", None)
+        context["pagination_query"] = query.urlencode()
         return context
 
 

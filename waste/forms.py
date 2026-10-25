@@ -35,6 +35,11 @@ class WasteRequestForm(RequiresPositionMixin, forms.ModelForm):
         return image
 
 
+class WasteRequestEditForm(WasteRequestForm):
+    class Meta(WasteRequestForm.Meta):
+        fields = ("waste_type", "estimated_weight", "address", "image", "latitude", "longitude")
+
+
 class OfferForm(forms.Form):
     planned_date = forms.DateTimeField(
         label="Date et heure de passage proposées",

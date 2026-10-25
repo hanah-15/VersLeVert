@@ -18,6 +18,7 @@ from .models import (
     WasteType,
 )
 from .services import user_impact
+from waste.services import total_impact
 User = get_user_model()
 
 
@@ -56,6 +57,78 @@ class WasteTestCase(TestCase):
         }
         data.update(overrides)
         return CollectionOffer.objects.create(**data)
+
+    def test_requests_are_paginated(self):
+        for index in range(7):
+            self.make_request(address=f"Adresse {index}")
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("waste:index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["is_paginated"])
+        self.assertEqual(len(response.context["requests"]), 3)
+
+    def test_pagination_controls_are_visible_on_single_page(self):
+        self.make_request()
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("waste:index"))
+        self.assertContains(response, "Page 1 sur 1")
+        self.assertContains(response, "Précédent")
+        self.assertContains(response, "Suivant")
+
+    def test_owner_can_edit_requested_request_but_other_user_cannot(self):
+        request = self.make_request()
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("waste:edit", args=[request.pk]))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(
+            reverse("waste:edit", args=[request.pk]),
+            {
+                "waste_type": WasteType.PLASTIC,
+                "estimated_weight": "3.00",
+                "address": "Nouvelle adresse",
+                "latitude": "36.8",
+                "longitude": "10.1",
+            },
+        )
+        self.assertRedirects(response, reverse("waste:detail", args=[request.pk]))
+        request.refresh_from_db()
+        self.assertEqual(request.address, "Nouvelle adresse")
+        self.client.force_login(self.collector)
+        self.assertEqual(
+            self.client.get(reverse("waste:edit", args=[request.pk])).status_code,
+            404,
+        )
+
+    def test_requested_request_can_be_deleted_only_by_owner(self):
+        request = self.make_request()
+        self.client.force_login(self.collector)
+        self.assertEqual(
+            self.client.post(reverse("waste:delete", args=[request.pk])).status_code,
+            404,
+        )
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("waste:delete", args=[request.pk]))
+        self.assertRedirects(response, reverse("waste:index"))
+        self.assertFalse(WasteRequest.objects.filter(pk=request.pk).exists())
+
+    def test_total_impact_uses_confirmed_requests_once(self):
+        self.make_request(
+            status=Status.CONFIRMED,
+            confirmed_weight=Decimal("2"),
+            co2_avoided=Decimal("3.000"),
+            points_awarded=20,
+        )
+        self.make_request(
+            status=Status.REQUESTED,
+            confirmed_weight=None,
+            co2_avoided=None,
+            points_awarded=None,
+        )
+        self.assertEqual(total_impact()["co2"], Decimal("3.000"))
+        self.assertEqual(total_impact()["points"], 20)
+        home = self.client.get(reverse("home"))
+        self.assertContains(home, "kg de CO₂ évités")
+        self.assertContains(home, "points gagnés")
 
     def test_login_required_and_private_index(self):
         response = self.client.get(reverse("waste:index"))
@@ -210,6 +283,13 @@ class WasteTestCase(TestCase):
         self.assertContains(detail, "1.5")
         self.assertNotContains(detail, str(offer.latitude))
         self.assertNotContains(detail, str(offer.longitude))
+
+    def test_market_uses_existing_offer_position_for_distance(self):
+        request = self.make_request()
+        self.make_offer(request)
+        self.client.force_login(self.collector)
+        market = self.client.get(reverse("waste:market"))
+        self.assertContains(market, "1.5 km de vous")
 
     def test_my_offers_shows_address_only_when_accepted(self):
         request = self.make_request()

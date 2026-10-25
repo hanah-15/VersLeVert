@@ -35,10 +35,15 @@
     {% endif %}
 
     {% if waste_request.status == "requested" %}
-        <div class="request-actions">
+        <div class="request-actions mt-5 flex flex-wrap gap-3">
+            <a href="{% url 'waste:edit' waste_request.pk %}" class="inline-flex items-center justify-center rounded-full bg-palm px-6 py-3 font-ui text-sm font-semibold text-forest shadow-card hover:bg-olive">Modifier</a>
             <form method="post" action="{% url 'waste:cancel' waste_request.pk %}" onsubmit="return confirm('Annuler cette demande de collecte ?');">
                 {% csrf_token %}
                 <button type="submit" class="w-full inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/40 px-7 py-3.5 font-ui text-[14px] font-semibold text-brick transition-all duration-300 hover:-translate-y-0.5 hover:border-brick hover:bg-brick/10 focus:outline-none focus:ring-4 focus:ring-brick/30">Annuler la demande</button>
+            </form>
+            <form method="post" action="{% url 'waste:delete' waste_request.pk %}" onsubmit="return confirm('Supprimer définitivement cette demande ?');">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center justify-center rounded-full border border-brick/50 bg-white/40 px-6 py-3 font-ui text-sm font-semibold text-brick hover:bg-brick/10">Supprimer</button>
             </form>
         </div>
     {% endif %}

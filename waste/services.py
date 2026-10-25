@@ -24,3 +24,15 @@ def user_impact(user):
         "declared": _impact_for_requests(confirmed.filter(user=user)),
         "collected": _impact_for_requests(confirmed.filter(collector=user)),
     }
+
+
+def total_impact():
+    """Return the impact recorded by all confirmed waste collections."""
+    totals = _impact_for_requests(WasteRequest.objects.filter(status=Status.CONFIRMED))
+    totals["points"] = (
+        WasteRequest.objects.filter(status=Status.CONFIRMED).aggregate(
+            points=Sum("points_awarded")
+        )["points"]
+        or 0
+    )
+    return totals
