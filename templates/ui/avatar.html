@@ -3,6 +3,7 @@
   <div class="dropdown">
     <div class="mb-1 border-b border-line px-3 py-3"><strong class="block truncate text-sm text-forest">{{ user.first_name|default:user.username }}</strong><span class="block truncate text-xs text-muted">{{ user.email }}</span></div>
     <a href="{% url 'profile-overview' %}">Mon profil</a>
+    <a href="{% url 'profile-section' 'points' %}">Mes points · {{ points_balance }} pts</a>
     {% if not is_sponsor %}<a href="{% url 'profile-section' 'sponsor' %}">Devenir sponsor</a>{% endif %}
     {% if is_sponsor %}<a href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
     {% if is_admin_user %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}

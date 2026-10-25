@@ -37,6 +37,7 @@ module.exports = {
         ink: '#23362B'
       },
       fontFamily: {
+        ui: ['DM Sans', 'Segoe UI', 'sans-serif'],
         heading: ['Fraunces', 'serif'],
         body: ['Nunito Sans', 'system-ui', 'sans-serif']
       },
@@ -55,6 +56,7 @@ module.exports = {
         page: '1180px'
       },
       boxShadow: {
+        glass: 'inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 20px 60px -32px rgba(4, 46, 9, 0.35)',
         card: '0 4px 24px -12px rgba(4, 46, 9, 0.12)',
         float: '0 16px 48px -16px rgba(4, 46, 9, 0.24)'
       }

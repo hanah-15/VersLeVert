@@ -3,9 +3,11 @@
 {% block places_content %}
 <article class="ui-card mx-auto max-w-3xl space-y-6 rounded-lg-ui border border-olive bg-white p-6 sm:p-9">
   <a href="{% url 'places:recommendations' %}" class="inline-block rounded py-2 font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">← Les recommandations</a>
-  <div class="flex flex-wrap gap-3 text-sm font-bold text-forest"><span class="rounded-full bg-olive/50 px-3 py-1.5">{{ recommendation.get_category_display }}</span><span class="px-2 py-1.5">{{ recommendation.get_status_display }}</span></div>
+  <header class="ui-title-panel space-y-4">
+  <div class="flex flex-wrap gap-3 text-sm font-bold"><span class="rounded-full bg-olive px-3 py-1.5 text-forest">{{ recommendation.get_category_display }}</span><span class="px-2 py-1.5">{{ recommendation.get_status_display }}</span></div>
   <h1 class="break-words font-heading text-3xl font-bold text-forest sm:text-[40px]">{{ recommendation.product_name }}</h1>
   <p class="text-sm">Proposé par {{ recommendation.user.first_name|default:recommendation.user.username }} · {{ recommendation.created_at|date:"d/m/Y" }}</p>
+  </header>
   {% if recommendation.status == 'pending' %}<p class="rounded-xl bg-sky/30 p-4">Cette recommandation attend la validation d’un administrateur. Elle n’est pas encore visible dans le catalogue.</p>{% elif recommendation.status == 'rejected' %}<div class="rounded-xl border-2 border-brick p-4"><h2 class="font-bold text-brick">Publication refusée</h2><p class="mt-2 break-words">{{ recommendation.rejection_reason }}</p><p class="mt-2 text-sm">Vous pouvez la modifier puis la renvoyer pour validation.</p></div>{% endif %}
   <section aria-labelledby="experience-heading"><h2 id="experience-heading" class="mb-3 font-heading text-xl font-semibold text-forest">L’avis de la communauté</h2><div class="break-words leading-relaxed">{{ recommendation.description|linebreaks }}</div></section>
   {% if recommendation.place %}<p>À découvrir chez <a href="{{ recommendation.place.get_absolute_url }}" class="rounded font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">{{ recommendation.place.name }}</a>.</p>{% endif %}

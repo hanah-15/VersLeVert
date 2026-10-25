@@ -1,8 +1,10 @@
 # Système de design Vers le Vert
 
-La présentation commune conserve la palette verte, Fraunces pour les titres et
-Nunito Sans pour le texte. Elle privilégie les fonds clairs, les cartes blanches,
-les espaces généreux et une navigation adaptée au téléphone.
+La présentation commune utilise le vert palm comme couleur principale et le
+vert olive pour les grands titres sur fond forest. Les sept couleurs d'origine
+conservent exactement leurs valeurs. La police DM Sans apporte une lecture
+simple, sans empattements. Les surfaces translucides vertes, les contours clairs
+et un flou discret donnent de la profondeur sans gêner les formulaires.
 
 ## Périmètre et exception déchets
 
@@ -13,7 +15,7 @@ comportements de présentation dans `static/js/ui.js`.
 
 **Le module déchets de Hana conserve son UI actuelle.** Ses templates continuent
 d'étendre `base.html` et d'utiliser les anciens `templates/partials/` et
-`templates/components/`. Ces fichiers sont conservés sans modification. Les
+  `templates/components/`. Ces fichiers sont conservés sans modification. Les
 nouveaux styles généraux sont limités à `.site-body`, classe ajoutée uniquement
 par `ui/base.html`. Les composants nouveaux utilisent des classes distinctes.
 Ne pas appliquer la nouvelle base au module déchets sans accord de Hana.
@@ -39,10 +41,10 @@ d'origine gardent leurs valeurs.
 | Token | Valeur | Usage |
 |---|---|---|
 | `porcelain` | `#F8F7F2` | Fond de page |
-| `forest` | `#042E09` | Titres, boutons et navigation active |
+| `forest` | `#042E09` | Fonds des titres olive et texte sur fond clair |
 | `carbon` | `#212121` | Texte courant |
-| `palm` | `#8A9B63` | Accents décoratifs |
-| `olive` | `#B1C588` | Fonds et accents |
+| `palm` | `#8A9B63` | Couleur principale : navigation, boutons et surfaces |
+| `olive` | `#B1C588` | Grands titres sur fond sombre et accents |
 | `sky` | `#89BCCF` | Focus et fonds d'information |
 | `brick` | `#B3402F` | Erreurs et actions sensibles |
 | `paper` | `#FFFFFF` | Cartes et champs |
@@ -55,11 +57,25 @@ d'origine gardent leurs valeurs.
 
 ## Mise en page
 
-La navigation latérale apparaît à partir de 1280 px. En dessous, un menu compact
-donne accès aux mêmes destinations. Une barre inférieure complète la navigation
-sur téléphone. Les menus se ferment au clic extérieur et avec Échap. Le panneau
-d'inspiration latéral disparaît sur les écrans peu hauts pour garder les liens
-accessibles. Le contenu utilise un maximum de 1180 px.
+La navigation est horizontale, dans un en-tête palm translucide. À partir de
+1280 px, les sept destinations sont affichées directement. En dessous, un menu
+compact conserve tous les liens. Une barre inférieure complète la navigation
+sur téléphone. Les menus se ferment au clic extérieur et avec Échap. Le contenu
+utilise un maximum de 1280 px.
+
+L'accueil est une page de découverte commune aux visiteurs et aux membres :
+photographie, façons d'agir, présentation de la communauté. Les statistiques
+personnelles restent disponibles en bas de page pour les membres.
+
+Les pages de connexion et d'inscription affichent le logo en 80 px sur ordinateur
+et 64 px sur téléphone. L'inscription utilise deux colonnes à partir de 640 px.
+Les aides de saisie peuvent être ouvertes à la demande ; elles ne sont pas
+supprimées. Les erreurs restent visibles et la page peut grandir si nécessaire,
+sans masquer un champ ou un bouton pour forcer la hauteur de l'écran.
+
+La nouvelle typographie utilise le token `font-ui`. Les anciens tokens
+`font-heading` et `font-body` gardent leurs polices d'origine pour Hana. Leur
+apparence est remplacée uniquement à l'intérieur de `.site-body`.
 
 Le contexte et les liens proviennent toujours de la configuration de navigation
 existante. Les URLs, formulaires POST, CSRF et champs métier sont conservés.
@@ -105,8 +121,11 @@ Le bouton d'affichage du mot de passe modifie uniquement la visibilité du champ
 
 ## Accessibilité et médias
 
-- Utiliser `forest`, `carbon` ou `muted` pour le texte sur fond clair. Réserver
-  `palm`, `olive` et `sky` aux accents, fonds et bordures.
+- Utiliser `forest`, `carbon` ou `muted` pour le texte sur fond clair. Les titres
+  `olive` se placent sur fond `forest`, pour conserver leur contraste. Les boutons
+  `palm` utilisent du texte `forest`.
+- Garder une teinte de fond suffisamment forte sur les surfaces vitrées : le
+  contenu reste lisible même si le navigateur ne prend pas en charge le flou.
 - Conserver le lien d'accès direct au contenu, les labels, les erreurs textuelles,
   le focus visible et les noms accessibles des boutons à icône.
 - Les actions principales et champs mesurent au moins 46 px de haut. Le mouvement

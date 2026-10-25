@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="{% static 'images/logowhite.png' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
   <script src="{% static 'js/ui.js' %}" defer></script>
   {% block extra_head %}{% endblock %}
@@ -20,11 +20,11 @@
     <main id="contenu" class="app-main">
       <div class="page-container">
         {% if space_tabs %}{% block secondary_navigation %}{% include "ui/tabs.html" with tabs=space_tabs %}{% endblock %}{% endif %}
-        {% if messages %}<div class="mb-6 space-y-3">{% for message in messages %}<div class="ui-alert {% if message.tags == 'error' or message.tags == 'warning' %}ui-alert-error{% elif message.tags == 'success' %}ui-alert-success{% endif %}" role="alert"><span class="shrink-0" aria-hidden="true">{% include "ui/icon.html" with name="info" %}</span><span>{{ message }}</span></div>{% endfor %}</div>{% endif %}
+        {% block page_messages %}{% if messages %}<div class="mb-6 space-y-3">{% for message in messages %}<div class="ui-alert {% if message.tags == 'error' or message.tags == 'warning' %}ui-alert-error{% elif message.tags == 'success' %}ui-alert-success{% endif %}" role="alert"><span class="shrink-0" aria-hidden="true">{% include "ui/icon.html" with name="info" %}</span><span>{{ message }}</span></div>{% endfor %}</div>{% endif %}{% endblock %}
         <div class="app-content">{% block content %}{% endblock %}</div>
       </div>
     </main>
-    {% block footer %}{% if not user.is_authenticated %}<footer class="visitor-footer"><span>© {% now "Y" %} Vers le Vert. Chaque geste compte.</span><span>Un quotidien plus responsable, ensemble.</span></footer>{% endif %}{% endblock %}
+    {% block footer %}<footer class="community-footer"><a href="{% url 'home' %}">{% include "ui/icon.html" with name="leaf" %}<strong>Vers le Vert</strong></a><span>Un petit geste. Un nouvel élan.</span><span>© {% now "Y" %} · Chaque geste compte.</span></footer>{% endblock %}
   </div>
 </body>
 </html>

@@ -1,36 +1,70 @@
 {% extends "ui/base.html" %}
 {% load static waste_stats %}
 {% block title %}Accueil · Vers le Vert{% endblock %}
+{% block body_class %}community-page{% endblock %}
 {% block content %}
-{% if not user.is_authenticated %}
-<section class="landing-hero">
-  <div class="landing-hero-copy">
-    <span class="ui-badge mb-7"><span class="ui-dot"></span> Un quotidien plus responsable</span>
-    <h1>Les petits gestes.<br>Un avenir<br><em>plus vert.</em></h1>
-    <p>Transformez vos bonnes intentions en habitudes. Des défis, des adresses et une communauté pour avancer, un geste après l'autre.</p>
-    <div class="mt-8 flex flex-wrap gap-3"><a href="{% url 'signup' %}" class="ui-button ui-button-primary">Je fais le premier pas {% include "ui/icon.html" with name="arrow" %}</a><a href="#comment-ca-marche" class="ui-button ui-button-secondary">Découvrir le concept</a></div>
-    <p class="mt-5 text-sm text-muted sm:hidden">Déjà membre ? <a href="{% url 'login' %}" class="ui-link">Se connecter</a></p>
-    <div class="mt-8 flex items-center gap-3 text-xs text-muted"><span class="ui-icon-box h-8 w-8">{% include "ui/icon.html" with name="leaf" %}</span>À votre rythme. Avec un impact collectif.</div>
+<section class="community-hero" aria-labelledby="home-heading">
+  <div class="community-hero-copy">
+    <p class="community-kicker">{% include "ui/icon.html" with name="leaf" %}{% if user.is_authenticated %}Bonjour, {{ user.first_name|default:user.username }}. On fait un petit pas ?{% else %}Des petits gestes. Une belle énergie collective.{% endif %}</p>
+    <h1 id="home-heading">Ensemble,<br>cultivons un<br><em>quotidien plus vert.</em></h1>
+    <p class="community-hero-intro">Un lieu à découvrir, une habitude à changer, une rencontre pour agir. Le changement commence tout près de vous.</p>
+    <div class="community-hero-actions">
+      {% if user.is_authenticated %}
+      <a href="{% url 'places:index' %}" class="ui-button ui-button-primary">Explorer les lieux {% include "ui/icon.html" with name="arrow" %}</a>
+      <a href="{% url 'places:guide' %}" class="ui-button ui-button-outline">Trouver une idée {% include "ui/icon.html" with name="spark" %}</a>
+      {% else %}
+      <a href="{% url 'signup' %}" class="ui-button ui-button-primary">Rejoindre l'aventure {% include "ui/icon.html" with name="arrow" %}</a>
+      <a href="#nos-univers" class="ui-button ui-button-outline">Je découvre</a>
+      {% endif %}
+    </div>
+    <span class="community-hero-foot">À votre rythme, avec les autres.</span>
   </div>
-  <div class="landing-photo"><img src="{% static 'images/forest-path.webp' %}" alt="Un sentier ensoleillé au milieu des oliviers" width="1536" height="1024" fetchpriority="high"><div class="landing-photo-note"><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span><div><strong class="block text-sm text-forest">Le changement prend racine ici.</strong><span class="text-xs text-muted">Dans nos choix, nos habitudes, notre quotidien.</span></div></div></div>
+  <div class="community-hero-visual">
+    <img src="{% static 'images/forest-path.webp' %}" alt="Un chemin ensoleillé entre les oliviers" width="1536" height="1024" fetchpriority="high">
+    <span class="community-photo-label">Un nouveau regard<br>sur le quotidien.</span>
+    <span class="community-photo-seal" aria-hidden="true">{% include "ui/icon.html" with name="leaf" %}<span>Tout commence<br>par un geste.</span></span>
+  </div>
 </section>
-<section id="comment-ca-marche" class="py-12 sm:py-16">
-  <div class="mb-8 max-w-2xl"><p class="ui-eyebrow">Simplement, concrètement</p><h2 class="font-heading text-3xl font-semibold sm:text-4xl">De l'intention à l'action.</h2><p class="mt-4 text-muted">Pas besoin de tout changer. Commencez par un geste qui vous ressemble.</p></div>
-  <div class="grid gap-5 md:grid-cols-3"><article class="landing-feature"><span class="ui-eyebrow">01 · Découvrez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="place" %}</span><h3>Trouvez votre déclic</h3><p>Explorez des lieux responsables, des produits recommandés et des défis du quotidien.</p></article><article class="landing-feature"><span class="ui-eyebrow">02 · Agissez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span><h3>Faites votre part</h3><p>Triez, participez et changez vos habitudes. Les actions vérifiées comptent dans votre parcours.</p></article><article class="landing-feature"><span class="ui-eyebrow">03 · Avancez</span><span class="ui-icon-box">{% include "ui/icon.html" with name="reward" %}</span><h3>Voyez la différence</h3><p>Suivez votre progression et profitez des récompenses proposées par les partenaires.</p></article></div>
+
+<section id="nos-univers" class="community-section" aria-labelledby="explore-heading">
+  <div class="community-section-heading">
+    <div><p class="ui-eyebrow">Il y a mille façons de faire sa part</p><h2 id="explore-heading">Et vous, quel sera<br>votre prochain petit pas ?</h2></div>
+    <p>Suivez votre curiosité.<br>Le reste se construit en chemin.</p>
+  </div>
+  <div class="action-paths">
+    <a href="{% url 'places:index' %}" class="action-path">
+      <span class="action-path-number">01</span><span class="action-path-symbol">{% include "ui/icon.html" with name="place" %}</span>
+      <div><h3>Consommer autrement</h3><p>De bonnes adresses et des produits recommandés par la communauté.</p><span class="action-path-link">Découvrir les lieux {% include "ui/icon.html" with name="arrow" %}</span></div>
+    </a>
+    <a href="{% url 'challenges:index' %}" class="action-path">
+      <span class="action-path-number">02</span><span class="action-path-symbol">{% include "ui/icon.html" with name="challenge" %}</span>
+      <div><h3>Changer une habitude</h3><p>Un objectif à votre portée, pour faire grandir votre engagement.</p><span class="action-path-link">Explorer les défis {% include "ui/icon.html" with name="arrow" %}</span></div>
+    </a>
+    <a href="{% url 'events:index' %}" class="action-path">
+      <span class="action-path-number">03</span><span class="action-path-symbol">{% include "ui/icon.html" with name="event" %}</span>
+      <div><h3>Faire bouger les choses</h3><p>Des rencontres et des actions locales, parce qu'ensemble on avance.</p><span class="action-path-link">Voir les événements {% include "ui/icon.html" with name="arrow" %}</span></div>
+    </a>
+  </div>
+  <div class="community-more">
+    <span>Et si votre prochain geste était déjà là ?</span>
+    <a href="{% url 'waste:index' %}">{% include "ui/icon.html" with name="waste" %} Valoriser mes déchets</a>
+    <a href="{% url 'places:recommendations' %}">{% include "ui/icon.html" with name="heart" %} Partager des découvertes</a>
+    <a href="{% url 'gamification:index' %}">{% include "ui/icon.html" with name="reward" %} Découvrir les récompenses</a>
+  </div>
 </section>
-<section id="nos-univers" class="space-y-8 pb-8"><div class="ui-section-heading"><div><p class="ui-eyebrow">À chacun sa façon d'agir</p><h2>Tout un monde à explorer.</h2></div><a href="{% url 'signup' %}" class="ui-link">Rejoindre l'aventure {% include "ui/icon.html" with name="arrow" %}</a></div><div class="landing-universes"><article class="landing-feature">{% include "ui/icon.html" with name="challenge" %}<h3>Des défis qui motivent</h3><p>Des objectifs personnels pour ancrer de meilleures habitudes.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="waste" %}<h3>Des déchets valorisés</h3><p>Du tri à la collecte locale, donnez une nouvelle utilité à vos déchets.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="event" %}<h3>Une énergie collective</h3><p>Rencontrez celles et ceux qui veulent agir près de chez vous.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="place" %}<h3>De bonnes adresses</h3><p>Découvrez des lieux et des produits pour consommer autrement.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="reward" %}<h3>Des gestes valorisés</h3><p>Des points, des badges et des offres partenaires pour entretenir votre élan.</p></article><article class="landing-feature">{% include "ui/icon.html" with name="spark" %}<h3>Un peu d'inspiration</h3><p>Un guide pour trouver des pistes dans le catalogue de la communauté.</p></article></div></section>
-{% else %}
+
+<section id="comment-ca-marche" class="community-story" aria-labelledby="story-heading">
+  <div class="community-story-title"><p class="ui-eyebrow">L'esprit Vers le Vert</p><h2 id="story-heading">On ne change pas<br>tout en un jour.<br><em>On commence<br>ensemble.</em></h2></div>
+  <div class="community-story-copy"><p>Un quotidien plus responsable se construit avec des choix simples. Vers le Vert vous aide à trouver les idées, les lieux et l'élan pour les faire vivre.</p><ol><li><span>01</span><div><h3>Découvrez ce qui vous inspire.</h3><p>Une adresse, un défi, une action près de chez vous.</p></div></li><li><span>02</span><div><h3>Faites un premier pas.</h3><p>Choisissez une action qui vous ressemble.</p></div></li><li><span>03</span><div><h3>Faites grandir le mouvement.</h3><p>Partagez vos découvertes et avancez avec la communauté.</p></div></li></ol></div>
+</section>
+
+{% if user.is_authenticated %}
 {% waste_impact user as impact %}
-<header class="dashboard-welcome"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Chaque geste compte</p><h1>Bonjour, {{ user.first_name|default:user.username }}<span class="text-palm">.</span></h1><p class="mt-3 text-sm text-muted">Un nouveau jour pour faire un peu mieux, ensemble.</p></div><a href="{% url 'places:guide' %}" class="ui-button ui-button-secondary">{% include "ui/icon.html" with name="spark" %} Trouver de l'inspiration</a></header>
-<section class="grid gap-4 sm:grid-cols-3" aria-label="Votre impact">
-  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">CO₂ évité</span><span class="ui-icon-box">{% include "ui/icon.html" with name="leaf" %}</span></div><strong class="ui-stat-value">{{ impact.declared.co2|floatformat:1 }} <span class="text-lg text-muted">kg</span></strong><p class="ui-stat-foot">Grâce à vos collectes confirmées</p></article>
-  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">Déchets triés</span><span class="ui-icon-box bg-sand/60">{% include "ui/icon.html" with name="waste" %}</span></div><strong class="ui-stat-value">{{ impact.declared.kg }} <span class="text-lg text-muted">kg</span></strong><p class="ui-stat-foot">Un geste concret pour la planète</p></article>
-  <article class="ui-stat"><div class="flex items-center justify-between gap-3"><span class="ui-stat-label">Collectes réalisées</span><span class="ui-icon-box bg-sky/20">{% include "ui/icon.html" with name="check" %}</span></div><strong class="ui-stat-value">{{ impact.collected.count }}</strong><p class="ui-stat-foot">Des ressources remises en circulation</p></article>
+<section class="community-impact" aria-label="Votre contribution">
+  <div><p class="ui-eyebrow">Votre contribution</p><h2>Chaque geste laisse une trace.</h2><a class="ui-link" href="{% url 'profile-section' 'points' %}">Retrouver mon parcours {% include "ui/icon.html" with name="arrow" %}</a></div>
+  <dl><div><dt>CO₂ évité</dt><dd>{{ impact.declared.co2|floatformat:1 }} <span>kg</span></dd></div><div><dt>Déchets triés</dt><dd>{{ impact.declared.kg }} <span>kg</span></dd></div><div><dt>Collectes réalisées</dt><dd>{{ impact.collected.count }}</dd></div></dl>
 </section>
-<div class="dashboard-grid">
-  <section class="dashboard-hero">{% include "ui/icon.html" with name="leaf" %}<span class="mb-4 inline-flex rounded-full border border-porcelain/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Votre prochain petit pas</span><h2>Le vert se trouve<br>aussi au coin de la rue.</h2><p>Un café engagé, une boutique en vrac, un parc pour souffler. Découvrez les adresses qui changent le quotidien.</p><a href="{% url 'places:index' %}" class="ui-button">Explorer les lieux {% include "ui/icon.html" with name="arrow" %}</a></section>
-  <section class="ui-card ui-card-pad"><p class="ui-eyebrow">À votre rythme</p><h2 class="text-2xl">Envie de passer à l'action ?</h2><div class="mt-4"><a class="discovery-item" href="{% url 'challenges:index' %}"><span class="ui-icon-box">{% include "ui/icon.html" with name="challenge" %}</span><div><strong>Relever un défi</strong><span>Cultiver une nouvelle habitude</span></div>{% include "ui/icon.html" with name="arrow" %}</a><a class="discovery-item" href="{% url 'events:index' %}"><span class="ui-icon-box bg-sand/60">{% include "ui/icon.html" with name="event" %}</span><div><strong>Agir ensemble</strong><span>Découvrir les événements</span></div>{% include "ui/icon.html" with name="arrow" %}</a><a class="discovery-item" href="{% url 'places:recommendation-create' %}"><span class="ui-icon-box bg-sky/20">{% include "ui/icon.html" with name="heart" %}</span><div><strong>Partager une découverte</strong><span>Recommander un produit</span></div>{% include "ui/icon.html" with name="arrow" %}</a></div></section>
-</div>
-<section class="ui-card ui-card-pad"><div class="ui-section-heading"><div><p class="ui-eyebrow">Votre parcours</p><h2>Derniers mouvements de points</h2></div><a href="{% url 'profile-section' 'points' %}" class="ui-link">Mon historique {% include "ui/icon.html" with name="arrow" %}</a></div><div class="mt-5 flex items-center gap-4 rounded-2xl bg-mist/60 p-5"><span class="ui-icon-box bg-paper">{% include "ui/icon.html" with name="clock" %}</span><div><p class="text-sm font-bold text-forest">Votre histoire commence ici.</p><p class="mt-1 text-xs text-muted">Aucun mouvement pour le moment. Vos prochaines actions vérifiées feront grandir votre parcours.</p></div></div></section>
+{% else %}
+<section class="community-invitation"><span class="community-invitation-icon">{% include "ui/icon.html" with name="leaf" %}</span><div><p class="ui-eyebrow">Votre histoire commence ici</p><h2>Un petit pas pour vous.<br>Un nouvel élan pour tous.</h2></div><a href="{% url 'signup' %}" class="ui-button ui-button-light">Je rejoins l'aventure {% include "ui/icon.html" with name="arrow" %}</a></section>
 {% endif %}
 {% endblock %}

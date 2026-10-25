@@ -1,7 +1,7 @@
 {% extends "places/base.html" %}
 {% block title %}{% if mine %}Mes publications{% else %}Recommandations{% endif %} · Vers le Vert{% endblock %}
 {% block places_content %}
-<header class="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+<header class="ui-page-header">
   <div class="max-w-2xl space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">Choisir mieux, ensemble</p><h1 class="font-heading text-3xl font-bold text-forest sm:text-[40px]">{% if mine %}Mes publications{% else %}De petites découvertes,<br>de meilleures habitudes.{% endif %}</h1><p>{% if mine %}Retrouvez vos produits proposés et suivez leur validation.{% else %}Des produits conseillés par la communauté, pour rendre vos choix du quotidien plus responsables.{% endif %}</p></div>
   <a href="{% url 'places:recommendation-create' %}" class="ui-button ui-button-primary shrink-0 rounded-xl bg-forest px-5 py-3 text-center font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">+ Recommander un produit</a>
 </header>
