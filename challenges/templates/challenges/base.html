@@ -1,0 +1,52 @@
+{% extends "ui/base.html" %}
+{% load static %}
+
+{% block title %}Défis · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="space-y-7">
+  <!-- Barre d'outils et navigation du module Défis -->
+  <nav aria-label="Navigation des défis" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-olive/30 bg-white/80 p-3 shadow-sm backdrop-blur">
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="{% url 'challenges:index' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition {% if active_tab == 'catalog' %}bg-forest text-porcelain shadow{% else %}text-forest hover:bg-mist{% endif %}">
+        {% include "ui/icon.html" with name="challenge" %}
+        <span>Catalogue des défis</span>
+      </a>
+      <a href="{% url 'challenges:mine' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition {% if active_tab == 'mine' %}bg-forest text-porcelain shadow{% else %}text-forest hover:bg-mist{% endif %}">
+        {% include "ui/icon.html" with name="spark" %}
+        <span>Mes défis</span>
+        {% if my_active_count %}<span class="rounded-full bg-palm px-2 py-0.5 text-xs text-white">{{ my_active_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'challenges:dashboard' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition {% if active_tab == 'dashboard' %}bg-forest text-porcelain shadow{% else %}text-forest hover:bg-mist{% endif %}">
+        <span>Dashboard</span>
+      </a>
+      <a href="{% url 'challenges:leaderboard' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition {% if active_tab == 'leaderboard' %}bg-forest text-porcelain shadow{% else %}text-forest hover:bg-mist{% endif %}">
+        <span>Classement</span>
+      </a>
+      <a href="{% url 'challenges:recommendations' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition {% if active_tab == 'recommendations' %}bg-forest text-porcelain shadow{% else %}text-forest hover:bg-mist{% endif %}">
+        <span>Pour vous</span>
+      </a>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="{% url 'challenges:personal-create' %}" class="ui-button ui-button-secondary text-xs sm:text-sm">
+        {% include "ui/icon.html" with name="plus" %}
+        <span>Nouveau défi personnel</span>
+      </a>
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <a href="{% url 'challenges:admin-create' %}" class="ui-button ui-button-primary text-xs sm:text-sm">
+        {% include "ui/icon.html" with name="shield" %}
+        <span>Créer un défi à points</span>
+      </a>
+      {% endif %}
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <a href="{% url 'challenges:admin-stats' %}" class="ui-button ui-button-secondary text-xs sm:text-sm">
+        Statistiques admin
+      </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  {% block challenges_content %}{% endblock %}
+</div>
+{% endblock %}

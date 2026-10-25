@@ -1,0 +1,142 @@
+{% extends "challenges/base.html" %}
+
+{% block title %}Mes défis · Vers le Vert{% endblock %}
+
+{% block challenges_content %}
+<header class="ui-page-header">
+  <div>
+    <p class="ui-eyebrow"><span class="ui-dot"></span> Tableau de bord</p>
+    <h1>Mon parcours et mes progrès</h1>
+    <p>Suivez l'avancement de vos défis en cours, enregistrez vos efforts et célébrez vos succès.</p>
+  </div>
+  <div class="flex shrink-0 gap-3">
+    <a href="{% url 'challenges:index' %}" class="ui-button ui-button-secondary">
+      {% include "ui/icon.html" with name="challenge" %} Explorer le catalogue
+    </a>
+    <a href="{% url 'challenges:personal-create' %}" class="ui-button ui-button-primary">
+      {% include "ui/icon.html" with name="plus" %} Nouveau défi
+    </a>
+  </div>
+</header>
+
+<!-- Défis en cours (C-04) -->
+<section class="space-y-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-forest">Défis en cours ({{ active_paginator.count }})</h2>
+  </div>
+
+  {% if active_participations %}
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for part in active_participations %}
+      <article class="ui-card flex flex-col justify-between rounded-2xl border border-olive/40 bg-white p-6 shadow-sm transition hover:shadow-md">
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="ui-badge bg-palm/15 text-forest font-bold">
+              {% if part.challenge.challenge_type == "points" %}
+                {{ part.challenge.points_reward }} pts à gagner
+              {% else %}
+                Défi personnel
+              {% endif %}
+            </span>
+            <span class="text-xs text-muted">Inscrit le {{ part.joined_at|date:"d/m/Y" }}</span>
+          </div>
+
+          <h3 class="mt-4 text-xl font-bold text-forest">
+            <a href="{{ part.challenge.get_absolute_url }}" class="hover:underline">{{ part.challenge.title }}</a>
+          </h3>
+          {% if part.challenge.description %}
+            <p class="mt-2 line-clamp-2 text-sm text-muted">{{ part.challenge.description }}</p>
+          {% endif %}
+
+          <!-- Barre de progression chiffrée (C-04 : ex. 18 / 30 km) -->
+          <div class="mt-5 space-y-2 rounded-xl bg-mist/60 p-4">
+            <div class="flex items-center justify-between text-sm font-bold text-forest">
+              <span>{{ part.progress_value }} / {{ part.challenge.goal_value }} {{ part.challenge.unit }}</span>
+              <span class="text-palm font-extrabold">{{ part.percentage }}%</span>
+            </div>
+            <div class="h-3 w-full overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow="{{ part.percentage }}" aria-valuemin="0" aria-valuemax="100">
+              <div class="h-full rounded-full bg-palm transition-all duration-500" style="width: {{ part.percentage }}%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between border-t border-olive/30 pt-4">
+          <a href="{{ part.challenge.get_absolute_url }}" class="ui-button ui-button-primary ui-button-small w-full justify-center">
+            {% include "ui/icon.html" with name="plus" %} Ajouter un progrès
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="rounded-2xl border border-dashed border-olive p-8 text-center bg-white/60">
+      <p class="text-muted">Vous n'avez aucun défi en cours pour le moment.</p>
+      <div class="mt-4 flex justify-center gap-3">
+        <a href="{% url 'challenges:index' %}" class="ui-button ui-button-primary ui-button-small">
+          Rejoindre un défi à points
+        </a>
+        <a href="{% url 'challenges:personal-create' %}" class="ui-button ui-button-secondary ui-button-small">
+          Créer un défi personnel
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if active_is_paginated %}
+  <nav aria-label="Pagination des défis en cours" class="flex flex-wrap items-center justify-center gap-2 pt-2">
+    {% if active_page_obj.has_previous %}
+      <a href="?active_page={{ active_page_obj.previous_page_number }}" class="ui-button ui-button-secondary ui-button-small">Précédent</a>
+    {% endif %}
+    <span class="px-3 py-2 text-xs font-semibold text-muted" aria-current="page">
+      Page {{ active_page_obj.number }} sur {{ active_paginator.num_pages }}
+    </span>
+    {% if active_page_obj.has_next %}
+      <a href="?active_page={{ active_page_obj.next_page_number }}" class="ui-button ui-button-secondary ui-button-small">Suivant</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</section>
+
+<!-- Défis accomplis (C-05) -->
+<section class="mt-10 space-y-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-forest">Défis accomplis ({{ completed_participations|length }})</h2>
+  </div>
+
+  {% if completed_participations %}
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for part in completed_participations %}
+      <article class="ui-card flex flex-col justify-between rounded-2xl border border-palm/40 bg-mist/30 p-6 shadow-sm">
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="ui-badge bg-palm text-white font-bold">
+              {% include "ui/icon.html" with name="check" %} Réussi
+            </span>
+            <span class="text-xs text-muted">Le {{ part.completed_at|date:"d/m/Y" }}</span>
+          </div>
+
+          <h3 class="mt-4 text-xl font-bold text-forest">
+            <a href="{{ part.challenge.get_absolute_url }}" class="hover:underline">{{ part.challenge.title }}</a>
+          </h3>
+
+          <div class="mt-4 rounded-xl bg-white/80 p-3 text-xs text-forest">
+            <p class="font-bold">Objectif atteint : {{ part.progress_value }} / {{ part.challenge.goal_value }} {{ part.challenge.unit }} (100%)</p>
+            {% if part.challenge.challenge_type == "points" %}
+              <p class="mt-1 font-semibold text-palm">+{{ part.challenge.points_reward }} points crédités sur votre compte</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-4 border-t border-olive/30 pt-3 text-right">
+          <a href="{{ part.challenge.get_absolute_url }}" class="text-xs font-bold text-forest underline hover:text-carbon">
+            Consulter l'historique →
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-xs text-muted">Vos défis terminés apparaîtront ici dès que vous aurez atteint vos objectifs !</p>
+  {% endif %}
+</section>
+{% endblock %}
