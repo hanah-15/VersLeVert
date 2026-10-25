@@ -58,6 +58,45 @@
     </div>
   </div>
 
+  {% if event.status == "published" and event.is_upcoming %}
+    <section class="ui-card ui-card-pad bg-sky/20 border border-sky space-y-3" aria-labelledby="event-weather-title">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="ui-eyebrow">Prévisions météo</p>
+          <h2 id="event-weather-title" class="text-lg font-bold text-forest">Météo à l'heure de l'événement</h2>
+        </div>
+        <span class="text-2xl" aria-hidden="true">☀</span>
+      </div>
+      <p id="event-weather-status" class="text-sm text-muted" role="status" aria-live="polite">
+        Chargement des prévisions pour {{ event.location }}…
+      </p>
+      <div id="event-weather-details" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Conditions</p>
+          <p id="event-weather-description" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Température</p>
+          <p id="event-weather-temperature" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Risque de pluie</p>
+          <p id="event-weather-rain" class="font-semibold text-forest"></p>
+        </div>
+        <div class="bg-paper p-3 rounded-xl">
+          <p class="text-xs text-muted">Vent</p>
+          <p id="event-weather-wind" class="font-semibold text-forest"></p>
+        </div>
+      </div>
+      <p id="event-weather-source" class="hidden text-xs text-muted"></p>
+      <p class="text-xs text-muted">
+        Prévision indicative, susceptible d'évoluer.
+        Données météo et géocodage par
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="underline">Open-Meteo</a>.
+      </p>
+    </section>
+  {% endif %}
+
   <!-- Bloc Résultats visibles si clôturé (CA E-06) + Innovation IA Impact -->
   {% if event.status == "closed" %}
     <section class="ui-card ui-card-pad bg-olive/20 border-2 border-olive space-y-6">
@@ -445,6 +484,38 @@
 </div>
 
 <script>
+async function loadEventWeather() {
+  const status = document.getElementById("event-weather-status");
+  if (!status) return;
+
+  try {
+    const response = await fetch("{% url 'events:weather' event.pk %}");
+    const data = await response.json();
+    if (!response.ok || !data.available) {
+      status.textContent = data.message || "La prévision météo est indisponible.";
+      return;
+    }
+
+    document.getElementById("event-weather-description").textContent = data.description;
+    document.getElementById("event-weather-temperature").textContent =
+      `${data.temperature_c} °C (ressenti ${data.feels_like_c} °C)`;
+    document.getElementById("event-weather-rain").textContent =
+      `${data.precipitation_probability}%`;
+    document.getElementById("event-weather-wind").textContent =
+      `${data.wind_speed_kmh} km/h`;
+    document.getElementById("event-weather-details").classList.remove("hidden");
+    document.getElementById("event-weather-source").textContent =
+      `Prévision pour ${data.location}, le ${data.forecast_time}.`;
+    document.getElementById("event-weather-source").classList.remove("hidden");
+    status.textContent = "Prévision estimée à l'heure prévue de l'événement.";
+  } catch (error) {
+    console.error("Unable to load event weather:", error);
+    status.textContent = "Impossible de charger la météo pour le moment. Réessayez plus tard.";
+  }
+}
+
+loadEventWeather();
+
 async function loadSocialKit() {
   const box = document.getElementById("social-kit-box");
   box.classList.remove("hidden");

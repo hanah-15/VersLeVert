@@ -1,8 +1,11 @@
 from datetime import timedelta
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
+import httpx
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -483,3 +486,104 @@ class EventM3Tests(TestCase):
         self.assertIn("recommendations", data)
         self.assertTrue(len(data["recommendations"]) > 0)
 
+
+class EventWeatherTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(
+            username="weather_user",
+            email="weather@example.com",
+            password="weather-test-password",
+        )
+        self.event = Event.objects.create(
+            title="Nettoyage de la plage",
+            objective="Collecter les déchets sur la plage.",
+            location="La Marsa, Tunisia",
+            date=timezone.now() + timedelta(days=3),
+            organizer=self.user,
+            status=Event.Status.PUBLISHED,
+        )
+
+    def _provider_response(self, payload):
+        request = httpx.Request("GET", "https://api.open-meteo.com/")
+        return httpx.Response(200, json=payload, request=request)
+
+    @patch("events.weather.httpx.get")
+    def test_weather_endpoint_returns_forecast_for_event_time(self, mock_get):
+        event_local_time = self.event.date.astimezone(ZoneInfo("Africa/Tunis"))
+        forecast_time = event_local_time.replace(minute=0, second=0, microsecond=0)
+        mock_get.side_effect = [
+            self._provider_response(
+                {
+                    "results": [
+                        {
+                            "name": "La Marsa",
+                            "country": "Tunisia",
+                            "latitude": 36.878,
+                            "longitude": 10.324,
+                        }
+                    ]
+                }
+            ),
+            self._provider_response(
+                {
+                    "timezone": "Africa/Tunis",
+                    "hourly": {
+                        "time": [forecast_time.strftime("%Y-%m-%dT%H:%M")],
+                        "temperature_2m": [24.5],
+                        "apparent_temperature": [25.1],
+                        "precipitation_probability": [10],
+                        "weather_code": [1],
+                        "wind_speed_10m": [12.0],
+                    },
+                }
+            ),
+        ]
+
+        response = self.client.get(reverse("events:weather", kwargs={"pk": self.event.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["description"], "Majoritairement dégagé")
+        self.assertEqual(response.json()["temperature_c"], 24.5)
+        self.assertEqual(response.json()["precipitation_probability"], 10)
+        self.assertEqual(mock_get.call_count, 2)
+        self.assertEqual(mock_get.call_args.kwargs["params"]["forecast_days"], 16)
+
+    @patch("events.weather.httpx.get")
+    def test_past_event_weather_is_not_requested(self, mock_get):
+        self.event.date = timezone.now() - timedelta(hours=1)
+        self.event.save(update_fields=["date"])
+
+        response = self.client.get(reverse("events:weather", kwargs={"pk": self.event.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["available"])
+        mock_get.assert_not_called()
+
+    @patch("events.weather.httpx.get")
+    def test_unpublished_event_has_no_weather_endpoint(self, mock_get):
+        self.event.status = Event.Status.PENDING
+        self.event.save(update_fields=["status"])
+
+        response = self.client.get(reverse("events:weather", kwargs={"pk": self.event.pk}))
+
+        self.assertEqual(response.status_code, 404)
+        mock_get.assert_not_called()
+
+    @patch("events.weather.httpx.get")
+    def test_weather_provider_failure_is_reported(self, mock_get):
+        request = httpx.Request("GET", "https://geocoding-api.open-meteo.com/")
+        mock_get.side_effect = httpx.ConnectError("offline", request=request)
+
+        response = self.client.get(reverse("events:weather", kwargs={"pk": self.event.pk}))
+
+        self.assertEqual(response.status_code, 503)
+        self.assertFalse(response.json()["available"])
+        self.assertIn("indisponible", response.json()["message"])
+
+    def test_upcoming_published_event_detail_shows_weather_panel(self):
+        response = self.client.get(reverse("events:detail", kwargs={"pk": self.event.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Météo à l'heure de l'événement")
+        self.assertContains(response, "Open-Meteo")

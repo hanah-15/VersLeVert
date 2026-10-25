@@ -27,6 +27,7 @@ from .ai import (
 )
 from .forms import EventCloseResultForm, EventProposalForm
 from .models import Event, EventRegistration
+from .weather import WeatherUnavailableError, get_event_forecast
 
 
 class EventListView(ListView):
@@ -464,3 +465,11 @@ class EventAISmartSearchView(View):
                 "recommendations": matched[:3],
             })
 
+
+class EventWeatherView(View):
+    def get(self, request, pk):
+        event = get_object_or_404(Event, pk=pk, status=Event.Status.PUBLISHED)
+        try:
+            return JsonResponse(get_event_forecast(event))
+        except WeatherUnavailableError as exc:
+            return JsonResponse({"available": False, "message": str(exc)}, status=503)

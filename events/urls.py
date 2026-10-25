@@ -21,6 +21,7 @@ urlpatterns = [
     # Endpoints et fonctionnalités IA
     path("api/ai-copilot/", views.EventAICopilotView.as_view(), name="ai_copilot"),
     path("api/ai-search/", views.EventAISmartSearchView.as_view(), name="ai_search"),
+    path("<int:pk>/weather/", views.EventWeatherView.as_view(), name="weather"),
     path("<int:pk>/ai-impact/", views.EventAIImpactView.as_view(), name="ai_impact"),
     path("<int:pk>/ai-social-kit/", views.EventAISocialKitView.as_view(), name="ai_social_kit"),
     path("<int:pk>/ai-moderate/", views.EventAIModerateView.as_view(), name="ai_moderate"),

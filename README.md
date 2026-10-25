@@ -28,6 +28,15 @@ tokens are defined in `tailwind.config.js`; shared UI components are defined in
 `static/css/tailwind.source.css` and `templates/ui/`. See `DESIGN_SYSTEM.md` for
 the layout, components, and the waste module exception.
 
+## Event weather forecasts
+
+Published upcoming event details display an hourly forecast for the event's
+location and scheduled time. The feature geocodes the event's free-text location
+and retrieves forecast data from [Open-Meteo](https://open-meteo.com/); no API
+key is required. Forecasts are cached for 30 minutes and are limited to the
+provider's 16-day forecast window. Forecasts are indicative and may change; past
+events and locations that cannot be resolved do not show a forecast.
+
 ## PostgreSQL
 
 This project uses PostgreSQL only. Copy `.env.example` to `.env`, create the
