@@ -1,0 +1,193 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Proposer un événement · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+  <div>
+    <p class="ui-eyebrow"><span class="ui-dot"></span> Mobilisation collective</p>
+    <h1 class="text-3xl font-bold text-forest">Proposer un événement écologique</h1>
+    <p class="text-muted mt-1 text-sm">
+      Organisez une rencontre, un atelier de réparation ou une opération de nettoyage de quartier.
+    </p>
+  </div>
+
+  <!-- Assistant IA Événement (Copilot) -->
+  <div class="ui-card ui-card-pad bg-sun/15 border-2 border-sun/60 space-y-4 rounded-2xl">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-forest font-bold">{% include "ui/icon.html" with name="spark" %}</span>
+        <h2 class="text-lg font-bold text-forest">Copilote IA : Générez votre plan d'action</h2>
+      </div>
+      <span class="bg-sun/40 text-forest text-xs font-bold px-2.5 py-0.5 rounded-full">Assistant Intelligent</span>
+    </div>
+    <p class="text-xs text-carbon/80">
+      Décrivez simplement votre idée et laissez l'IA structurer votre titre, objectif, déroulé, capacité conseillée et checklist zéro déchet.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <input
+        type="text"
+        id="ai-topic-input"
+        placeholder="Ex: Nettoyage de la plage de La Marsa et tri du plastique..."
+        class="ui-input input flex-1 text-sm bg-paper"
+      />
+      <button
+        type="button"
+        id="ai-generate-btn"
+        class="ui-button ui-button-primary inline-flex items-center justify-center gap-1.5 shrink-0"
+        onclick="generateWithAI()"
+      >
+        <span>{% include "ui/icon.html" with name="spark" %}</span>
+        <span id="ai-btn-text">Générer avec l'IA</span>
+      </button>
+    </div>
+    <div id="ai-status-msg" class="hidden text-xs text-forest font-semibold flex items-center gap-1"></div>
+    <div id="ai-checklist-preview" class="hidden text-xs bg-paper p-3 rounded-xl border border-sun/50 space-y-1">
+      <p class="font-bold text-forest flex items-center gap-1">
+        {% include "ui/icon.html" with name="check" %}
+        <span>Checklist éco-responsable suggérée :</span>
+      </p>
+      <ul id="ai-checklist-list" class="list-disc list-inside text-muted space-y-0.5"></ul>
+    </div>
+  </div>
+
+  {% if user.is_staff or user.is_superuser or user.is_admin_user %}
+    <div class="ui-alert bg-olive/30 text-forest p-4 rounded-xl flex items-start gap-3">
+      <span class="shrink-0 mt-0.5">{% include "ui/icon.html" with name="shield" %}</span>
+      <div class="text-sm">
+        <strong>Mode Administrateur :</strong> Votre événement sera validé et publié immédiatement dès son enregistrement.
+      </div>
+    </div>
+  {% else %}
+    <div class="ui-alert bg-mist text-carbon p-4 rounded-xl flex items-start gap-3 border border-line">
+      <span class="shrink-0 text-forest mt-0.5">{% include "ui/icon.html" with name="info" %}</span>
+      <div class="text-sm">
+        Votre événement sera examiné par l'équipe d'administration. Une fois validé, il sera visible de tous les membres pour les inscriptions.
+      </div>
+    </div>
+  {% endif %}
+
+  <form method="post" class="ui-card ui-card-pad space-y-5 bg-paper" novalidate id="event-form">
+    {% csrf_token %}
+    {{ form.ai_checklist }}
+
+    {% if form.non_field_errors %}
+      <div class="ui-alert ui-alert-error p-4 rounded-xl text-sm" role="alert">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div>
+      {% include "ui/field.html" with field=form.title %}
+    </div>
+
+    <div>
+      {% include "ui/field.html" with field=form.location %}
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        {% include "ui/field.html" with field=form.date %}
+      </div>
+      <div>
+        {% include "ui/field.html" with field=form.capacity %}
+      </div>
+    </div>
+
+    <div>
+      {% include "ui/field.html" with field=form.objective %}
+    </div>
+
+    <div class="pt-4 border-t border-line flex items-center justify-between">
+      <a href="{% url 'events:upcoming' %}" class="ui-button ui-button-secondary">
+        Annuler
+      </a>
+      <button type="submit" class="ui-button ui-button-primary">
+        {% if user.is_staff or user.is_superuser or user.is_admin_user %}
+          Créer et publier l'événement
+        {% else %}
+          Soumettre pour validation
+        {% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+async function generateWithAI() {
+  const topicInput = document.getElementById("ai-topic-input");
+  const topic = topicInput.value.trim();
+  const locationInput = document.getElementById("id_location");
+  const location = locationInput ? locationInput.value.trim() : "";
+  const btn = document.getElementById("ai-generate-btn");
+  const btnText = document.getElementById("ai-btn-text");
+  const statusMsg = document.getElementById("ai-status-msg");
+  const checklistBox = document.getElementById("ai-checklist-preview");
+  const checklistList = document.getElementById("ai-checklist-list");
+
+  if (!topic) {
+    alert("Veuillez entrer une brève description de votre idée d'événement.");
+    topicInput.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btnText.textContent = "Génération en cours...";
+  statusMsg.classList.remove("hidden");
+  statusMsg.textContent = "L'intelligence artificielle prépare votre plan d'action écologique...";
+
+  try {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const response = await fetch("{% url 'events:ai_copilot' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify({ topic: topic, location: location })
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur de réponse");
+    }
+
+    const data = await response.json();
+
+    // Remplissage automatique des champs du formulaire
+    const titleField = document.getElementById("id_title");
+    const objField = document.getElementById("id_objective");
+    const capField = document.getElementById("id_capacity");
+    const checklistHidden = document.getElementById("id_ai_checklist");
+
+    if (titleField && data.title) titleField.value = data.title;
+    if (objField && data.objective) objField.value = data.objective;
+    if (capField && data.suggested_capacity && !capField.value) capField.value = data.suggested_capacity;
+
+    if (checklistHidden && data.checklist) {
+      checklistHidden.value = JSON.stringify(data.checklist);
+    }
+
+    // Affichage de l'éco-checklist suggérée
+    if (data.checklist && data.checklist.length > 0) {
+      checklistList.innerHTML = "";
+      data.checklist.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        checklistList.appendChild(li);
+      });
+      checklistBox.classList.remove("hidden");
+    }
+
+    statusMsg.textContent = "✨ Formulaire complété avec succès par l'IA ! Vous pouvez ajuster les champs ci-dessous.";
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = "Impossible de contacter l'assistant. Veuillez saisir les informations manuellement.";
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = "Générer avec l'IA";
+  }
+}
+</script>
+{% endblock %}

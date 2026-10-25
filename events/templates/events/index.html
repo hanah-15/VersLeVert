@@ -1,6 +1,1 @@
-{% extends "ui/base.html" %}
-{% block title %}Événements · Vers le Vert{% endblock %}
-{% block content %}
-<header class="module-splash"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Une énergie collective</p><h1>Ensemble, on va plus vert.</h1><p>Des rencontres et des actions locales pour faire bouger les choses, près de chez vous.</p></div><span class="ui-icon-box">{% include "ui/icon.html" with name="event" %}</span></header>
-<section class="module-empty"><span class="ui-icon-box">{% include "ui/icon.html" with name="event" %}</span><h2>Les prochaines rencontres se préparent.</h2><p>Le calendrier des événements sera disponible prochainement. En attendant, découvrez les bonnes adresses de votre quotidien.</p><a class="ui-button ui-button-secondary mt-5" href="{% url 'places:index' %}">Découvrir les lieux</a></section>
-{% endblock %}
+{% extends "events/upcoming.html" %}

@@ -1,0 +1,81 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Confirmer les présences · {{ event.title }} · Vers le Vert{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <nav class="text-sm text-muted flex items-center gap-2 mb-2">
+      <a href="{% url 'events:detail' event.pk %}" class="hover:text-forest">← Retour à l'événement</a>
+    </nav>
+    <p class="ui-eyebrow"><span class="ui-dot"></span> Émargement après événement</p>
+    <h1 class="text-3xl font-bold text-forest">Confirmer les présences</h1>
+    <p class="text-muted mt-1 text-sm">
+      Événement : <strong class="text-carbon">{{ event.title }}</strong> · Tenu le {{ event.date|date:"d/m/Y à H:i" }} à {{ event.location }}.
+    </p>
+  </div>
+
+  <div class="ui-alert bg-mist text-carbon p-4 rounded-xl flex items-start gap-3 border border-line">
+    <span class="shrink-0 text-forest mt-0.5">{% include "ui/icon.html" with name="info" %}</span>
+    <div class="text-sm leading-relaxed">
+      <strong>Règle de gestion :</strong> Cochez les personnes qui étaient effectivement présentes sur le terrain. À la clôture de l'événement, seuls les participants dont la présence est cochée recevront leurs points éco-citoyens (via M2).
+    </div>
+  </div>
+
+  <form method="post" class="ui-card ui-card-pad space-y-6 bg-paper">
+    {% csrf_token %}
+
+    {% if registrations %}
+      <div class="flex items-center justify-between pb-3 border-b border-line">
+        <span class="text-sm font-bold text-forest">{{ registrations.count }} inscrit{{ registrations.count|pluralize }}</span>
+        <div class="space-x-3 text-xs">
+          <button type="button" class="text-forest hover:underline font-semibold" onclick="document.querySelectorAll('input[name=present_user_ids]').forEach(cb => cb.checked = true)">Tout cocher</button>
+          <span>·</span>
+          <button type="button" class="text-muted hover:underline" onclick="document.querySelectorAll('input[name=present_user_ids]').forEach(cb => cb.checked = false)">Tout décocher</button>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        {% for reg in registrations %}
+          <label class="flex items-center justify-between p-3.5 rounded-xl border border-line hover:bg-mist/50 transition cursor-pointer select-none">
+            <div class="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="present_user_ids"
+                value="{{ reg.user.pk }}"
+                {% if reg.present %}checked{% endif %}
+                class="w-5 h-5 rounded border-2 border-line text-forest focus:ring-sky cursor-pointer"
+              />
+              <div>
+                <p class="font-bold text-carbon text-sm">
+                  {{ reg.user.first_name }} {{ reg.user.last_name|default:reg.user.username }}
+                </p>
+                <p class="text-xs text-muted">{{ reg.user.email }}</p>
+              </div>
+            </div>
+            <div class="text-right text-xs text-muted">
+              Inscrit le {{ reg.registered_at|date:"d/m/Y" }}
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="pt-4 border-t border-line flex items-center justify-between">
+        <a href="{% url 'events:detail' event.pk %}" class="ui-button ui-button-secondary">
+          Annuler
+        </a>
+        <button type="submit" class="ui-button ui-button-primary">
+          Enregistrer les présences
+        </button>
+      </div>
+    {% else %}
+      <div class="ui-empty text-center py-8">
+        <p class="text-muted text-sm">Aucun participant ne s'est inscrit à cet événement.</p>
+        <div class="pt-4">
+          <a href="{% url 'events:detail' event.pk %}" class="ui-button ui-button-secondary">Retour</a>
+        </div>
+      </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
