@@ -1,7 +1,28 @@
-{% extends "ui/base.html" %}
-{% block title %}Espace sponsor · Vers le Vert{% endblock %}
+{% extends "sponsor/base_sponsor.html" %}
+{% block title %}Tableau de bord · Espace sponsor{% endblock %}
 {% block content %}
-<header class="ui-page-header"><div><p class="ui-eyebrow">Ensemble, valorisons les bons gestes</p><h1>Bonjour, {{ sponsor.business_name }}.</h1><p>Votre espace pour faire rayonner votre activité et encourager la communauté.</p></div><span class="ui-badge"><span class="ui-dot"></span>{{ sponsor.get_status_display }}</span></header>
-<section class="dashboard-hero">{% include "ui/icon.html" with name="leaf" %}<span class="mb-4 inline-flex text-[10px] font-bold uppercase tracking-widest text-forest">Des engagements qui se rencontrent</span><h2>Vos offres donnent<br>du sens aux petits gestes.</h2><p>Faites découvrir vos récompenses et accompagnez les habitudes responsables de la communauté.</p><a class="ui-button" href="{% url 'sponsor-shop' %}">Gérer la boutique {% include "ui/icon.html" with name="arrow" %}</a></section>
-<div class="grid gap-5 md:grid-cols-3"><a class="ui-card ui-card-pad block" href="{% url 'sponsor-shop' %}"><span class="ui-icon-box">{% include "ui/icon.html" with name="shop" %}</span><h2 class="mb-2 mt-5 text-xl">Ma boutique</h2><p class="text-sm text-muted">Créez et gérez vos offres.</p><span class="ui-link mt-5">Ouvrir la boutique →</span></a><a class="ui-card ui-card-pad block" href="{% url 'sponsor-stats' %}"><span class="ui-icon-box bg-sand/60">{% include "ui/icon.html" with name="spark" %}</span><h2 class="mb-2 mt-5 text-xl">Mes statistiques</h2><p class="text-sm text-muted">Suivez l'activité de vos offres.</p><span class="ui-link mt-5">Voir les statistiques →</span></a><a class="ui-card ui-card-pad block" href="{% url 'sponsor-profile' %}"><span class="ui-icon-box bg-sky/20">{% include "ui/icon.html" with name="profile" %}</span><h2 class="mb-2 mt-5 text-xl">Mon entreprise</h2><p class="text-sm text-muted">Présentez votre activité et vos engagements.</p><span class="ui-link mt-5">Profil entreprise →</span></a></div>
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Bonjour, {{ sponsor.business_name }}.</h1><p>Gérez vos offres, suivez vos échanges et présentez votre entreprise.</p></div><span class="ui-badge"><span class="ui-dot"></span>{{ sponsor.get_status_display }}</span></header>
+<div class="grid gap-4 md:grid-cols-3">
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres</p><p class="mt-2 text-3xl font-semibold text-forest">{{ offers.count }}</p><a class="ui-link mt-4" href="{% url 'sponsor-shop' %}">Gérer la boutique</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Mes statistiques</p><p class="mt-2 text-lg text-forest">Voir l'activité</p><a class="ui-link mt-4" href="{% url 'sponsor-stats' %}">Accéder</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Mon entreprise</p><p class="mt-2 text-lg text-forest">Profil & informations</p><a class="ui-link mt-4" href="{% url 'sponsor-profile' %}">Mettre à jour</a></article>
+</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Mes offres</h2><a class="ui-button ui-button-primary ui-button-small" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a></header>
+    <div class="divide-y divide-line">
+      {% for offer in offers %}
+      <div class="flex items-center justify-between py-3"><div><p class="font-semibold text-forest">{{ offer.title }}</p><p class="text-sm text-muted">{{ offer.points_cost }} pts · {% if offer.active %}Active{% else %}Inactive{% endif %}</p></div><div class="flex gap-2"><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a></div></div>
+      {% empty %}<p class="text-sm text-muted">Aucune offre pour le moment.</p>{% endfor %}
+    </div>
+  </section>
+  <section class="ui-card ui-card-pad">
+    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Raccourcis</h2></header>
+    <div class="grid gap-3">
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-shop' %}"><div><p class="font-semibold text-forest">Boutique</p><p class="text-sm text-muted">Gérer toutes vos offres</p></div><span class="text-sky">→</span></a>
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-stats' %}"><div><p class="font-semibold text-forest">Statistiques</p><p class="text-sm text-muted">Suivre vos échanges</p></div><span class="text-sky">→</span></a>
+      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-profile' %}"><div><p class="font-semibold text-forest">Profil entreprise</p><p class="text-sm text-muted">Mettre à jour vos informations</p></div><span class="text-sky">→</span></a>
+    </div>
+  </section>
+</div>
 {% endblock %}

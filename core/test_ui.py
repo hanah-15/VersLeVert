@@ -16,7 +16,8 @@ class PresentationContractTests(TestCase):
             username="ui-partner", email="partner-ui@example.test", password="Test-Password-2026!"
         )
         cls.partner = SponsorAccount.objects.create(
-            user=cls.partner_user, business_name="Entreprise test", activity="Commerce",
+            user=cls.partner_user, business_name="Entreprise test",
+            activity=SponsorAccount.Activity.FOOD_LOCAL,
             description="Test", contact_email="partner-ui@example.test",
             status=SponsorAccount.Status.APPROVED,
         )

@@ -19,10 +19,12 @@ Tailwind CSS is compiled locally with the Tailwind CLI. After installing Node.js
 
 ```bash
 npm install
-npm run build:css
+npm run build
 ```
 
-During development, run `npm run watch:css` in a separate terminal. The generated
+During development, run `npm run dev` in a separate terminal to watch the CSS,
+and run Django separately with `python manage.py runserver`. The explicit
+`build:css` and `watch:css` commands remain available as well. The generated
 `static/css/tailwind.css` file is ignored because it is a build artifact. Design
 tokens are defined in `tailwind.config.js`; shared UI components are defined in
 `static/css/tailwind.source.css` and `templates/ui/`. See `DESIGN_SYSTEM.md` for

@@ -6,12 +6,14 @@
     {% if form_kind == 'recommendation' %}<p>Partagez un produit et expliquez ce qui le rend intéressant. Un administrateur vérifiera votre publication avant sa mise en ligne.</p>{% endif %}
     {% if editing_recommendation %}<p class="rounded-xl border border-palm bg-olive/25 p-4 text-sm">Toute modification nécessite une nouvelle validation et réinitialise les mentions J’aime.</p>{% endif %}
   </header>
-  <form method="post" class="ui-card space-y-5 rounded-lg-ui border border-olive bg-white p-5 sm:p-8">
+  {% include "ui/rewards_tabs.html" %}
+  {% include "places/_tools.html" %}
+  <form method="post" class="ui-content-panel space-y-5">
     {% csrf_token %}
     {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
     {% for field in form %}{% include "places/_field.html" %}{% endfor %}
     <p class="text-sm">Les champs marqués * sont obligatoires.</p>
-    <div class="flex flex-wrap items-center gap-4 pt-2"><button class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-6 py-3 font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">{{ submit_label }}</button><a class="rounded px-3 py-3 font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky" href="{% if object %}{{ object.get_absolute_url }}{% elif form_kind == 'place' %}{% url 'places:index' %}{% else %}{% url 'places:recommendations' %}{% endif %}">Annuler</a></div>
+    <div class="flex flex-wrap items-center gap-4 pt-2"><button class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">{{ submit_label }}</button><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% if object %}{{ object.get_absolute_url }}{% elif form_kind == 'place' %}{% url 'places:index' %}{% else %}{% url 'places:recommendations' %}{% endif %}">Annuler</a></div>
   </form>
 </div>
 {% endblock %}

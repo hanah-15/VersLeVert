@@ -3,19 +3,22 @@
 {% block places_content %}
 <header class="ui-page-header">
   <div><p class="ui-eyebrow"><span class="ui-dot"></span> Les bonnes adresses du quotidien</p><h1>Le vert est juste<br>au coin de la rue.</h1><p>Parcs, cafés responsables, boutiques zéro déchet : trouvez votre prochaine découverte.</p></div>
-  <div class="flex shrink-0 flex-col items-start gap-3 sm:items-end"><span class="ui-badge">{{ total_places }} adresse{{ total_places|pluralize }} à découvrir</span>{% if request.user.is_staff %}<a href="{% url 'places:create' %}" class="ui-button ui-button-primary">{% include "ui/icon.html" with name="plus" %} Ajouter un lieu</a>{% endif %}</div>
+  <div class="flex shrink-0 flex-col items-start gap-3 sm:items-end"><span class="ui-badge">{{ total_places }} adresse{{ total_places|pluralize }} à découvrir</span>{% if request.user.is_staff %}<a href="{% url 'places:create' %}" class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40"> Ajouter un lieu</a>{% endif %}</div>
 </header>
-<section aria-label="Recherche de lieux" class="ui-card rounded-lg-ui border border-olive bg-white p-5 sm:p-6">
+{% include "ui/rewards_tabs.html" %}
+{% include "places/_tools.html" %}
+<section aria-label="Recherche de lieux" class="ui-content-panel">
+  <div class="rounded-[20px] border border-line bg-porcelain p-5 shadow-card sm:p-6">
   <form method="get" class="space-y-5" data-location-form>
     {% if filter_form.non_field_errors %}<div class="text-sm font-bold text-brick" role="alert">{{ filter_form.non_field_errors }}</div>{% endif %}
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-[2fr_1fr_auto] lg:items-end">
       {% include "places/_field.html" with field=filter_form.q %}
       {% include "places/_field.html" with field=filter_form.category %}
-      <button class="ui-button ui-button-primary min-h-[46px] rounded-xl bg-forest px-6 py-3 font-bold text-porcelain hover:bg-carbon focus:outline-none focus:ring-4 focus:ring-sky">Rechercher</button>
+      <button class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Rechercher</button>
     </div>
     <div class="flex flex-wrap items-center gap-4">
-      <button type="button" data-use-location class="ui-button ui-button-secondary">Autour de moi</button>
-      <a href="{% url 'places:index' %}" class="rounded-lg px-2 py-3 text-sm font-bold text-forest underline focus:outline-none focus:ring-4 focus:ring-sky">Réinitialiser</a>
+      <button type="button" data-use-location class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Autour de moi</button>
+      <a href="{% url 'places:index' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-[13px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Réinitialiser</a>
       <p data-location-status aria-live="polite" class="text-xs text-muted">Votre position est utilisée uniquement à votre demande.</p>
     </div>
     <details {% if filter_form.latitude.value or filter_form.longitude.value or filter_form.errors %}open{% endif %}>
@@ -27,8 +30,9 @@
       </div>
     </details>
   </form>
+  </div>
 </section>
-<section aria-labelledby="results-heading" class="space-y-4">
+<section aria-labelledby="results-heading" class="ui-content-panel space-y-4">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
     <h2 id="results-heading" class="font-heading text-2xl font-semibold text-forest">Les adresses à découvrir</h2>
     <p class="text-xs text-muted">{{ paginator.count }} résultat{{ paginator.count|pluralize }}{% if position_known %} · Du plus proche au plus éloigné{% endif %}</p>

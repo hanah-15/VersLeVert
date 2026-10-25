@@ -7,6 +7,6 @@
         {% if not is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'profile-section' 'sponsor' %}">Devenir sponsor</a>{% endif %}
         {% if is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
         {% if is_admin_user %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky" href="{% url 'admin:index' %}">Administration</a>{% endif %}
-        <form method="post" action="{% url 'logout' %}" class="mt-1 border-t border-olive pt-1">{% csrf_token %}<button type="submit" class="w-full rounded-sm-ui px-3 py-2 text-left font-bold text-brick hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Déconnexion</button></form>
+        <form method="post" action="{% url 'logout' %}" class="mt-1 border-t border-olive pt-1">{% csrf_token %}{% include "ui/button.html" with label="Déconnexion" variant="secondary" size="sm" full=True button_type="submit" %}</form>
     </div>
 </details>

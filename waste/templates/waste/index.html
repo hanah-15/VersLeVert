@@ -5,9 +5,9 @@
 <div class="mx-auto max-w-page">
 <h1 class="font-heading text-h1 font-bold text-forest">Mes déchets</h1>
 <div class="mt-6 flex flex-wrap gap-3">
-    <a href="{% url 'waste:create' %}" class="rounded-md-ui border-2 border-forest bg-forest px-5 py-2.5 font-bold text-porcelain no-underline hover:bg-palm hover:text-forest focus:outline-none focus:ring-4 focus:ring-sky">Déclarer un déchet</a>
-    <a href="{% url 'waste:market' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Collecter un déchet</a>
-    <a href="{% url 'waste:my_offers' %}" class="rounded-md-ui border-2 border-forest bg-porcelain px-5 py-2.5 font-bold text-forest no-underline hover:bg-olive focus:outline-none focus:ring-4 focus:ring-sky">Mes propositions</a>
+    <a href="{% url 'waste:create' %}" class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Déclarer un déchet</a>
+    <a href="{% url 'waste:market' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Collecter un déchet</a>
+    <a href="{% url 'waste:my_offers' %}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Mes propositions</a>
 </div>
 {% if has_pending_offers %}
     <div class="mt-5 flex items-start gap-3 rounded-md-ui bg-sky p-4 text-forest" role="alert">Vous avez des propositions de collecte à examiner.</div>

@@ -44,16 +44,57 @@ class ProfileSectionView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         titles = {
-            "points": "Mes points",
-            "proofs": "Mes actions prouvées",
-            "badges": "Mes badges",
+            "points":        "Mes points",
+            "proofs":        "Mes actions prouvées",
+            "badges":        "Mes badges",
             "notifications": "Notifications",
-            "sponsor": "Devenir sponsor",
-            "security": "Sécurité",
+            "sponsor":       "Devenir sponsor",
+            "security":      "Sécurité",
+            "collector":     "Mode collecteur",
         }
-        context.update(section=self.kwargs["section"], section_title=titles.get(self.kwargs["section"], "Profil"))
-        if self.kwargs["section"] == "sponsor":
+        section = self.kwargs["section"]
+        context.update(section=section, section_title=titles.get(section, "Profil"))
+
+        if section == "sponsor":
             context["application"] = getattr(self.request.user, "sponsor_account", None)
+
+        if section == "points":
+            try:
+                from gamification.services import PointsService
+                from gamification.models import PointsTransaction
+                context["points_balance"] = PointsService.balance(self.request.user)
+                context["recent_transactions"] = (
+                    PointsTransaction.objects
+                    .filter(user=self.request.user)
+                    .order_by("-created_at")[:5]
+                )
+            except Exception:
+                context["points_balance"] = 0
+                context["recent_transactions"] = []
+
+        if section == "proofs":
+            try:
+                from gamification.models import EcoProof
+                context["recent_proofs"] = (
+                    EcoProof.objects
+                    .filter(user=self.request.user)
+                    .order_by("-submitted_at")[:5]
+                )
+            except Exception:
+                context["recent_proofs"] = []
+
+        if section == "badges":
+            try:
+                from gamification.models import UserBadge
+                context["earned_badges"] = (
+                    UserBadge.objects
+                    .filter(user=self.request.user)
+                    .select_related("badge")
+                    .order_by("-awarded_at")
+                )
+            except Exception:
+                context["earned_badges"] = []
+
         return context
 
 
@@ -76,7 +117,9 @@ class SponsorApplicationView(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         account = getattr(self.request.user, "sponsor_account", None)
         if account and account.status in (SponsorAccount.Status.PENDING, SponsorAccount.Status.REJECTED):
-            return SponsorApplicationForm(instance=account, **self.get_form_kwargs())
+            form_kwargs = self.get_form_kwargs()
+            form_kwargs["instance"] = account
+            return (form_class or self.get_form_class())(**form_kwargs)
         return super().get_form(form_class)
 
     def form_valid(self, form):

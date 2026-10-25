@@ -1,0 +1,149 @@
+{% extends "ui/base.html" %}
+{% block title %}Soumettre une preuve · Vers le Vert{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+
+{% block content %}
+{# ── Breadcrumb + page title ───────────────────────────── #}
+<div class="flex flex-col gap-4 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <a href="{% url 'gamification:my-proofs' %}" class="ui-eyebrow mb-1 hover:text-forest transition-colors">
+      {% include "ui/icon.html" with name="arrow" %} Retour à mes preuves
+    </a>
+    <h1 class="text-3xl font-semibold text-forest sm:text-4xl">Soumettre une preuve</h1>
+    <p class="mt-1.5 text-sm text-muted">Téléversez un justificatif de votre action écologique pour valider vos points.</p>
+  </div>
+</div>
+{% include "ui/rewards_tabs.html" %}
+
+<div class="grid gap-8 lg:grid-cols-[1fr_340px]">
+
+  {# ── Form card ─────────────────────────────────────────────────────── #}
+  <div class="ui-content-panel">
+  <div class="ui-card ui-card-pad">
+    <form method="post" enctype="multipart/form-data" class="space-y-6" id="proof-upload-form" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="ui-alert ui-alert-error" role="alert">
+          {% include "ui/icon.html" with name="info" %}
+          <div>{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+        </div>
+      {% endif %}
+
+      {# proof_type #}
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-forest" for="{{ form.proof_type.id_for_label }}">
+          {{ form.proof_type.label }}
+        </label>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-label="Type de preuve">
+          {% for val, lbl in form.proof_type.field.choices %}
+          <label class="proof-type-option group relative cursor-pointer" id="label-type-{{ forloop.counter }}">
+            <input type="radio" name="{{ form.proof_type.html_name }}" value="{{ val }}"
+                   class="sr-only peer"
+                   {% if form.proof_type.value == val %}checked{% endif %}>
+            <span class="flex flex-col items-center gap-2 rounded-xl border border-line bg-white/25 p-3 text-center text-xs font-medium text-muted transition-all peer-checked:border-palm peer-checked:bg-palm/10 peer-checked:text-forest peer-focus:ring-2 peer-focus:ring-palm/40 group-hover:border-palm/50">
+              {% if val == "ELECTRICITY_BILL" %}⚡{% elif val == "TRANSPORT_TICKET" %}🚌{% elif val == "TEXTILE_LABEL" %}👕{% else %}📄{% endif %}
+              <span class="leading-tight">{{ lbl }}</span>
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+        {% if form.proof_type.errors %}
+          <p class="text-xs text-brick">{{ form.proof_type.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      {# proof_date #}
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-forest" for="{{ form.proof_date.id_for_label }}">
+          {{ form.proof_date.label }}
+        </label>
+        <input type="date" name="{{ form.proof_date.html_name }}"
+               id="{{ form.proof_date.id_for_label }}"
+               value="{{ form.proof_date.value|default:'' }}"
+               class="w-full rounded-xl border border-line bg-white/50 px-4 py-3 text-sm text-forest placeholder:text-muted focus:border-palm focus:outline-none focus:ring-2 focus:ring-palm/30 {% if form.proof_date.errors %}border-brick{% endif %}">
+        {% if form.proof_date.errors %}<p class="text-xs text-brick">{{ form.proof_date.errors.0 }}</p>{% endif %}
+      </div>
+
+      {# file #}
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-forest" for="{{ form.file.id_for_label }}">
+          {{ form.file.label }}
+        </label>
+        <div id="drop-zone"
+             class="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line bg-white/30 p-6 text-center transition-all hover:border-palm/60 hover:bg-palm/5 {% if form.file.errors %}border-brick{% endif %}">
+          <span class="flex h-12 w-12 items-center justify-center rounded-full bg-olive/30 text-palm-deep [&>svg]:h-6 [&>svg]:w-6">
+            {% include "ui/icon.html" with name="camera" %}
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-forest">Glissez votre fichier ici</p>
+            <p class="text-xs text-muted">ou <span class="text-palm-deep underline">cliquez pour parcourir</span></p>
+            <p class="mt-1 text-xs text-muted">JPG, PNG ou PDF — 5 Mo maximum</p>
+          </div>
+          <p id="file-name" class="hidden text-sm font-medium text-palm-deep"></p>
+          <input type="file" name="{{ form.file.html_name }}" id="{{ form.file.id_for_label }}"
+                 accept=".jpg,.jpeg,.png,.pdf"
+                 class="absolute inset-0 cursor-pointer opacity-0"
+                 onchange="document.getElementById('file-name').textContent = this.files[0]?.name || ''; document.getElementById('file-name').classList.toggle('hidden', !this.files[0])">
+        </div>
+        {% if form.file.errors %}<p class="text-xs text-brick">{{ form.file.errors.0 }}</p>{% endif %}
+      </div>
+
+      {# source_url (optional) #}
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-forest" for="{{ form.source_url.id_for_label }}">
+          {{ form.source_url.label }} <span class="font-normal text-muted">(optionnel)</span>
+        </label>
+        <input type="url" name="{{ form.source_url.html_name }}"
+               id="{{ form.source_url.id_for_label }}"
+               value="{{ form.source_url.value|default:'' }}"
+               placeholder="https://…"
+               class="w-full rounded-xl border border-line bg-white/50 px-4 py-3 text-sm text-forest placeholder:text-muted/60 focus:border-palm focus:outline-none focus:ring-2 focus:ring-palm/30">
+      </div>
+
+      <div class="pt-2">
+        <button type="submit"
+                class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-palm px-7 py-3.5 font-ui text-sm font-semibold text-forest shadow-card transition-all hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
+          <span class="[&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="plus" %}</span>
+          Soumettre ma preuve
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+
+  {# ── Side info panel ───────────────────────────────────────────────── #}
+  <aside class="ui-content-panel space-y-5">
+    <div class="ui-card p-5">
+      <p class="ui-eyebrow mb-3">Votre solde actuel</p>
+      <div class="flex items-center gap-3">
+        <span class="ui-icon-box h-12 w-12 text-palm-deep [&>svg]:h-5 [&>svg]:w-5">{% include "ui/icon.html" with name="spark" %}</span>
+        <strong class="font-heading text-4xl text-forest">{{ points_balance }}<span class="text-base font-normal text-muted"> pts</span></strong>
+      </div>
+    </div>
+
+    <div class="ui-card p-5 space-y-3">
+      <p class="flex items-center gap-2 text-sm font-semibold text-forest">
+        <span class="text-palm-deep [&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="info" %}</span>
+        Comment ça marche ?
+      </p>
+      <ol class="space-y-2 text-xs text-muted list-decimal list-inside leading-relaxed">
+        <li>Choisissez le type de preuve adapté à votre action.</li>
+        <li>Téléversez un fichier clair et lisible (photo ou PDF).</li>
+        <li>Notre système analyse votre document automatiquement.</li>
+        <li>Si approuvée, les points sont crédités sur votre compte.</li>
+      </ol>
+    </div>
+
+    <div class="ui-card p-5 space-y-2">
+      <p class="text-sm font-semibold text-forest">📋 Types acceptés</p>
+      <ul class="space-y-1.5 text-xs text-muted">
+        <li class="flex items-center gap-2">⚡ <span>Facture d'électricité verte</span></li>
+        <li class="flex items-center gap-2">🚌 <span>Ticket de transport en commun</span></li>
+        <li class="flex items-center gap-2">👕 <span>Étiquette produit textile éthique</span></li>
+        <li class="flex items-center gap-2">📄 <span>Autre justificatif écologique</span></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+{% endblock %}

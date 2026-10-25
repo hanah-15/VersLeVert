@@ -1,23 +1,26 @@
 {% extends "ui/auth_base.html" %}
 {% block title %}Inscription · Vers le Vert{% endblock %}
-{% block auth_page_class %}signup-page{% endblock %}
 {% block auth_content %}
-<p class="ui-eyebrow">Bienvenue dans l'aventure</p>
+<p class="ui-eyebrow text-palm-deep">Bienvenue dans l'aventure</p>
 <h1>Créez votre compte.</h1>
-<p class="auth-intro">Votre prochain petit pas commence ici.</p>
+<p class="mb-6 mt-2 text-[13px] leading-relaxed text-forest/90">Votre prochain petit pas commence ici.</p>
 {% if form.non_field_errors %}<div class="ui-alert ui-alert-error mb-4" role="alert">{{ form.non_field_errors }}</div>{% endif %}
-<form method="post" class="auth-form">
+<form method="post" class="space-y-4">
   {% csrf_token %}
-  <div class="auth-field-grid">
+  <div class="grid gap-y-4">
     {% for field in form %}
-    {% if field.name == 'username' %}{% include "ui/field.html" with label="Nom d’utilisateur" compact_help=True %}
-    {% elif field.name == 'email' %}{% include "ui/field.html" with label="Adresse e-mail" compact_help=True %}
-    {% elif field.name == 'password1' %}{% include "ui/field.html" with label="Mot de passe" compact_help=True %}
-    {% elif field.name == 'password2' %}{% include "ui/field.html" with label="Confirmer le mot de passe" compact_help=True %}
-    {% else %}{% include "ui/field.html" with compact_help=True %}{% endif %}
+    {% if field.name == 'username' %}{% include "ui/field.html" with label="Nom d’utilisateur" hide_help=True auth_field=True %}
+    {% elif field.name == 'email' %}{% include "ui/field.html" with label="Adresse e-mail" compact_help=True auth_field=True %}
+    {% elif field.name == 'password1' %}{% include "ui/field.html" with label="Mot de passe" hide_help=True auth_field=True %}
+    {% elif field.name == 'password2' %}{% include "ui/field.html" with label="Confirmer le mot de passe" hide_help=True auth_field=True %}
+    {% else %}{% include "ui/field.html" with compact_help=True auth_field=True %}{% endif %}
     {% endfor %}
   </div>
-  <button type="submit" class="ui-button ui-button-primary">Créer mon compte {% include "ui/icon.html" with name="arrow" %}</button>
+    {% include "ui/button.html" with label="S'inscrire" variant="primary" full=True button_type="submit" %}
 </form>
-<p class="auth-switch">Déjà membre ? <a href="{% url 'login' %}">Se connecter</a></p>
+<div class="my-4 flex items-center gap-3 text-caption text-forest/70">
+  <span class="h-px flex-1 bg-white/30"></span>ou<span class="h-px flex-1 bg-white/30"></span>
+</div>
+{% url 'login' as login_url %}
+{% include "ui/button.html" with href=login_url label="Se connecter" variant="secondary" full=True %}
 {% endblock %}

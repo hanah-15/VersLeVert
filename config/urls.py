@@ -27,6 +27,7 @@ from sponsor.views import redeem_reward
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("dashboard/", include("core.urls_admin")),
     path("accounts/", include("accounts.urls")),
     path("challenges/", include("challenges.urls")),
     path("waste/", include("waste.urls")),

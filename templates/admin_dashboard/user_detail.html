@@ -1,0 +1,19 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block title %}{{ user_obj.get_full_name|default:user_obj.username }} · Utilisateur{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Administration</p><h1>{{ user_obj.get_full_name|default:user_obj.username }}</h1><p>{{ user_obj.email }}</p></div><div class="flex flex-wrap gap-2"><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin_dashboard:users_list' %}">Retour à la liste</a><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% url 'admin:index' %}accounts/user/{{ user_obj.pk }}/change/">Modifier dans Django Admin</a></div></header>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="ui-card ui-card-pad space-y-3">
+    <h2 class="text-xl">Informations</h2>
+    <dl class="grid grid-cols-2 gap-2 text-sm"><dt class="text-muted">Nom d'utilisateur</dt><dd>{{ user_obj.username }}</dd><dt class="text-muted">Email</dt><dd>{{ user_obj.email }}</dd><dt class="text-muted">Prénom/Nom</dt><dd>{{ user_obj.first_name }} {{ user_obj.last_name }}</dd><dt class="text-muted">Ville</dt><dd>{{ user_obj.city|default:"-" }}</dd><dt class="text-muted">Inscrit le</dt><dd>{{ user_obj.date_joined|date:"d/m/Y H:i" }}</dd><dt class="text-muted">Dernière connexion</dt><dd>{{ user_obj.last_login|date:"d/m/Y H:i"|default:"-" }}</dd><dt class="text-muted">Actif</dt><dd>{{ user_obj.is_active|yesno:"Oui,Non" }}</dd><dt class="text-muted">Staff</dt><dd>{{ user_obj.is_staff|yesno:"Oui,Non" }}</dd><dt class="text-muted">Superuser</dt><dd>{{ user_obj.is_superuser|yesno:"Oui,Non" }}</dd></dl>
+  </section>
+  <section class="ui-card ui-card-pad space-y-3">
+    <h2 class="text-xl">Sponsor</h2>
+    {% if user_obj.sponsor_account %}
+      <p class="text-sm">Statut : <strong>{{ user_obj.sponsor_account.get_status_display }}</strong></p>
+      <p class="text-sm text-muted">Entreprise : {{ user_obj.sponsor_account.business_name }}</p>
+      <a class="ui-link" href="{% url 'admin_dashboard:sponsor_detail' user_obj.sponsor_account.pk %}">Voir la demande sponsor</a>
+    {% else %}<p class="text-sm text-muted">Aucun compte sponsor.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

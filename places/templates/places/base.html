@@ -2,4 +2,5 @@
 {% load static %}
 {% block title %}Découvrir · Vers le Vert{% endblock %}
 {% block extra_head %}<script src="{% static 'places/places.js' %}" defer></script>{% endblock %}
-{% block content %}<div class="space-y-7"><nav aria-label="Outils de découverte" class="places-tools"><a href="{% url 'places:guide' %}">{% include "ui/icon.html" with name="spark" %} Guide éco</a><a href="{% url 'places:my-recommendations' %}">{% include "ui/icon.html" with name="profile" %} Mes publications</a>{% if request.user.is_staff %}<a href="{% url 'places:moderation' %}">{% include "ui/icon.html" with name="shield" %} Modération</a>{% endif %}</nav>{% block places_content %}{% endblock %}</div>{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block content %}<div class="space-y-7">{% block places_content %}{% endblock %}</div>{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "ui/base.html" %}
+{% block title %}Mes preuves · Vers le Vert{% endblock %}
+{% block secondary_navigation %}{% endblock %}
+{% block page_shell_class %}page-shell !max-w-none !px-0{% endblock %}
+
+{% block content %}
+<div class="mx-auto mt-4 w-full max-w-[1440px] space-y-4 px-4 sm:px-6 xl:px-10">
+  <section class="grid gap-5 rounded-[24px] border border-white/70 bg-olive/25 p-4 shadow-card backdrop-blur-sm md:grid-cols-[minmax(0,1fr)_280px] md:items-center md:p-6">
+    <div class="flex items-center gap-4">
+      <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-porcelain text-palm [&>svg]:h-7 [&>svg]:w-7">{% include "ui/icon.html" with name="camera" %}</span>
+      <div>
+        <h1 class="font-ui text-2xl font-semibold text-forest sm:text-3xl">Mes preuves écologiques</h1>
+        <p class="mt-1 text-sm leading-relaxed text-paper">Suivez l'état de vos justificatifs et les points associés.</p>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-olive bg-porcelain p-4 shadow-card">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <span class="block text-xs font-semibold text-muted">Solde actuel</span>
+          <strong class="mt-1 block text-3xl font-semibold leading-none text-forest">{{ points_balance|default:0 }} <span class="text-base font-medium text-muted">pts</span></strong>
+        </div>
+        <a class="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-palm-deep underline-offset-4 hover:underline" href="{% url 'gamification:points-history' %}">Historique {% include "ui/icon.html" with name="arrow" %}</a>
+      </div>
+      <a href="{% url 'gamification:proof-submit' %}" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-palm px-5 py-2.5 font-ui text-sm font-semibold text-forest shadow-card transition-all hover:-translate-y-0.5 hover:bg-olive hover:shadow-float focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">
+        {% include "ui/icon.html" with name="plus" %} Ajouter une preuve
+      </a>
+    </div>
+  </section>
+
+  {% include "ui/rewards_tabs.html" %}
+
+  <section class="ui-content-panel">
+    <div class="space-y-6">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="font-ui text-xl font-semibold text-porcelain">Historique de mes preuves</h2>
+          <p class="text-sm text-porcelain/80">Liste de vos soumissions avec leur statut.</p>
+        </div>
+      </div>
+
+      {% if proofs %}
+      <div class="space-y-3">
+        {% for proof in proofs %}
+        <a href="{% url 'gamification:proof-detail' proof.pk %}"
+           class="group flex items-center gap-4 rounded-[16px] border border-line bg-paper p-4 transition-all hover:-translate-y-0.5 hover:shadow-card sm:p-5">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl [&>svg]:h-5 [&>svg]:w-5
+            {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
+            {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
+            {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky
+            {% else %}bg-sand text-muted{% endif %}">
+            {% if proof.status == 'APPROVED' %}{% include "ui/icon.html" with name="check" %}
+            {% elif proof.status == 'REJECTED' %}{% include "ui/icon.html" with name="info" %}
+            {% elif proof.status == 'NEEDS_REVIEW' %}{% include "ui/icon.html" with name="search" %}
+            {% else %}{% include "ui/icon.html" with name="clock" %}{% endif %}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="truncate text-sm font-semibold text-forest">{{ proof.get_proof_type_display }}</p>
+              <span class="shrink-0 rounded-full px-2.5 py-0.5 font-ui text-[11px] font-semibold
+                {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
+                {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
+                {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky
+                {% else %}bg-sand text-muted{% endif %}">
+                {{ proof.get_status_display }}
+              </span>
+            </div>
+            <p class="mt-0.5 text-xs text-muted">
+              Soumise le {{ proof.submitted_at|date:"d M Y" }}
+              · Date du document : {{ proof.proof_date|date:"d M Y" }}
+            </p>
+            {% if proof.status == 'REJECTED' and proof.rejection_reason %}
+              <p class="mt-1 truncate text-xs text-brick">↳ {{ proof.rejection_reason }}</p>
+            {% endif %}
+          </div>
+          <span class="shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">
+            {% include "ui/icon.html" with name="arrow" %}
+          </span>
+        </a>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.has_other_pages %}
+      <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-sm font-semibold text-forest backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20">← Précédent</a>
+        {% endif %}
+        <span class="text-sm text-porcelain">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-5 py-2.5 font-ui text-sm font-semibold text-forest backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20">Suivant →</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="rounded-[16px] border border-dashed border-palm/40 bg-paper/60 p-10 text-center">
+        <span class="ui-icon-box mx-auto">{% include "ui/icon.html" with name="camera" %}</span>
+        <h2 class="mt-4 text-xl font-semibold text-forest">Aucune preuve soumise</h2>
+        <p class="mt-2 text-sm text-muted">Téléversez votre premier justificatif pour commencer à gagner des points.</p>
+        <a href="{% url 'gamification:proof-submit' %}"
+           class="mt-4 inline-flex items-center gap-2 rounded-full bg-palm px-6 py-3 font-ui text-sm font-semibold text-forest shadow-card transition-all hover:-translate-y-0.5 hover:bg-olive hover:shadow-float">
+          <span class="[&>svg]:h-4 [&>svg]:w-4">{% include "ui/icon.html" with name="plus" %}</span>
+          Soumettre une preuve
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
