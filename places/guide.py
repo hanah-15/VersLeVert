@@ -109,7 +109,7 @@ def catalogue_snapshot():
 
     places = list(Place.objects.values("id", "name", "category", "description", "address", "latitude", "longitude", "image"))
     products = list(ProductRecommendation.objects.filter(status=ProductRecommendation.Status.APPROVED).values(
-        "id", "product_name", "category", "description", "place_id", "image",
+        "id", "product_name", "category", "description", "place_id", "purchase_location", "image",
     ))
     for item in places + products:
         item["image_url"] = default_storage.url(item.pop("image")) if item.get("image") else ""
@@ -186,7 +186,8 @@ def rank_catalogue(snapshot, query, intent, filters=None):
                 continue
             if filters.get("category") and (not place or place["category"] != filters["category"]):
                 continue
-            if city and (not place or not re.search(r"(?<!\w)" + re.escape(normalize(city)) + r"(?!\w)", normalize(place["address"]))):
+            address = place["address"] if place else item.get("purchase_location", "")
+            if city and not re.search(r"(?<!\w)" + re.escape(normalize(city)) + r"(?!\w)", normalize(address)):
                 continue
             distance = None
             if origin:
@@ -218,7 +219,7 @@ def rank_catalogue(snapshot, query, intent, filters=None):
                 "excerpt": item["description"][:220],
                 "evidence": evidence, "matched_terms": sorted(matched),
                 "url": reverse("places:detail" if kind == "places" else "places:recommendation-detail", args=[item["id"]]),
-                "address": place["address"] if place else "Lieu non renseigné",
+                "address": address or "Lieu non renseigné",
                 "distance_km": round(distance, 2) if distance is not None else None,
                 "place_name": place["name"] if place else "",
                 "place_url": reverse("places:detail", args=[place["id"]]) if place else "",

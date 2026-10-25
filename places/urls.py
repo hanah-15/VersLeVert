@@ -5,6 +5,7 @@ app_name = "places"
 
 urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
+    path("position/quartier/", views.locate_area, name="locate-area"),
     path("api/lieux/", api.PlaceListAPI.as_view(), name="api-places"),
     path("api/lieux/<int:pk>/", api.PlaceDetailAPI.as_view(), name="api-place-detail"),
     path("api/recommandations/", api.RecommendationListAPI.as_view(), name="api-recommendations"),

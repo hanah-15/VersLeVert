@@ -1,13 +1,13 @@
 {
-  "measured_at": "2026-10-25T19:36:22.146661+00:00",
+  "measured_at": "2026-10-25T20:22:57.709766+00:00",
   "mode": "live",
   "model": "gemini-3.5-flash-lite",
-  "case_count": 8,
-  "completed_count": 8,
+  "case_count": 10,
+  "completed_count": 10,
   "category_accuracy": 1.0,
   "expected_issue_recall": 1.0,
-  "latency_median_ms": 1990.5,
-  "latency_p95_ms": 2941,
+  "latency_median_ms": 1744.5,
+  "latency_p95_ms": 2204,
   "rows": [
     {
       "id": "reusable_bottle",
@@ -15,13 +15,15 @@
       "expected_issues": [],
       "category": "home",
       "product_name": "",
-      "description": "J'utilise cette gourde en inox depuis trois semaines. Je m'en sers pour la remplir au lieu d'acheter des bouteilles jetables. Elle est facile à nettoyer.",
+      "description": "J'utilise cette gourde depuis trois semaines pour la remplir au lieu d'acheter des bouteilles jetables, et je la trouve facile à nettoyer.",
       "issues": [],
-      "elapsed_ms": 2941,
+      "elapsed_ms": 1836,
       "exact_source_quotes": true,
       "missing_information": [
         "Précisez le nom du produit."
-      ]
+      ],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "solid_shampoo",
@@ -29,11 +31,13 @@
       "expected_issues": [],
       "category": "personal_care",
       "product_name": "Shampoing solide",
-      "description": "J'ai testé ce shampoing solide pendant un mois. Je n'ai plus de flacon à jeter et il prend moins de place dans mon sac.",
+      "description": "J'ai testé ce shampoing solide pendant un mois, et je trouve qu'il prend moins de place dans mon sac tout en évitant d'avoir un flacon à jeter.",
       "issues": [],
-      "elapsed_ms": 1941,
+      "elapsed_ms": 1786,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "bulk_food",
@@ -41,11 +45,13 @@
       "expected_issues": [],
       "category": "food",
       "product_name": "Lentilles en vrac",
-      "description": "J'achète ces lentilles en vrac avec mon bocal. Je peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.",
+      "description": "J'achète ces lentilles en vrac avec mon propre bocal, ce qui me permet de choisir la quantité dont j'ai besoin tout en réutilisant mon contenant.",
       "issues": [],
-      "elapsed_ms": 1832,
+      "elapsed_ms": 1609,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "secondhand_clothes",
@@ -53,11 +59,13 @@
       "expected_issues": [],
       "category": "fashion",
       "product_name": "Veste de seconde main",
-      "description": "Je porte cette veste de seconde main depuis deux mois. J'ai réparé un bouton plutôt que d'en acheter une neuve.",
+      "description": "Je porte cette veste de seconde main depuis deux mois. J'ai réparé un bouton plutôt que d'acheter une veste neuve.",
       "issues": [],
-      "elapsed_ms": 2018,
+      "elapsed_ms": 1613,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "bicycle",
@@ -65,11 +73,13 @@
       "expected_issues": [],
       "category": "mobility",
       "product_name": "Vélo reconditionné",
-      "description": "J'utilise ce vélo reconditionné pour me rendre à l'université deux fois par semaine. Cela me permet de remplacer certains de mes trajets en voiture.",
+      "description": "J'utilise ce vélo reconditionné pour me rendre à l'université deux fois par semaine, ce qui me permet de remplacer certains trajets en voiture.",
       "issues": [],
-      "elapsed_ms": 2104,
+      "elapsed_ms": 1548,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "absolute_and_quantified",
@@ -85,9 +95,11 @@
         "absolute_eco_claim",
         "quantified_impact"
       ],
-      "elapsed_ms": 1915,
+      "elapsed_ms": 1794,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "unsupported_certificate",
@@ -101,12 +113,13 @@
       "issues": [
         "certification"
       ],
-      "elapsed_ms": 1963,
+      "elapsed_ms": 1876,
       "exact_source_quotes": true,
       "missing_information": [
-        "Précisez le nom du produit.",
         "Ajoutez votre expérience personnelle avec ce produit."
-      ]
+      ],
+      "purchase_location": "",
+      "topics_found": {}
     },
     {
       "id": "short_informal_review",
@@ -114,18 +127,68 @@
       "expected_issues": [],
       "category": "food",
       "product_name": "Cookies Nasser",
-      "description": "Je trouve ces cookies très délicieux.",
-      "issues": [],
-      "elapsed_ms": 2411,
+      "description": "Je trouve ces biscuits très délicieux. Son emballage me semble intéressant dans une démarche plus respectueuse de l'environnement, mais cet aspect reste à vérifier.",
+      "issues": [
+        "health_claim",
+        "absolute_eco_claim"
+      ],
+      "elapsed_ms": 1674,
       "exact_source_quotes": true,
-      "missing_information": []
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {}
+    },
+    {
+      "id": "english_review_multiple_points",
+      "expected_category": "personal_care",
+      "expected_issues": [
+        "health_claim",
+        "absolute_eco_claim"
+      ],
+      "category": "personal_care",
+      "product_name": "Savon solide",
+      "description": "Je trouve ce savon abordable et son parfum agréable. Pour moi, c'est un achat qui en vaut la peine. Son emballage me semble intéressant dans une démarche plus respectueuse de l'environnement, mais cet aspect reste à vérifier.",
+      "issues": [
+        "health_claim",
+        "absolute_eco_claim"
+      ],
+      "elapsed_ms": 2204,
+      "exact_source_quotes": true,
+      "missing_information": [],
+      "purchase_location": "",
+      "topics_found": {
+        "price": true,
+        "scent": true,
+        "value": true,
+        "packaging": true
+      }
+    },
+    {
+      "id": "purchase_location_english",
+      "expected_category": "personal_care",
+      "expected_issues": [],
+      "category": "personal_care",
+      "product_name": "Savon solide",
+      "description": "Je trouve ce savon abordable et son parfum agréable. Pour moi, c'est un achat qui en vaut la peine.",
+      "issues": [],
+      "elapsed_ms": 1703,
+      "exact_source_quotes": true,
+      "missing_information": [],
+      "purchase_location": "Monoprix in Nouvelle Medina",
+      "location_exact": true,
+      "topics_found": {}
     }
   ],
+  "location_exact_matches": 1,
+  "location_case_count": 1,
+  "feedback_topics_found": 4,
+  "feedback_topic_count": 4,
   "limitations": [
-    "Small synthetic French sample; not a general accuracy estimate.",
+    "Small synthetic French/English sample; not a general accuracy estimate.",
     "Warnings identify claims needing evidence; they do not establish whether a claim is true or false.",
     "Rewrites require exact source quotes and pass limited claim checks; author review remains necessary and truth is not verified.",
     "Latency covers the provider and validation, without browser rendering or cache.",
-    "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues."
+    "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues.",
+    "Feedback topics are checked by lexical markers on one synthetic review, not a general semantic-quality score."
   ]
 }

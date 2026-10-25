@@ -1,11 +1,22 @@
-{{ location_form.latitude }}{{ location_form.longitude }}
+<div data-area-controls data-location-endpoint="{% url 'places:locate-area' %}" data-csrf-token="{{ csrf_token }}">
+{{ location_form.latitude }}{{ location_form.longitude }}{{ location_form.location_token }}
 <div class="location-row">
   {% include "places/_field.html" with field=location_form.city %}
   <button type="button" data-use-location class="ui-button ui-button-small">{% include "ui/icon.html" with name="place" %} Autour de moi</button>
 </div>
-<p data-location-status aria-live="polite" class="text-xs text-muted">{% if location_form.location_label %}Recherche autour de : {{ location_form.location_label }}.{% else %}Toutes les villes. Vous pouvez préciser une ville ou utiliser votre position.{% endif %}</p>
-<details class="location-options" {% if location_form.near_place.value or location_form.radius.value %}open{% endif %}>
-  <summary>Autour d'un lieu précis <span aria-hidden="true">⌄</span></summary>
-  <div class="location-row">{% include "places/_field.html" with field=location_form.near_place %}{% include "places/_field.html" with field=location_form.radius %}</div>
+<p data-location-status aria-live="polite" class="text-xs text-muted">{% if location_form.location_label %}Choisissez une distance, puis lancez la recherche.{% else %}Indiquez une ville ou repérez votre quartier avec « Autour de moi ».{% endif %}</p>
+<div class="detected-area" data-location-selection {% if not location_form.location_label and not location_form.radius.errors %}hidden{% endif %}>
+  <div class="detected-area-heading"><div><span class="text-xs text-muted">Point de départ</span><strong data-location-name>{{ location_form.location_label|default:"Position à choisir" }}</strong></div><button type="button" data-clear-location class="ui-link text-xs">Retirer</button></div>
+  <p class="text-xs text-muted" data-location-accuracy hidden></p>
+  <div class="location-row">
+    {% include "places/_field.html" with field=location_form.radius %}
+    {% if catalogue %}<button type="submit" class="ui-button ui-button-primary ui-button-small">Afficher les lieux</button>{% endif %}
+  </div>
+</div>
+<details class="location-options" {% if location_form.near_place.value %}open{% endif %}>
+  <summary>Ou choisir un lieu de départ <span aria-hidden="true">⌄</span></summary>
+  <div class="mt-3">{% include "places/_field.html" with field=location_form.near_place %}</div>
 </details>
 {% if location_form.latitude.errors or location_form.longitude.errors %}<p class="ui-errors" role="alert">La position n'est pas disponible. Choisissez un lieu ou utilisez « Autour de moi ».</p>{% endif %}
+<p class="location-credit">Le quartier est identifié à partir d'une position approximative par <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>.</p>
+</div>

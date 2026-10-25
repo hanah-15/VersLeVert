@@ -65,6 +65,7 @@ class ProductRecommendation(models.Model):
     place = models.ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="recommendations", verbose_name="Lieu associé")
     product_name = models.CharField("Nom du produit", max_length=150)
+    purchase_location = models.CharField("Où le trouver ?", max_length=255, blank=True)
     image = models.ImageField("Photo du produit", upload_to="places/products/", blank=True)
     image_credit = models.CharField(max_length=255, blank=True)
     image_source = models.URLField(max_length=500, blank=True)

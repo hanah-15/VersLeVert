@@ -61,21 +61,58 @@ Une publication non approuvée ne figure pas dans l'API, même pour son auteur.
 ## IA : assistant de publication (fonction principale)
 
 Dans `/places/recommandations/nouvelle/`, **Améliorer mon texte** propose une
-correction légère en français, y compris pour un avis court ou familier.
-**Utiliser ce texte** remplace uniquement l'avis ; un nom ou une catégorie saisis
-manuellement sont conservés. **Garder mon texte** ferme la proposition et
+reformulation en français qui conserve les idées utiles (prix, parfum, usage,
+intérêt de l'achat), y compris pour un avis familier ou écrit en anglais.
+**Utiliser la suggestion** remplace l'avis et peut remplir un lieu d'achat vide
+à partir du texte. Un nom, une catégorie ou un lieu déjà saisis sont conservés. **Garder mon texte** ferme la proposition et
 **Annuler la modification** rétablit le texte initial sans écraser une saisie récente.
 La suggestion ne publie rien. L'envoi conserve le statut `pending` et la modération.
 
 - JSON structuré validé par Pydantic, citations justificatives exactes et vérification
   de leur présence dans le texte. Les reformulations peuvent différer de ces citations.
-- Les clauses signalées sont exclues des justifications des propriétés du produit ;
+- Une impression sur l'emballage peut être reformulée avec prudence ; les bénéfices
+  de santé, certifications et chiffres non justifiés ne sont pas affirmés.
+  Les clauses signalées sont exclues des justifications des propriétés du produit ;
   des contrôles supplémentaires bloquent des chiffres et termes de certification
   ajoutés. Ces contrôles limités ne prouvent ni la fidélité sémantique de toute phrase
   ni la véracité de l'avis. La relecture de l'auteur reste indispensable.
 - Seuls le nom et le texte du brouillon sont envoyés à Gemini au clic, sans photo,
   compte, position ou catalogue. Cache séparé par utilisateur, délai borné, CSRF.
 - En cas d'erreur, le formulaire et la rédaction manuelle restent disponibles.
+
+## Position et lieu d'achat
+
+**Autour de moi** demande une position au navigateur, affiche le quartier puis
+laisse choisir la distance. Aucune recherche n'est soumise automatiquement.
+La précision annoncée par le navigateur apparaît si elle dépasse 200 m. Le point
+reste utilisable si le nom du quartier n'est pas disponible. Le nom signé est
+conservé lors du changement de distance ; il n'influence pas le calcul Haversine.
+Les adresses du catalogue restent la seule source des résultats à proximité.
+
+`POST /places/position/quartier/` nécessite connexion, CSRF et coordonnées valides.
+L'application transmet une position arrondie à trois décimales (~100 m) au service
+Nominatim ; la position précise et le compte ne sont pas transmis au fournisseur.
+Aucun point n'est envoyé à Gemini. Un résultat est conservé 24 h et un échec 60 s.
+
+Le fournisseur public est destiné à cette utilisation ponctuelle, avec attribution,
+identifiant d'application et limite globale d'une requête/seconde. Consulter les
+[conditions Nominatim](https://operations.osmfoundation.org/policies/nominatim/).
+Le verrou de cache est atomique ; **un déploiement avec plusieurs processus exige
+un cache partagé atomique** (par exemple Redis) pour appliquer la limite à toute
+l'application. Le développement local utilise un seul processus serveur actif.
+`PLACES_GEOCODER_URL` et `PLACES_GEOCODER_USER_AGENT` permettent de configurer
+un fournisseur compatible ou une instance dédiée. Aucun appel périodique ni
+recherche de toutes les adresses d'une zone n'est implémenté.
+
+**Où le trouver ?** est un champ texte libre : magasin, adresse ou site de vente.
+`purchase_location` complète la FK historique `place`. Une correspondance exacte
+avec un nom du catalogue conserve le lien ; une autre saisie reste du texte et ne
+crée aucun lieu. Une localisation trouvée par Gemini doit figurer exactement dans
+un extrait de l'avis. Elle reste visible dans la proposition et n'est appliquée
+qu'à un champ vide, après acceptation. Annuler préserve les saisies manuelles
+faites après acceptation. Les lieux d'achat textuels sont recherchables et visibles
+sur les fiches et l'API. Le guide peut filtrer leur ville, mais n'invente pas de
+coordonnées ou de distance pour un magasin non géolocalisé.
 
 ## Photos et catalogue initial
 
@@ -158,6 +195,7 @@ les mesures réelles, distinctes des tests avec réponses simulées.
 .\venv\Scripts\python.exe manage.py load_places_catalogue
 # Tests sans réseau ni consommation de quota :
 .\venv\Scripts\python.exe -m coverage run --source=places manage.py test places
+node --test places/test_frontend.cjs
 .\venv\Scripts\python.exe -m coverage report --omit="places/tests.py,places/test_*.py,places/migrations/*" -m
 ```
 

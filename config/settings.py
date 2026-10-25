@@ -185,3 +185,7 @@ if os.getenv('CLOUDINARY_URL') or os.getenv('CLOUDINARY_CLOUD_NAME'):
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Place-area labels only; exact distances are calculated by the application.
+PLACES_GEOCODER_URL = os.getenv('PLACES_GEOCODER_URL', 'https://nominatim.openstreetmap.org/reverse')
+PLACES_GEOCODER_USER_AGENT = os.getenv('PLACES_GEOCODER_USER_AGENT', 'VersLeVert/1.0 (+https://github.com/hanah-15/VersLeVert)')

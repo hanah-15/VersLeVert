@@ -16,7 +16,7 @@
       {% include "places/_field.html" with field=filter_form.category %}
       <button class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Rechercher</button>
     </div>
-    {% include "places/_location_filters.html" with location_form=filter_form %}
+    {% include "places/_location_filters.html" with location_form=filter_form catalogue=True %}
     <a href="{% url 'places:index' %}" class="ui-link text-xs">Effacer les filtres</a>
   </form>
   </div>

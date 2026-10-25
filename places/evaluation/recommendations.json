@@ -59,5 +59,29 @@
     "description": "Tres delicieux , healthy et packaging bien pour l'environment",
     "category": "food",
     "expected_issues": []
+  },
+  {
+    "id": "english_review_multiple_points",
+    "product_name": "Savon solide",
+    "description": "Cheap and healthy and its packaging is safe for environment so its worth to buy and smells good",
+    "category": "personal_care",
+    "expected_issues": [
+      "health_claim",
+      "absolute_eco_claim"
+    ],
+    "expected_topics": {
+      "price": "abordable|bon march[ée]|prix",
+      "scent": "parfum|odeur|sent bon",
+      "value": "vaut|rapport.*qualit",
+      "packaging": "emballage"
+    }
+  },
+  {
+    "id": "purchase_location_english",
+    "product_name": "Savon solide",
+    "description": "This soap is cheap and smells good. I bought it at Monoprix in Nouvelle Medina.",
+    "category": "personal_care",
+    "expected_issues": [],
+    "expected_location": "Monoprix in Nouvelle Medina"
   }
 ]

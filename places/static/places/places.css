@@ -56,3 +56,12 @@
 .writing-suggestion > p { margin-bottom: 14px; }
 .writing-help [data-restore-preparation] { margin-top: 8px; }
 @media (max-width: 520px) { .activity-choice { flex: 1 1 44%; } .activity-choice span { height: 100%; text-align: center; } .location-row { gap: 12px; } .location-row > div { flex-basis: 100%; } }
+
+.detected-area { margin-top: 14px; padding: 18px; border: 1px solid #a1ad8c; border-radius: 16px; background: #f0f3eb; }
+.detected-area-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.detected-area-heading strong { display: block; color: #042e09; font-size: 17px; }
+[data-area-controls] > [data-location-status] { margin-top: 10px; }
+.detected-area [data-location-accuracy] { margin-bottom: 14px; }
+.location-credit { margin-top: 12px; color: #596650; font-size: 10px; }
+.location-credit a { text-decoration: underline; text-underline-offset: 2px; }
+.writing-location { padding: 10px 12px; background: #fff; border-radius: 10px; font-size: 13px; margin-bottom: 14px; }

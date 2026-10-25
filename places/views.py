@@ -15,7 +15,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 from core.permissions import AdminRequiredMixin
 from .ai import GeminiUnavailableError
 from .guide import GuideRateLimitError, search_catalogue
-from .forms import GuideForm, ModerationForm, PlaceFilterForm, PlaceForm, RecommendationFilterForm, RecommendationForm, RecommendationPreparationForm
+from .forms import GuideForm, LocationLookupForm, ModerationForm, PlaceFilterForm, PlaceForm, RecommendationFilterForm, RecommendationForm, RecommendationPreparationForm
 from .models import Place, ProductRecommendation, RecommendationLike
 from .services import find_places, suggest_from_catalogue
 
@@ -118,7 +118,7 @@ class RecommendationListView(LoginRequiredMixin, PaginationContextMixin, ListVie
             return queryset.none()
         data = self.filter_form.cleaned_data
         if data["q"]:
-            queryset = queryset.filter(Q(product_name__icontains=data["q"]) | Q(description__icontains=data["q"]))
+            queryset = queryset.filter(Q(product_name__icontains=data["q"]) | Q(description__icontains=data["q"]) | Q(purchase_location__icontains=data["q"]))
         if data["category"]:
             queryset = queryset.filter(category=data["category"])
         if data["sort"] == "popular":
@@ -153,6 +153,8 @@ class RecommendationCreateView(LoginRequiredMixin, CreateView):
         place = self.request.GET.get("place", "")
         if place.isdecimal():
             initial["place"] = Place.objects.filter(pk=place).first()
+            if initial["place"]:
+                initial["purchase_location"] = initial["place"].name
         return initial
 
     def form_valid(self, form):
@@ -310,3 +312,18 @@ async def prepare_recommendation(request):
     except GeminiUnavailableError:
         return JsonResponse({"error": "L'assistant est momentanément indisponible. Votre texte est conservé ; vous pouvez compléter et envoyer le formulaire vous-même."}, status=503)
     return JsonResponse(result)
+
+
+@login_required
+@require_POST
+def locate_area(request):
+    from .geolocation import LocationUnavailable, resolve_location
+
+    form = LocationLookupForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"error": "La position reçue n'est pas valide."}, status=400)
+    try:
+        return JsonResponse(resolve_location(form.cleaned_data))
+    except LocationUnavailable:
+        # The GPS point remains usable even when an area name cannot be found.
+        return JsonResponse({"error": "Position repérée ; le nom du quartier est indisponible. Choisissez votre distance."}, status=503)

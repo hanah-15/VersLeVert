@@ -52,6 +52,7 @@ class PlaceFilterForm(StyledFormMixin, forms.Form):
         queryset=Place.objects.all(), empty_label="Choisir un lieu du catalogue")
     latitude = forms.DecimalField(required=False, min_value=-90, max_value=90, max_digits=9, decimal_places=6, widget=forms.HiddenInput)
     longitude = forms.DecimalField(required=False, min_value=-180, max_value=180, max_digits=9, decimal_places=6, widget=forms.HiddenInput)
+    location_token = forms.CharField(required=False, max_length=1000, widget=forms.HiddenInput)
     radius = forms.DecimalField(label="Distance", required=False, min_value=0.1, max_value=500, max_digits=5, decimal_places=1,
         widget=forms.Select(choices=[("", "Toutes les distances"), (1, "À moins de 1 km"), (5, "À moins de 5 km"), (10, "À moins de 10 km"), (25, "À moins de 25 km"), (50, "À moins de 50 km")]))
 
@@ -73,17 +74,41 @@ class PlaceFilterForm(StyledFormMixin, forms.Form):
             return ""
         if self.cleaned_data.get("near_place"):
             return self.cleaned_data["near_place"].name
-        return "Ma position" if self.cleaned_data.get("latitude") is not None else ""
+        if self.cleaned_data.get("latitude") is not None:
+            from .geolocation import read_location_label
+            return read_location_label(self.cleaned_data) or "Ma position"
+        return ""
 
 
 class RecommendationForm(StyledFormMixin, forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.place_id and not self.instance.purchase_location:
+            self.initial["purchase_location"] = self.instance.place.name
+
+    def clean(self):
+        data = super().clean()
+        location = data.get("purchase_location", "").strip()
+        if location:
+            matches = list(Place.objects.filter(name__iexact=location)[:2])
+            data["place"] = matches[0] if len(matches) == 1 else None
+        elif data.get("place") and "purchase_location" not in self.data:
+            location = data["place"].name
+        else:
+            data["place"] = None
+        data["purchase_location"] = location
+        return data
+
     class Meta:
         model = ProductRecommendation
-        fields = ("product_name", "category", "description", "image", "place")
+        fields = ("product_name", "category", "description", "image", "purchase_location", "place")
         widgets = {"description": forms.Textarea(attrs={"rows": 4, "placeholder": "Ce que vous avez aimé, comment vous l'utilisez, ce qui vous semble intéressant…"}),
-                   "image": forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"})}
-        labels = {"description": "Votre avis", "place": "Où le trouver ? (facultatif)"}
-        help_texts = {"description": "Quelques phrases suffisent.", "image": "Ajoutez une photo pour reconnaître le produit. JPG, PNG ou WebP, 5 Mo maximum."}
+                   "image": forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
+                   "place": forms.HiddenInput,
+                   "purchase_location": forms.TextInput(attrs={"placeholder": "Ex. Monoprix, Nouvelle Médina, ou une boutique en ligne"})}
+        labels = {"description": "Votre avis", "purchase_location": "Où le trouver ? (facultatif)"}
+        help_texts = {"description": "Quelques phrases suffisent.", "image": "Ajoutez une photo pour reconnaître le produit. JPG, PNG ou WebP, 5 Mo maximum.",
+                      "purchase_location": "Écrivez le magasin, l'adresse ou le site. L'IA peut reprendre un lieu mentionné dans votre avis."}
 
 
 class RecommendationFilterForm(StyledFormMixin, forms.Form):
@@ -131,3 +156,8 @@ class GuideForm(PlaceFilterForm):
 class RecommendationPreparationForm(forms.Form):
     product_name = forms.CharField(required=False, max_length=150)
     description = forms.CharField(min_length=20, max_length=3000)
+
+
+class LocationLookupForm(forms.Form):
+    latitude = forms.DecimalField(min_value=-90, max_value=90, max_digits=9, decimal_places=6)
+    longitude = forms.DecimalField(min_value=-180, max_value=180, max_digits=9, decimal_places=6)

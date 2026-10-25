@@ -32,7 +32,7 @@ class RecommendationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductRecommendation
-        fields = ("id", "product_name", "category", "category_label", "description", "place", "author", "like_count", "created_at", "image", "image_credit", "image_source")
+        fields = ("id", "product_name", "category", "category_label", "description", "place", "purchase_location", "author", "like_count", "created_at", "image", "image_credit", "image_source")
 
 
 class PlaceListAPI(generics.ListAPIView):
@@ -65,7 +65,7 @@ class RecommendationListAPI(generics.ListAPIView):
         data = form.cleaned_data
         queryset = ProductRecommendation.objects.filter(status=ProductRecommendation.Status.APPROVED).select_related("user", "place").annotate(like_count=Count("likes")).order_by("-created_at", "-pk")
         if data["q"]:
-            queryset = queryset.filter(Q(product_name__icontains=data["q"]) | Q(description__icontains=data["q"]))
+            queryset = queryset.filter(Q(product_name__icontains=data["q"]) | Q(description__icontains=data["q"]) | Q(purchase_location__icontains=data["q"]))
         if data["category"]:
             queryset = queryset.filter(category=data["category"])
         if data["sort"] == "popular":

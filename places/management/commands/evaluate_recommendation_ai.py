@@ -1,6 +1,7 @@
 import asyncio
 import json
 import math
+import re
 import statistics
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,12 +38,17 @@ class Command(BaseCommand):
             "latency_median_ms": statistics.median(latencies) if latencies else None,
             "latency_p95_ms": latencies[math.ceil(len(latencies) * .95) - 1] if latencies else None,
             "rows": rows,
+            "location_exact_matches": sum(row.get("location_exact", False) for row in rows),
+            "location_case_count": sum("location_exact" in row for row in rows),
+            "feedback_topics_found": sum(sum(row.get("topics_found", {}).values()) for row in rows),
+            "feedback_topic_count": sum(len(row.get("topics_found", {})) for row in rows),
             "limitations": [
-                "Small synthetic French sample; not a general accuracy estimate.",
+                "Small synthetic French/English sample; not a general accuracy estimate.",
                 "Warnings identify claims needing evidence; they do not establish whether a claim is true or false.",
                 "Rewrites require exact source quotes and pass limited claim checks; author review remains necessary and truth is not verified.",
                 "Latency covers the provider and validation, without browser rendering or cache.",
                 "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues.",
+                "Feedback topics are checked by lexical markers on one synthetic review, not a general semantic-quality score.",
             ],
         }
         if options["output"]:
@@ -63,7 +69,11 @@ class Command(BaseCommand):
                     issues=[warning["issue"] for warning in result["warnings"]], elapsed_ms=result["elapsed_ms"],
                     exact_source_quotes=all(quote in case["description"] for quote in result["evidence_quotes"]),
                     missing_information=result["missing_information"],
+                    purchase_location=result["purchase_location"],
                 )
+                if "expected_location" in case:
+                    row["location_exact"] = result["purchase_location"] == case["expected_location"]
+                row["topics_found"] = {key: bool(re.search(pattern, result["description"], re.I)) for key, pattern in case.get("expected_topics", {}).items()}
             except GeminiUnavailableError:
                 row["error"] = "provider_unavailable_or_invalid"
             rows.append(row)
