@@ -10,7 +10,7 @@
                 <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'places:index' %}">Lieux</a>
                 <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'profile-overview' %}">Profil</a>
                 <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'waste-create' %}">Publier un déchet</a>
-                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'proof-create' %}">Ajouter une preuve</a>
+                <a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'proofs:new' %}">Ajouter une preuve</a>
                 {% if is_sponsor %}<a class="block rounded-sm-ui px-3 py-2 text-forest no-underline hover:bg-olive" href="{% url 'sponsor-dashboard' %}">Espace sponsor</a>{% endif %}
             </div>
         </details>

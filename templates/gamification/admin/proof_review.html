@@ -6,8 +6,8 @@
 <header class="ui-page-header">
   <div>
     <p class="ui-eyebrow">Administration · Examen</p>
-    <h1>Preuve #{{ proof.pk }} — {{ proof.get_proof_type_display }}</h1>
-    <p>Citoyen : <strong>{{ proof.user.email }}</strong> · Date : {{ proof.proof_date|date:"d M Y" }}</p>
+    <h1>Preuve #{{ proof.pk }} — {{ proof.proof_type.label_fr }}</h1>
+    <p>Citoyen : <strong>{{ proof.user.email }}</strong> · Date : {{ proof.document_date|date:"d M Y"|default:"—" }}</p>
   </div>
   <a href="{% url 'gamification:admin-proof-queue' %}" class="ui-btn-secondary text-sm">← Retour à la file</a>
 </header>
@@ -19,19 +19,8 @@
   <div class="space-y-5">
     <div class="ui-card p-5">
       <p class="mb-4 text-sm font-semibold text-forest">Document soumis</p>
-      {% if proof.file %}
-        {% with name=proof.file.name %}
-        {% if name|lower|slice:"-4:" == ".pdf" %}
-          <div class="rounded-xl border border-line bg-sand/50 p-8 text-center">
-            <p class="text-5xl mb-3">📄</p>
-            <a href="{{ proof.file.url }}" target="_blank" class="inline-flex items-center gap-2 rounded-full border border-palm/40 px-5 py-2.5 text-sm font-semibold text-palm-deep hover:bg-palm/10 transition-colors">
-              Ouvrir le PDF {% include "ui/icon.html" with name="arrow" %}
-            </a>
-          </div>
-        {% else %}
-          <img src="{{ proof.file.url }}" alt="Preuve" class="w-full rounded-xl border border-line object-contain max-h-[500px] bg-sand/30">
-        {% endif %}
-        {% endwith %}
+      {% if proof.has_file %}
+        <img src="{% url 'proofs:file' proof.pk %}" alt="Preuve" class="w-full rounded-xl border border-line object-contain max-h-[500px] bg-sand/30">
       {% endif %}
     </div>
 
@@ -39,10 +28,10 @@
     <div class="ui-card p-5">
       <p class="mb-4 text-sm font-semibold text-forest">Résultat OCR</p>
       <dl class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-        {% if ocr.extracted_date %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Date</dt><dd class="font-medium">{{ ocr.extracted_date|date:"d M Y" }}</dd></div>{% endif %}
-        {% if ocr.extracted_merchant %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Marchand</dt><dd class="font-medium">{{ ocr.extracted_merchant }}</dd></div>{% endif %}
-        {% if ocr.extracted_amount %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Montant</dt><dd class="font-medium">{{ ocr.extracted_amount }}</dd></div>{% endif %}
-        <div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Confiance</dt><dd class="font-medium">{{ ocr.confidence_score|floatformat:0 }}%</dd></div>
+        {% if proof.document_date %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Date</dt><dd class="font-medium">{{ proof.document_date|date:"d M Y" }}</dd></div>{% endif %}
+        {% if proof.merchant %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Marchand</dt><dd class="font-medium">{{ proof.merchant }}</dd></div>{% endif %}
+        {% if proof.amount %}<div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Montant</dt><dd class="font-medium">{{ proof.amount }}</dd></div>{% endif %}
+        <div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Confiance</dt><dd class="font-medium">{{ ocr.mean_confidence|floatformat:0 }}%</dd></div>
         <div class="rounded-lg bg-mist p-3"><dt class="text-xs text-muted">Décision OCR</dt><dd class="font-medium">{{ ocr.decision|default:"—" }}</dd></div>
       </dl>
       {% if ocr.raw_text %}

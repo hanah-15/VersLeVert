@@ -23,10 +23,7 @@ class Offer(models.Model):
     def image_list(self):
         urls = []
         if self.image:
-            try:
-                urls.append(self.image.url)
-            except Exception:
-                pass
+            urls.append(self.image.url)
         if self.image_url:
             urls.append(self.image_url.strip())
         if self.images_url:

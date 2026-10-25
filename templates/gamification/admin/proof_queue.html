@@ -38,7 +38,7 @@
     </div>
     <div class="min-w-0 flex-1">
       <div class="flex flex-wrap items-center gap-2">
-        <p class="font-semibold text-forest">{{ proof.get_proof_type_display }}</p>
+        <p class="font-semibold text-forest">{{ proof.proof_type.label_fr }}</p>
         <span class="rounded-full px-2.5 py-0.5 font-ui text-[11px] font-semibold
           {% if proof.status == 'PENDING' %}bg-sand text-muted{% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky{% endif %}">
           {{ proof.get_status_display }}
@@ -46,7 +46,7 @@
       </div>
       <p class="mt-0.5 text-xs text-muted">
         Citoyen : <span class="font-medium text-forest">{{ proof.user.email }}</span>
-        · Date doc : {{ proof.proof_date|date:"d M Y" }}
+        · Date doc : {{ proof.document_date|date:"d M Y"|default:"—" }}
         · Soumise : {{ proof.submitted_at|date:"d M Y H:i" }}
       </p>
     </div>

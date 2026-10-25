@@ -26,6 +26,7 @@ from accounts.views import ProfileOverviewView, ProfileSectionView
 from sponsor.views import redeem_reward
 
 urlpatterns = [
+    path("preuves/", include("gamification.proofs_urls")),
     path("admin/", admin.site.urls),
     path("dashboard/", include("core.urls_admin")),
     path("accounts/", include("accounts.urls")),

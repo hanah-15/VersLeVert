@@ -9,3 +9,14 @@ sqlparse==0.6.0
 typing_extensions==4.16.0
 tzdata==2026.5
 google-genai==2.33.0
+
+# Cloudinary storage (proof files, authenticated assets)
+cloudinary==1.44.0
+django-cloudinary-storage==0.3.0
+
+# OCR and image processing
+pytesseract==0.3.13
+opencv-python-headless==4.11.0.86
+numpy==2.3.1
+pillow-heif==0.22.0
+PyMuPDF==1.26.1

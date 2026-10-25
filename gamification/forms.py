@@ -2,59 +2,14 @@
 Gamification forms — M1-A
 """
 
-import hashlib
-
 from django import forms
-from django.core.exceptions import ValidationError
 
-from .models import Badge, EcoProof, ImpactFactor
+from .models import Badge, ImpactFactor
 
 
 # ---------------------------------------------------------------------------
 # EcoProof upload form (PT-01)
 # ---------------------------------------------------------------------------
-
-_ALLOWED_MIME = {"image/jpeg", "image/png", "application/pdf"}
-_MAX_BYTES    = 5 * 1024 * 1024  # 5 MB
-
-
-class EcoProofForm(forms.ModelForm):
-    """Form for citizens to upload an ecological proof."""
-
-    class Meta:
-        model  = EcoProof
-        fields = ["proof_type", "file", "proof_date", "source_url"]
-        widgets = {
-            "proof_date": forms.DateInput(attrs={"type": "date"}),
-            "source_url": forms.URLInput(attrs={"placeholder": "https://… (optionnel)"}),
-        }
-        labels = {
-            "proof_type": "Type de preuve",
-            "file":       "Fichier (JPG, PNG ou PDF — 5 Mo max)",
-            "proof_date": "Date de la preuve",
-            "source_url": "URL source",
-        }
-
-    def clean_file(self):
-        f = self.cleaned_data.get("file")
-        if f is None:
-            return f
-        if f.size > _MAX_BYTES:
-            raise ValidationError("Le fichier ne doit pas dépasser 5 Mo.")
-        if hasattr(f, "content_type") and f.content_type not in _ALLOWED_MIME:
-            raise ValidationError("Format non accepté. Utilisez JPG, PNG ou PDF.")
-        return f
-
-    def compute_hash(self) -> str:
-        """Compute SHA-256 of the uploaded file. Call after form.is_valid()."""
-        f = self.cleaned_data["file"]
-        f.seek(0)
-        sha = hashlib.sha256()
-        for chunk in iter(lambda: f.read(8192), b""):
-            sha.update(chunk)
-        f.seek(0)
-        return sha.hexdigest()
-
 
 # ---------------------------------------------------------------------------
 # ImpactFactor admin form (PT-09)

@@ -4,19 +4,27 @@ Covers citizen-facing pages: rewards catalogue, proof upload, proof list/detail,
 points history, and badges.
 """
 
+import logging
+import mimetypes
+from pathlib import Path
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django.db.models import Sum
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
-from .forms import EcoProofForm, PointsAdjustmentForm, ProofReviewForm
-from .models import Badge, EcoProof, ImpactFactor, PointsTransaction, UserBadge
+from .forms import PointsAdjustmentForm, ProofReviewForm
+from .models import Badge, EcoProof, ImpactFactor, PointsTransaction, ProofType, UserBadge
 from .services import PointsService
 
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Rewards catalogue — /rewards/  (SP-05)
@@ -75,36 +83,158 @@ class IndexView(LoginRequiredMixin, TemplateView):
 # Proof upload — /rewards/preuves/ajouter/  (PT-01)
 # ---------------------------------------------------------------------------
 
-class ProofSubmitView(LoginRequiredMixin, FormView):
-    template_name = "gamification/proofs/submit.html"
-    form_class    = EcoProofForm
+class ProofNewView(LoginRequiredMixin, TemplateView):
+    template_name = "gamification/proofs/new.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["points_balance"] = PointsService.balance(self.request.user)
+        proof_types = list(ProofType.objects.filter(is_active=True).order_by("category", "label_fr"))
+        from .services.pipeline import _period_start
+        from django.utils import timezone
+
+        now = timezone.now()
+        for proof_type in proof_types:
+            used = EcoProof.objects.filter(
+                user=self.request.user,
+                proof_type=proof_type,
+                status=EcoProof.Status.APPROVED,
+                submitted_at__gte=_period_start(proof_type.cap_period, now),
+            ).count()
+            proof_type.remaining_this_period = max(0, proof_type.cap_count - used)
+            proof_type.points_value = proof_type.points_awarded()
+        ctx["proof_types"] = proof_types
+        ctx["proof_categories"] = ProofType.Category.choices
+        ctx["status_url_template"] = reverse("proofs:status", kwargs={"pk": 0}).replace("/0/", "/__proof_id__/")
         return ctx
 
-    def form_valid(self, form):
-        # Compute file hash before saving to detect duplicates (BR-06)
-        file_hash = form.compute_hash()
-        if EcoProof.objects.filter(file_hash=file_hash).exists():
-            form.add_error("file", "Cette preuve a déjà été soumise (fichier identique détecté).")
-            return self.form_invalid(form)
 
-        proof = form.save(commit=False)
-        proof.user      = self.request.user
-        proof.file_hash = file_hash
+class ProofUploadView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        proof_type_id = request.POST.get("proof_type")
+        upload = request.FILES.get("file")
+        if not upload:
+            return JsonResponse({"error": "Choisissez une image ou un document."}, status=400)
+        max_bytes = settings.PROOF_MAX_UPLOAD_MB * 1024 * 1024
+        if upload.size > max_bytes:
+            return JsonResponse({
+                "error": f"Le fichier dépasse la limite de {settings.PROOF_MAX_UPLOAD_MB} Mo.",
+                "code": "FILE_TOO_LARGE",
+            }, status=413)
         try:
-            proof.save()
-        except IntegrityError:
-            form.add_error("file", "Cette preuve a déjà été soumise.")
-            return self.form_invalid(form)
+            proof_type = ProofType.objects.get(pk=proof_type_id, is_active=True)
+        except (ProofType.DoesNotExist, TypeError, ValueError):
+            return JsonResponse({"error": "Choisissez un type de preuve valide."}, status=400)
+        from .services.intake import IntakeError, process_intake
 
-        messages.success(
-            self.request,
-            "Votre preuve a été soumise. Analyse en cours… vous serez notifié(e) du résultat.",
+        source = "CAMERA" if request.POST.get("source") == "CAMERA" else "UPLOAD"
+        try:
+            proof = process_intake(request.user, proof_type, upload.read(max_bytes + 1), source=source)
+        except IntakeError as exc:
+            return JsonResponse({"error": exc.message_fr, "code": exc.code}, status=exc.status_code)
+        status_url = reverse("proofs:status", kwargs={"pk": proof.pk})
+        return JsonResponse(
+            {"proof_id": proof.pk, "status": proof.status, "status_url": status_url},
+            status=202,
         )
-        return redirect("gamification:my-proofs")
+
+
+class ProofStatusView(LoginRequiredMixin, View):
+    def get(self, request, pk, *args, **kwargs):
+        proof = get_object_or_404(EcoProof, pk=pk)
+        if proof.user_id != request.user.pk and not request.user.is_staff:
+            raise Http404
+        return JsonResponse({
+            "proof_id": proof.pk,
+            "status": proof.status,
+            "points_awarded": proof.points_awarded,
+            "reason": proof.rejection_reason_fr,
+        })
+
+
+class ProofFileView(LoginRequiredMixin, View):
+    def get(self, request, pk, *args, **kwargs):
+        proof = get_object_or_404(EcoProof, pk=pk)
+        if proof.user_id != request.user.pk and not request.user.is_staff:
+            raise Http404
+        if not proof.has_file:
+            raise Http404
+        if proof.legacy_file_path and not proof.cloudinary_public_id:
+            media_root = Path(settings.MEDIA_ROOT).resolve()
+            legacy_path = (media_root / proof.legacy_file_path).resolve()
+            try:
+                legacy_path.relative_to(media_root)
+            except ValueError:
+                raise Http404
+            if not legacy_path.is_file():
+                raise Http404
+            content_type = mimetypes.guess_type(legacy_path.name)[0] or "application/octet-stream"
+            if content_type not in {"image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"}:
+                content_type = "application/octet-stream"
+            response = FileResponse(
+                legacy_path.open("rb"),
+                content_type=content_type,
+                as_attachment=content_type in {"application/pdf", "application/octet-stream"},
+            )
+            response["Cache-Control"] = "private, no-store"
+            response["X-Content-Type-Options"] = "nosniff"
+            response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+            return response
+        try:
+            page_number = max(1, int(request.GET.get("page", "1")))
+            width = min(1200, max(1, int(request.GET.get("w", "1000"))))
+        except ValueError:
+            raise Http404
+        page_ids = [proof.cloudinary_public_id, *proof.extra_page_ids]
+        if page_number > len(page_ids):
+            raise Http404
+        from .services.storage import StorageError, get_storage
+        from .services.pipeline import _stored_file
+
+        version = proof.cloudinary_version if page_number == 1 else None
+        try:
+            image = get_storage().read(_stored_file(proof, page_ids[page_number - 1], version), width=width)
+        except StorageError:
+            logger.exception("Unable to read private proof image, proof_id=%s", proof.pk)
+            return HttpResponse("Le fichier est momentanément indisponible.", status=503)
+        response = HttpResponse(image, content_type="image/jpeg")
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        return response
+
+
+class ProofDeleteView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        proof = get_object_or_404(EcoProof, pk=pk, user=request.user)
+        if proof.status not in (EcoProof.Status.PENDING, EcoProof.Status.REJECTED):
+            return JsonResponse({"error": "Seules les preuves en attente ou refusées peuvent être supprimées."}, status=409)
+        from .services.storage import delete_legacy_file, get_storage
+
+        storage = get_storage()
+        ids = [proof.cloudinary_public_id, *proof.extra_page_ids]
+        try:
+            for public_id in filter(None, ids):
+                storage.delete(_proof_stored_file(proof, public_id))
+            delete_legacy_file(proof.legacy_file_path)
+        except Exception:
+            logger.exception("Unable to delete proof asset, proof_id=%s", proof.pk)
+            return JsonResponse({"error": "Le fichier n'a pas pu être supprimé. Réessayez plus tard."}, status=503)
+        proof.delete()
+        if "application/json" in request.headers.get("Accept", ""):
+            return JsonResponse({"deleted": True})
+        messages.success(request, "Preuve supprimée.")
+        return redirect("proofs:list")
+
+
+def _proof_stored_file(proof, public_id):
+    from .services.pipeline import _stored_file
+
+    return _stored_file(proof, public_id, proof.cloudinary_version if public_id == proof.cloudinary_public_id else None)
 
 
 # ---------------------------------------------------------------------------
@@ -284,7 +414,9 @@ class AdminProofQueueView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        status = self.request.GET.get("status", "PENDING")
+        status = self.request.GET.get("status", EcoProof.Status.NEEDS_REVIEW)
+        if status not in EcoProof.Status.values:
+            status = EcoProof.Status.NEEDS_REVIEW
         return (
             EcoProof.objects
             .filter(status=status)
@@ -294,7 +426,7 @@ class AdminProofQueueView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["status_filter"] = self.request.GET.get("status", "PENDING")
+        ctx["status_filter"] = self.request.GET.get("status", EcoProof.Status.NEEDS_REVIEW)
         ctx["status_choices"] = EcoProof.Status.choices
         return ctx
 
@@ -323,21 +455,19 @@ class AdminProofReviewView(LoginRequiredMixin, FormView):
         reason = form.cleaned_data.get("rejection_reason", "")
 
         if action == "approve":
-            self.proof.approve(self.request.user)
-            PointsService.credit(
-                user=self.proof.user,
-                action_type=self.proof.proof_type,
-                quantity=1,
-                source_type="eco_proof",
-                source_id=self.proof.pk,
-                reason=f"Preuve approuvée : {self.proof.get_proof_type_display()}",
-            )
-            messages.success(self.request, "Preuve approuvée et points crédités.")
+            from .services.pipeline import approve_proof
+            approve_proof(self.proof.pk, admin_user=self.request.user, note=reason)
+            messages.success(self.request, "Preuve approuvée et décision enregistrée.")
         elif action == "needs_review":
-            self.proof.flag_for_review(self.request.user)
+            self.proof.send_to_review(self.request.user, note=reason)
             messages.info(self.request, "Preuve marquée 'À examiner'.")
         else:
-            self.proof.reject(self.request.user, reason)
+            self.proof.reject("ADMIN_REJECTED", reason, admin_user=self.request.user, note=reason)
+            from accounts.models import Notification
+            Notification.objects.create(
+                user=self.proof.user,
+                message=f"Preuve refusée : {reason}"[:255],
+            )
             messages.warning(self.request, "Preuve rejetée.")
 
         return redirect("gamification:admin-proof-queue")

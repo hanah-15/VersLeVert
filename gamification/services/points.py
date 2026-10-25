@@ -32,7 +32,7 @@ class PointsService:
         We read the most recent ``balance_after`` from the ledger.
         Returns 0 if the user has no transactions yet.
         """
-        from .models import PointsTransaction  # local import to avoid circular deps
+        from ..models import PointsTransaction  # local import to avoid circular deps
         tx = (
             PointsTransaction.objects
             .filter(user=user)
@@ -65,7 +65,7 @@ class PointsService:
             source_id:   PK of the originating object.
             reason:      Short label for the ledger (e.g. "Collecte confirmée").
         """
-        from .models import ImpactFactor, PointsTransaction
+        from ..models import ImpactFactor, PointsTransaction
         from accounts.models import Notification
 
         # Resolve factor — fall back to 1 pt/unit if not found
@@ -89,19 +89,20 @@ class PointsService:
         balance = PointsService.balance(user) + pts
 
         try:
-            tx = PointsTransaction(
-                user=user,
-                direction=PointsTransaction.Direction.CREDIT,
-                action_type=action_type,
-                quantity=quantity,
-                points=pts,
-                balance_after=balance,
-                source_type=source_type or "",
-                source_id=source_id,
-                reason=reason,
-                factor_snapshot=snapshot,
-            )
-            tx.save()  # triggers the immutability guard (pk check skipped on first save)
+            with db_transaction.atomic():
+                tx = PointsTransaction(
+                    user=user,
+                    direction=PointsTransaction.Direction.CREDIT,
+                    action_type=action_type,
+                    quantity=quantity,
+                    points=pts,
+                    balance_after=balance,
+                    source_type=source_type or "",
+                    source_id=source_id,
+                    reason=reason,
+                    factor_snapshot=snapshot,
+                )
+                tx.save()  # triggers the immutability guard (pk check skipped on first save)
         except IntegrityError:
             # BR-02: already credited
             logger.info(
@@ -131,7 +132,7 @@ class PointsService:
 
         Returns ``None`` if the balance is insufficient.
         """
-        from .models import PointsTransaction
+        from ..models import PointsTransaction
 
         current = PointsService.balance(user)
         if current < amount:
@@ -167,7 +168,7 @@ class PointsService:
         *delta* may be positive or negative.
         The balance will never go below 0.
         """
-        from .models import PointsTransaction
+        from ..models import PointsTransaction
 
         current = PointsService.balance(user)
         new_balance = max(0, current + delta)
@@ -213,7 +214,7 @@ class PointsService:
 
         Evaluated entirely from PointsTransaction — never reads other models.
         """
-        from .models import Badge, PointsTransaction, UserBadge
+        from ..models import Badge, PointsTransaction, UserBadge
 
         already_earned = set(
             UserBadge.objects.filter(user=user).values_list("badge_id", flat=True)

@@ -55,7 +55,7 @@
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <p class="truncate text-sm font-semibold text-forest">{{ proof.get_proof_type_display }}</p>
+              <p class="truncate text-sm font-semibold text-forest">{{ proof.proof_type.label_fr }}</p>
               <span class="shrink-0 rounded-full px-2.5 py-0.5 font-ui text-[11px] font-semibold
                 {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
                 {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
@@ -66,10 +66,11 @@
             </div>
             <p class="mt-0.5 text-xs text-muted">
               Soumise le {{ proof.submitted_at|date:"d M Y" }}
-              · Date du document : {{ proof.proof_date|date:"d M Y" }}
+              {% if proof.document_date %} · Date du document : {{ proof.document_date|date:"d M Y" }}{% endif %}
+              {% if proof.points_awarded %} · +{{ proof.points_awarded }} pts{% endif %}
             </p>
-            {% if proof.status == 'REJECTED' and proof.rejection_reason %}
-              <p class="mt-1 truncate text-xs text-brick">↳ {{ proof.rejection_reason }}</p>
+            {% if proof.status == 'REJECTED' and proof.rejection_reason_fr %}
+              <p class="mt-1 truncate text-xs text-brick">↳ {{ proof.rejection_reason_fr }}</p>
             {% endif %}
           </div>
           <span class="shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 [&>svg]:h-4 [&>svg]:w-4">

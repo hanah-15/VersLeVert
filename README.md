@@ -74,6 +74,11 @@ L'application est disponible sur http://127.0.0.1:8000/ et l'administration sur
 http://127.0.0.1:8000/admin/. Pour arrêter uniquement la base de ce projet :
 `docker compose stop db`.
 
+### Preuves écologiques et OCR
+
+Les dépendances Tesseract, le stockage privé, les commandes et les étapes de test
+du module Eco-Proof sont documentés dans [PROOFS.md](./PROOFS.md).
+
 ### Gemini pour les lieux et recommandations
 
 Le module utilise le [SDK officiel Google GenAI](https://ai.google.dev/gemini-api/docs/libraries)
