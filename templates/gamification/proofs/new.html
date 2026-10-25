@@ -7,14 +7,47 @@
   <div>
     <p class="ui-eyebrow">Mes actions écologiques</p>
     <h1>Ajouter une preuve</h1>
-    <p>Choisissez votre action, ajoutez un justificatif et suivez sa validation.</p>
+    <p>Choisissez votre action, ajoutez un justificatif et obtenez une décision automatique.</p>
   </div>
 </header>
 
-<div id="proof-alert" class="mb-5 hidden" role="alert"></div>
 <form id="proof-upload-form" data-upload-url="{% url 'proofs:upload' %}"
       data-status-url-template="{{ status_url_template }}" class="space-y-6" novalidate>
   {% csrf_token %}
+  <section class="ui-content-panel" aria-labelledby="proof-rules-heading">
+    <details class="ui-card ui-card-pad">
+      <summary id="proof-rules-heading" class="cursor-pointer font-semibold text-forest">
+        Règles d'acceptation des preuves
+      </summary>
+      <ul class="mt-4 space-y-3 text-sm leading-relaxed text-carbon">
+        {% for proof_type in proof_rules %}
+        <li class="rounded-xl border border-line bg-white p-3">
+          <strong class="text-forest">{{ proof_type.label_fr }} :</strong>
+          {{ proof_type.description_fr }} {{ proof_type.tips_fr }}
+          {% if proof_type.effective_window_days %}
+          <span>Date acceptée jusqu'à {{ proof_type.effective_window_days }} jours.</span>
+          {% else %}
+          <span>Aucune date requise.</span>
+          {% endif %}
+          <span>Limite : {{ proof_type.cap_count }} preuve{% if proof_type.cap_count != 1 %}s{% endif %} {{ proof_type.get_cap_period_display|lower }}.</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="mt-4 text-sm leading-relaxed text-carbon">Les mêmes justificatifs ne peuvent pas être réutilisés. Chaque preuve reçoit une décision automatique ; elle est acceptée si les critères sont remplis, sinon elle est refusée avec une explication.</p>
+    </details>
+  </section>
+  {% if ai_consent_required %}
+  <section class="ui-content-panel" aria-labelledby="proof-ai-consent-heading">
+    <div class="ui-card ui-card-pad">
+      <h2 id="proof-ai-consent-heading" class="text-lg font-semibold text-forest">Analyse par intelligence artificielle</h2>
+      <p class="mt-2 text-sm leading-relaxed text-carbon">Votre document est envoyé à un service d'analyse IA pour en lire la date et le montant. Évitez de photographier des données personnelles inutiles.</p>
+      <label class="mt-4 flex cursor-pointer items-start gap-3 text-sm text-carbon">
+        <input id="proof-ai-consent" name="ai_consent" type="checkbox" value="on" required class="mt-1 rounded border-line text-palm focus:ring-palm">
+        <span>J'accepte l'envoi de mon document aux services d'analyse IA pour traiter cette preuve.</span>
+      </label>
+    </div>
+  </section>
+  {% endif %}
   <section class="ui-content-panel space-y-5" aria-labelledby="proof-types-heading">
     <div class="ui-card ui-card-pad">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -22,80 +55,141 @@
         <label class="w-full sm:max-w-sm"><span class="sr-only">Rechercher un type de preuve</span><input id="proof-type-search" type="search" placeholder="Rechercher une action…" class="ui-input w-full"></label>
       </div>
       {% for category, category_label in proof_categories %}
-      <div class="mt-6" data-proof-category>
-        <h3 class="mb-3 text-sm font-semibold text-forest">{{ category_label }}</h3>
+      <details class="mt-6" data-proof-category open>
+        <summary class="mb-3 cursor-pointer text-sm font-semibold text-forest">{{ category_label }}</summary>
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {% for proof_type in proof_types %}
           {% if proof_type.category == category %}
-          <label data-proof-card data-search="{{ proof_type.label_fr|lower }}" class="relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white p-4 transition hover:border-palm hover:shadow-card {% if proof_type.remaining_this_period == 0 %}cursor-not-allowed opacity-60{% endif %}">
-            <input type="radio" name="proof_type" value="{{ proof_type.pk }}" class="sr-only" {% if proof_type.remaining_this_period == 0 %}disabled{% endif %}>
+          <label data-proof-card data-search="{{ proof_type.label_fr|lower }} {{ proof_type.description_fr|lower }} {{ proof_type.tips_fr|lower }}" class="relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white p-4 transition hover:border-palm hover:shadow-card {% if proof_type.remaining_this_period == 0 %}cursor-not-allowed bg-mist{% endif %}">
+            <input type="radio" name="proof_type" value="{{ proof_type.pk }}" data-proof-label="{{ proof_type.label_fr }}" data-proof-tips="{{ proof_type.tips_fr }}" data-proof-points="+{{ proof_type.points_value }} pts" class="sr-only" {% if proof_type.remaining_this_period == 0 %}disabled{% endif %}>
             <span class="flex items-center justify-between gap-3">
-              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-sky/20 text-sky [&>svg]:h-5 [&>svg]:w-5">{% include "ui/icon.html" with name=proof_type.icon %}</span>
+              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-mist text-forest [&>svg]:h-5 [&>svg]:w-5">{% include "ui/icon.html" with name=proof_type.icon %}</span>
               <strong class="rounded-full bg-mist px-3 py-1 text-xs text-forest">+{{ proof_type.points_value }} pts</strong>
             </span>
             <span class="font-semibold text-forest">{{ proof_type.label_fr }}</span>
-            <span class="text-xs leading-relaxed text-muted">{{ proof_type.tips_fr }}</span>
+            <span class="text-xs leading-relaxed text-carbon">{{ proof_type.tips_fr }}</span>
             {% if proof_type.remaining_this_period == 0 %}
             <span class="text-xs font-semibold text-brick">Limite atteinte pour cette période</span>
             {% else %}
-            <span class="text-xs text-muted">Jusqu'à {{ proof_type.cap_count }} preuve(s) {{ proof_type.get_cap_period_display|lower }}</span>
+            <span class="text-xs text-forest">Jusqu'à {{ proof_type.cap_count }} preuve{% if proof_type.cap_count != 1 %}s{% endif %} {{ proof_type.get_cap_period_display|lower }}</span>
             {% endif %}
           </label>
           {% endif %}
           {% endfor %}
         </div>
-      </div>
+      </details>
       {% endfor %}
     </div>
   </section>
 
-  <section id="proof-step-document" class="ui-content-panel hidden space-y-5" aria-labelledby="proof-document-heading">
-    <div class="ui-card ui-card-pad">
-      <span class="ui-eyebrow">Étape 2 sur 3</span>
-      <h2 id="proof-document-heading" class="mt-1 text-xl font-semibold text-forest">Ajoutez votre document</h2>
-      <ul class="mt-3 list-inside list-disc space-y-1 text-sm text-muted">
-        <li>Posez le document à plat.</li><li>Choisissez une bonne lumière, sans reflet.</li><li>Gardez toute la page visible, avec la date et le total.</li>
+  <dialog id="proof-flow-modal" class="proof-modal" aria-labelledby="proof-modal-title">
+    <div class="proof-modal-shell">
+      <header class="proof-modal-header">
+        <div class="min-w-0">
+          <p class="ui-eyebrow">Ajouter une preuve</p>
+          <h2 id="proof-modal-title" class="mt-1 text-xl font-semibold text-forest">Ajoutez votre justificatif</h2>
+        </div>
+        <button id="proof-modal-close" type="button" class="proof-icon-button" aria-label="Fermer la fenêtre">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <ol class="proof-stepper" aria-label="Progression">
+        <li class="proof-step" data-modal-step="type"><span class="proof-step-dot" aria-hidden="true">1</span><span>Type</span></li>
+        <li class="proof-step is-current" data-modal-step="document" aria-current="step"><span class="proof-step-dot" aria-hidden="true">2</span><span>Document</span></li>
+        <li class="proof-step" data-modal-step="analysis"><span class="proof-step-dot" aria-hidden="true">3</span><span>Analyse</span></li>
+      </ol>
+      <div class="proof-modal-scroll">
+    <div id="proof-alert" class="proof-alert hidden" role="alert"></div>
+    <section id="proof-step-document" class="proof-modal-body" aria-label="Ajouter le justificatif">
+      <p class="ui-eyebrow">Étape 2 sur 3</p>
+      <div class="proof-selected">
+        <span class="proof-selected-icon" aria-hidden="true">{% include "ui/icon.html" with name="document" %}</span>
+        <div class="min-w-0 flex-1">
+          <p id="proof-selected-label" class="font-semibold text-forest"></p>
+          <p id="proof-selected-tip" class="mt-0.5 text-sm leading-relaxed text-carbon"></p>
+        </div>
+        <span id="proof-selected-points" class="shrink-0 rounded-full border border-line bg-white px-3 py-1 text-xs font-bold text-forest"></span>
+        <button id="proof-change-type" type="button" class="proof-link">Changer</button>
+      </div>
+      <ul class="proof-checklist">
+        <li>Image nette, bien éclairée, sans reflet.</li>
+        <li>Document entier visible, avec sa date, son total et le commerçant.</li>
+        <li>Si possible, masquez votre nom et votre adresse.</li>
       </ul>
-      <div class="mt-5 flex flex-wrap gap-3">
-        <button id="camera-open" type="button" class="ui-button ui-button-secondary hidden">Prendre une photo</button>
-        <button id="camera-fallback-open" type="button" class="ui-button ui-button-secondary">Prendre une photo avec l'appareil</button>
-        <button id="choose-proof-file" type="button" class="ui-button ui-button-primary">Choisir un fichier</button>
+      <div class="proof-actions">
+        <button id="camera-open" type="button" class="proof-action hidden">
+          <span class="proof-action-icon" aria-hidden="true">{% include "ui/icon.html" with name="camera" %}</span>
+          <span class="proof-action-title">Prendre une photo</span>
+          <span class="proof-action-text">Caméra avec cadre de guidage</span>
+        </button>
+        <button id="camera-fallback-open" type="button" class="proof-action">
+          <span class="proof-action-icon" aria-hidden="true">{% include "ui/icon.html" with name="camera" %}</span>
+          <span class="proof-action-title">Prendre une photo</span>
+          <span class="proof-action-text">Avec l'appareil photo</span>
+        </button>
+        <button id="choose-proof-file" type="button" class="proof-action">
+          <span class="proof-action-icon" aria-hidden="true">{% include "ui/icon.html" with name="document" %}</span>
+          <span class="proof-action-title">Choisir un fichier</span>
+          <span class="proof-action-text">JPG, PNG, HEIC ou PDF</span>
+        </button>
       </div>
       <input id="proof-file" type="file" accept="image/jpeg,image/png,image/heic,image/heif,application/pdf" class="sr-only">
       <input id="camera-fallback" type="file" accept="image/*" capture="environment" class="sr-only">
-      <div id="proof-drop-zone" class="mt-4 rounded-2xl border-2 border-dashed border-palm/50 bg-mist p-8 text-center text-sm text-muted" tabindex="0">Ou déposez votre fichier ici</div>
-      <div id="camera-panel" class="mt-5 hidden space-y-4 rounded-2xl bg-carbon p-4 text-white">
-        <div class="relative mx-auto max-w-2xl overflow-hidden rounded-xl bg-black">
-          <video id="camera-video" autoplay playsinline muted class="max-h-[65vh] w-full object-contain"></video>
-          <div class="pointer-events-none absolute inset-[8%] rounded-lg border-2 border-white/80"></div>
-          <p class="absolute bottom-3 left-0 right-0 text-center text-sm text-white">Placez le document dans le cadre</p>
+      <div id="proof-drop-zone" class="proof-dropzone" tabindex="0" role="button" aria-label="Déposer un fichier ou appuyer pour en choisir un">Ou glissez-déposez votre fichier ici</div>
+      <div id="camera-panel" class="proof-camera hidden">
+        <div class="proof-camera-view">
+          <video id="camera-video" autoplay playsinline muted></video>
+          <div class="proof-camera-frame" aria-hidden="true"></div>
+          <p class="proof-camera-hint">Placez le document dans le cadre</p>
         </div>
         <canvas id="camera-canvas" class="hidden"></canvas>
         <p id="camera-error" class="hidden text-sm text-red-200" role="alert"></p>
-        <div class="flex flex-wrap justify-center gap-3">
-          <button id="camera-capture" type="button" class="ui-button ui-button-primary">Capturer</button>
-          <button id="camera-switch" type="button" class="ui-button ui-button-secondary hidden">Changer de caméra</button>
+        <div class="proof-camera-controls">
           <button id="camera-close" type="button" class="ui-button ui-button-secondary">Fermer</button>
+          <button id="camera-capture" type="button" class="proof-capture" aria-label="Capturer la photo"></button>
+          <button id="camera-switch" type="button" class="ui-button ui-button-secondary hidden">Changer de caméra</button>
         </div>
       </div>
-      <div id="proof-preview-panel" class="mt-5 hidden space-y-4">
-        <img id="proof-preview" alt="Aperçu du document" class="mx-auto max-h-96 rounded-xl border border-line bg-white object-contain">
-        <p id="proof-file-name" class="text-center text-sm text-muted"></p>
-        <div class="flex flex-wrap justify-center gap-3">
+      <div id="proof-preview-panel" class="hidden space-y-4">
+        <div class="proof-preview-frame">
+          <img id="proof-preview" alt="Aperçu du document">
+        </div>
+        <p id="proof-file-name" class="text-center text-sm text-carbon"></p>
+        <div class="proof-footer">
           <button id="proof-retry-file" type="button" class="ui-button ui-button-secondary">Reprendre</button>
-          <button id="proof-send" type="submit" class="ui-button ui-button-primary">Envoyer pour vérification</button>
+          <button id="proof-send" type="submit" class="ui-button ui-button-primary">Envoyer pour analyse</button>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="proof-progress" class="ui-content-panel hidden" aria-live="polite">
-    <div class="ui-card ui-card-pad text-center">
-      <span class="ui-eyebrow">Étape 3 sur 3</span>
-      <h2 class="mt-2 text-xl font-semibold text-forest">Analyse en cours…</h2>
-      <p id="proof-progress-message" class="mt-2 text-sm text-muted">Votre document est en cours de traitement.</p>
+    <section id="proof-progress" class="proof-modal-body hidden" aria-live="polite">
+      <p class="ui-eyebrow">Étape 3 sur 3</p>
+      <h3 id="proof-progress-title" class="text-lg font-semibold text-forest">Analyse en cours…</h3>
+      <p id="proof-progress-message" class="mt-1 text-sm text-carbon" role="status">Votre document est en cours de traitement.</p>
+      <ol id="proof-progress-steps" class="proof-stages">
+        <li data-proof-stage="upload" data-state="pending" class="proof-stage"><span class="proof-stage-icon" aria-hidden="true"></span><span>1. Envoi sécurisé</span></li>
+        <li data-proof-stage="ai" data-state="pending" class="proof-stage"><span class="proof-stage-icon" aria-hidden="true"></span><span>2. Lecture par l'IA</span></li>
+        <li data-proof-stage="result" data-state="pending" class="proof-stage"><span class="proof-stage-icon" aria-hidden="true"></span><span>3. Décision automatique</span></li>
+      </ol>
+      <div id="proof-ai-result" class="proof-result hidden">
+        <span class="inline-flex rounded-full bg-mist px-3 py-1 text-xs font-bold text-forest">Analysé par IA</span>
+        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+          <div><dt class="font-semibold text-forest">Date lue</dt><dd data-ai-field="date" class="mt-1 text-carbon">—</dd></div>
+          <div><dt class="font-semibold text-forest">Montant lu</dt><dd data-ai-field="amount" class="mt-1 text-carbon">—</dd></div>
+          <div><dt class="font-semibold text-forest">Partenaire lu</dt><dd data-ai-field="merchant" class="mt-1 text-carbon">—</dd></div>
+        </dl>
+        <details class="mt-4 text-sm">
+          <summary class="cursor-pointer font-semibold text-forest">Texte reconnu</summary>
+          <pre data-ai-field="transcript" class="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-mist p-3 text-xs text-carbon"></pre>
+        </details>
+      </div>
+      <div class="proof-footer">
+        <button id="proof-progress-close" type="button" class="ui-button ui-button-secondary" disabled>Fermer</button>
+      </div>
+    </section>
+      </div>
     </div>
-  </section>
+  </dialog>
 </form>
 <script src="{% static 'gamification/proofs.js' %}" defer></script>
 <script src="{% static 'gamification/camera.js' %}" defer></script>

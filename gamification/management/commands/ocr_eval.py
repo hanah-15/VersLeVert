@@ -18,6 +18,7 @@ from gamification.ocr.parsers import (
 )
 from gamification.ocr.preprocess import compute_quality_metrics
 from gamification.services.scoring import decision_from_score, score_proof
+from gamification.services.rules import effective_window_days
 
 
 class Command(BaseCommand):
@@ -39,7 +40,6 @@ class Command(BaseCommand):
             "count": 0,
             "confidence_sum": 0.0,
             "approved": 0,
-            "review": 0,
             "rejected": 0,
         })
         confusion = Counter()
@@ -56,7 +56,6 @@ class Command(BaseCommand):
                 expected = row.get("expected", "").strip().upper()
                 if expected not in {
                     EcoProof.Status.APPROVED,
-                    EcoProof.Status.NEEDS_REVIEW,
                     EcoProof.Status.REJECTED,
                 }:
                     raise CommandError(f"Invalid expected decision on CSV line {line_number}: {expected!r}")
@@ -71,12 +70,13 @@ class Command(BaseCommand):
                 result = read_document(image_bytes)
                 metrics = compute_quality_metrics(image_bytes).to_dict()
                 _, indices = match_keyword_groups(result.text, proof_type.keyword_groups or [])
-                valid = proof_type.photo_only or check_keyword_requirements(
+                valid = check_keyword_requirements(
                     proof_type.keyword_groups or [], indices, proof_type.min_groups
                 )
                 document_date = pick_best_date(extract_dates(result.text), result.text)
                 amount = pick_best_amount(extract_amounts(result.text), result.text)
                 now = timezone.now().date()
+                window_days = effective_window_days(proof_type)
                 if (
                     metrics["short_side"] < max(1, settings.PROOF_MIN_SHORT_SIDE_PX // 2)
                     or metrics["blur"] < settings.PROOF_BLUR_MIN_LAPLACIAN_VAR / 4
@@ -88,8 +88,8 @@ class Command(BaseCommand):
                     decision = EcoProof.Status.REJECTED
                 elif (
                     document_date
-                    and proof_type.window_days is not None
-                    and (now - document_date).days > proof_type.window_days
+                    and window_days is not None
+                    and (now - document_date).days > window_days
                 ):
                     decision = EcoProof.Status.REJECTED
                 elif not valid:
@@ -99,6 +99,7 @@ class Command(BaseCommand):
                         confidence=result.mean_conf,
                         matched_groups=len(indices),
                         total_groups=len(proof_type.keyword_groups or []),
+                        requires_date=proof_type.requires_date,
                         has_valid_date=bool(document_date),
                         has_amount=amount is not None,
                         requires_amount=proof_type.requires_amount,
@@ -106,14 +107,13 @@ class Command(BaseCommand):
                         source=EcoProof.Source.UPLOAD,
                     )
                     flags = ["OCR_FAILED"] if not result.text.strip() else []
-                    decision = decision_from_score(score, proof_type, flags)
+                    decision = decision_from_score(score, flags)
 
                 key = proof_code
                 totals[key]["count"] += 1
                 totals[key]["confidence_sum"] += result.mean_conf
                 totals[key][{
                     EcoProof.Status.APPROVED: "approved",
-                    EcoProof.Status.NEEDS_REVIEW: "review",
                     EcoProof.Status.REJECTED: "rejected",
                 }[decision]] += 1
                 confusion[(expected, decision)] += 1
@@ -121,12 +121,12 @@ class Command(BaseCommand):
                     mismatches += 1
                     self.stdout.write(f"{filename}: expected {expected}, got {decision}")
 
-        self.stdout.write("Type | Samples | Approved | Review | Rejected | Average OCR confidence")
+        self.stdout.write("Type | Samples | Approved | Rejected | Average OCR confidence")
         for proof_code, stats in sorted(totals.items()):
             average = stats["confidence_sum"] / stats["count"]
             self.stdout.write(
                 f"{proof_code} | {stats['count']} | {stats['approved']} | "
-                f"{stats['review']} | {stats['rejected']} | {average:.3f}"
+                f"{stats['rejected']} | {average:.3f}"
             )
         total = sum(item["count"] for item in totals.values())
         correct = sum(count for (expected, actual), count in confusion.items() if expected == actual)

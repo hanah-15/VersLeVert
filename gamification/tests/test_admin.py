@@ -1,15 +1,14 @@
-from unittest import mock
 from pathlib import Path
 import tempfile
+from unittest import mock
 
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from unittest import mock
 
-from accounts.models import Notification, User
+from accounts.models import User
 from gamification.admin import EcoProofAdmin, OcrAnalysisAdmin
-from gamification.models import EcoProof, OcrAnalysis, ProofType
+from gamification.models import AiCallLog, EcoProof, OcrAnalysis, ProofType
 
 
 class ProofAdminTests(TestCase):
@@ -41,6 +40,27 @@ class ProofAdminTests(TestCase):
     def test_ocr_admin_references_current_confidence_field(self):
         self.assertIn("mean_confidence", OcrAnalysisAdmin.list_display)
         self.assertTrue(hasattr(OcrAnalysis, "mean_confidence"))
+
+    def test_ai_call_log_admin_shows_daily_provider_totals(self):
+        admin_user = User.objects.create_superuser(
+            username="admin-log-test",
+            email="admin-log@example.com",
+            password="AdminTestPass123!",
+        )
+        AiCallLog.objects.create(
+            provider="gemini",
+            status=AiCallLog.Status.OK,
+            latency_ms=125,
+            request_count=2,
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse("admin:gamification_aicalllog_changelist"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Totaux des fournisseurs aujourd'hui")
+        self.assertContains(response, "gemini")
+        self.assertContains(response, "125 ms")
 
     @mock.patch("gamification.services.storage.get_storage")
     def test_proof_file_proxy_requires_owner_or_staff(self, get_storage):
@@ -75,52 +95,13 @@ class ProofAdminTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(b"".join(response.streaming_content), b"legacy-image")
 
-    def test_reject_action_requires_reason_and_keeps_proof_unchanged(self):
+    def test_proof_admin_has_no_manual_decision_actions(self):
         admin = EcoProofAdmin(EcoProof, AdminSite())
-        request = RequestFactory().post("/")
+        request = RequestFactory().get("/")
         request.user = self.user
 
-        with mock.patch.object(admin, "message_user") as message_user:
-            admin.action_reject(request, EcoProof.objects.filter(pk=self.proof.pk))
-
-        self.proof.refresh_from_db()
-        self.assertEqual(self.proof.status, EcoProof.Status.PENDING)
-        self.assertFalse(Notification.objects.filter(user=self.user).exists())
-        message_user.assert_called_once()
-
-    def test_reject_action_records_reason_and_does_not_reject_approved_proofs(self):
-        reviewer = User.objects.create_user(
-            username="proof-reviewer",
-            email="reviewer@example.com",
-            password="test-password",
-            is_staff=True,
-        )
-        approved = EcoProof.objects.create(
-            user=self.user,
-            proof_type=self.proof.proof_type,
-            status=EcoProof.Status.APPROVED,
-        )
-        request = RequestFactory().post("/", {
-            "rejection_reason": "Illisible",
-            "rejection_detail": "Le justificatif ne peut pas être lu.",
-        })
-        request.user = reviewer
-        admin = EcoProofAdmin(EcoProof, AdminSite())
-
-        with mock.patch.object(admin, "message_user"):
-            admin.action_reject(
-                request,
-                EcoProof.objects.filter(pk__in=[self.proof.pk, approved.pk]),
-            )
-
-        self.proof.refresh_from_db()
-        approved.refresh_from_db()
-        self.assertEqual(self.proof.status, EcoProof.Status.REJECTED)
-        self.assertEqual(self.proof.rejection_code, "ADMIN_REJECTED")
-        self.assertEqual(self.proof.reviewed_by, reviewer)
-        self.assertEqual(self.proof.review_note, "Illisible — Le justificatif ne peut pas être lu.")
-        self.assertEqual(approved.status, EcoProof.Status.APPROVED)
-        self.assertTrue(Notification.objects.filter(
-            user=self.user,
-            message__startswith="Preuve refusée : Illisible",
-        ).exists())
+        self.assertIn("status", admin.readonly_fields)
+        self.assertFalse(any(
+            "approv" in action_name or "reject" in action_name or "review" in action_name
+            for action_name in admin.get_actions(request)
+        ))

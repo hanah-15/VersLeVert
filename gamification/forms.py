@@ -76,34 +76,3 @@ class PointsAdjustmentForm(forms.Form):
         max_length=255,
         widget=forms.Textarea(attrs={"rows": 3}),
     )
-
-
-# ---------------------------------------------------------------------------
-# EcoProof review form — admin use (PT-06)
-# ---------------------------------------------------------------------------
-
-class ProofReviewForm(forms.Form):
-    ACTION_CHOICES = [
-        ("approve",      "Approuver"),
-        ("needs_review", "Mettre en révision"),
-        ("reject",       "Rejeter"),
-    ]
-    action           = forms.ChoiceField(
-        choices=ACTION_CHOICES,
-        widget=forms.RadioSelect,
-        label="Décision",
-    )
-    rejection_reason = forms.CharField(
-        label="Motif de rejet",
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 3}),
-        help_text="Obligatoire si vous rejetez la preuve.",
-    )
-
-    def clean(self):
-        data   = super().clean()
-        action = data.get("action")
-        reason = data.get("rejection_reason", "").strip()
-        if action == "reject" and not reason:
-            raise ValidationError({"rejection_reason": "Le motif est obligatoire en cas de rejet."})
-        return data

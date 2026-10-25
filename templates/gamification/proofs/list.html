@@ -46,11 +46,9 @@
           <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl [&>svg]:h-5 [&>svg]:w-5
             {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
             {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
-            {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky
             {% else %}bg-sand text-muted{% endif %}">
             {% if proof.status == 'APPROVED' %}{% include "ui/icon.html" with name="check" %}
             {% elif proof.status == 'REJECTED' %}{% include "ui/icon.html" with name="info" %}
-            {% elif proof.status == 'NEEDS_REVIEW' %}{% include "ui/icon.html" with name="search" %}
             {% else %}{% include "ui/icon.html" with name="clock" %}{% endif %}
           </div>
           <div class="min-w-0 flex-1">
@@ -59,7 +57,6 @@
               <span class="shrink-0 rounded-full px-2.5 py-0.5 font-ui text-[11px] font-semibold
                 {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
                 {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
-                {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky
                 {% else %}bg-sand text-muted{% endif %}">
                 {{ proof.get_status_display }}
               </span>

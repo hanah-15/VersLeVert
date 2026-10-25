@@ -84,11 +84,6 @@ class ProofType(models.Model):
     cap_period      = models.CharField(max_length=10, choices=CapPeriod.choices, verbose_name="période du cap")
 
     # Special modes
-    always_review   = models.BooleanField(
-        default=False,
-        verbose_name="toujours examiner manuellement",
-        help_text="Forcé à True pour les preuves ≥ 60 pts.",
-    )
     photo_only      = models.BooleanField(
         default=False,
         verbose_name="photo uniquement (pas d'OCR)",
@@ -128,7 +123,6 @@ class EcoProof(models.Model):
         PENDING      = "PENDING",      "En attente"
         PROCESSING   = "PROCESSING",   "En cours d'analyse"
         APPROVED     = "APPROVED",     "Approuvée"
-        NEEDS_REVIEW = "NEEDS_REVIEW", "À examiner"
         REJECTED     = "REJECTED",     "Rejetée"
 
     class Source(models.TextChoices):
@@ -302,43 +296,6 @@ class EcoProof(models.Model):
         self.status = self.Status.PROCESSING
         self.save(update_fields=["status", "updated_at"])
 
-    def approve(self, admin_user=None, note: str = "") -> None:
-        self.status = self.Status.APPROVED
-        self.rejection_code = ""
-        self.rejection_reason_fr = ""
-        if admin_user:
-            self.reviewed_by = admin_user
-            self.reviewed_at = timezone.now()
-            self.review_note = note
-        self.save(update_fields=[
-            "status", "rejection_code", "rejection_reason_fr",
-            "reviewed_by", "reviewed_at", "review_note", "updated_at",
-        ])
-
-    def reject(self, code: str, reason_fr: str, admin_user=None, note: str = "") -> None:
-        self.status = self.Status.REJECTED
-        self.rejection_code = code
-        self.rejection_reason_fr = reason_fr
-        if admin_user:
-            self.reviewed_by = admin_user
-            self.reviewed_at = timezone.now()
-            self.review_note = note
-        self.save(update_fields=[
-            "status", "rejection_code", "rejection_reason_fr",
-            "reviewed_by", "reviewed_at", "review_note", "updated_at",
-        ])
-
-    def send_to_review(self, admin_user=None, note: str = "") -> None:
-        self.status = self.Status.NEEDS_REVIEW
-        if admin_user:
-            self.reviewed_by = admin_user
-            self.reviewed_at = timezone.now()
-            self.review_note = note
-        self.save(update_fields=[
-            "status", "reviewed_by", "reviewed_at", "review_note", "updated_at",
-        ])
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # OcrAnalysis — full OCR pipeline result, 1:1 with EcoProof
 # ─────────────────────────────────────────────────────────────────────────────
@@ -378,6 +335,13 @@ class OcrAnalysis(models.Model):
 
     # Pipeline metadata
     engine              = models.CharField(max_length=80, default="tesseract", verbose_name="moteur OCR")
+    provider            = models.CharField(max_length=30, blank=True, default="", verbose_name="fournisseur OCR")
+    provider_model      = models.CharField(max_length=100, blank=True, default="", verbose_name="modèle fournisseur")
+    structured_result   = models.JSONField(default=dict, blank=True, verbose_name="résultat structuré validé")
+    latency_ms          = models.PositiveIntegerField(null=True, blank=True, verbose_name="latence fournisseur (ms)")
+    fallback_chain      = models.JSONField(default=list, blank=True, verbose_name="chaîne de repli")
+    error_code          = models.CharField(max_length=50, blank=True, default="", verbose_name="code d'erreur IA")
+    usage               = models.JSONField(default=dict, blank=True, verbose_name="consommation fournisseur")
     lang_used           = models.CharField(max_length=20, blank=True, default="", verbose_name="langue OCR")
     duration_ms         = models.PositiveIntegerField(null=True, blank=True, verbose_name="durée (ms)")
     flags               = models.JSONField(
@@ -399,6 +363,46 @@ class OcrAnalysis(models.Model):
 
     def __str__(self) -> str:
         return f"OCR #{self.eco_proof_id} — score {self.score:.0%}"
+
+
+class AiCallLog(models.Model):
+    class Status(models.TextChoices):
+        OK = "OK", "Succès"
+        TIMEOUT = "TIMEOUT", "Délai dépassé"
+        QUOTA = "QUOTA", "Quota dépassé"
+        ERROR = "ERROR", "Erreur fournisseur"
+        BAD_RESPONSE = "BAD_RESPONSE", "Réponse invalide"
+        CACHED = "CACHED", "Résultat réutilisé"
+        SKIPPED = "SKIPPED", "Appel ignoré"
+
+    provider = models.CharField(max_length=30)
+    proof = models.ForeignKey(
+        EcoProof,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="ai_call_logs",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="proof_ai_call_logs",
+    )
+    status = models.CharField(max_length=20, choices=Status.choices)
+    latency_ms = models.PositiveIntegerField(default=0)
+    request_count = models.PositiveSmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["created_at", "provider"])]
+        ordering = ["-created_at"]
+        verbose_name = "Appel IA des preuves"
+        verbose_name_plural = "Appels IA des preuves"
+
+    def __str__(self):
+        return f"{self.provider} · {self.status} · {self.created_at:%Y-%m-%d %H:%M}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

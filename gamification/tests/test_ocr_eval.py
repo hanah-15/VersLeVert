@@ -22,7 +22,6 @@ class OcrEvalCommandTests(TestCase):
             keyword_groups=[{"terms": ["facture"], "required": True}],
             min_groups=1,
             requires_date=False,
-            always_review=True,
         )
 
     @override_settings(PROOF_MIN_SHORT_SIDE_PX=700, PROOF_BLUR_MIN_LAPLACIAN_VAR=60)
@@ -51,13 +50,13 @@ class OcrEvalCommandTests(TestCase):
                 writer.writerow({
                     "filename": "sample.jpg",
                     "proof_type": self.proof_type.code,
-                    "expected": "NEEDS_REVIEW",
+                    "expected": "APPROVED",
                 })
 
             stdout = StringIO()
             call_command("ocr_eval", str(samples), "--labels", str(labels), stdout=stdout)
 
-        self.assertIn("EVAL_TEST | 1 | 0 | 1 | 0 | 0.950", stdout.getvalue())
+        self.assertIn("EVAL_TEST | 1 | 1 | 0 | 0.950", stdout.getvalue())
         self.assertIn("Accuracy: 1/1 (100.0%)", stdout.getvalue())
         read_document.assert_called_once()
         quality.assert_called_once()
@@ -74,7 +73,7 @@ class OcrEvalCommandTests(TestCase):
                 writer.writerow({
                     "filename": "..\\outside.jpg",
                     "proof_type": self.proof_type.code,
-                    "expected": "NEEDS_REVIEW",
+                    "expected": "REJECTED",
                 })
 
             with self.assertRaises(CommandError):

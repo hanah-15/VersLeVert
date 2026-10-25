@@ -201,6 +201,66 @@
   .app-content table { @apply w-full border-collapse text-left text-sm; }
   .app-content th { @apply border-b border-line bg-palm/15 p-3 text-xs font-bold text-muted; }
   .app-content td { @apply border-b border-line p-3; }
+
+  .proof-modal { @apply w-full max-w-2xl rounded-3xl border border-line bg-white p-0 text-carbon shadow-2xl; max-height: min(92vh, 52rem); overflow: hidden; margin: auto; }
+  .proof-modal::backdrop { background: rgb(33 33 33 / 0.6); }
+  .proof-modal[open] { animation: proof-modal-in 220ms ease-out; }
+  .proof-modal-shell { display: flex; flex-direction: column; max-height: min(92vh, 52rem); }
+  .proof-modal-header { @apply flex items-start justify-between gap-4 px-6 pb-4 pt-6; }
+  .proof-modal-scroll { overflow-y: auto; }
+  .proof-modal-body { @apply space-y-5 px-6 pb-6 pt-5; }
+  .proof-icon-button { @apply grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-white text-forest transition hover:bg-mist focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky; }
+  .proof-link { @apply shrink-0 text-sm font-semibold text-forest underline hover:text-carbon focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky; }
+  .proof-stepper { @apply flex items-center border-b border-line px-6 pb-4; }
+  .proof-step { @apply flex flex-1 items-center gap-2 text-sm font-semibold text-carbon; }
+  .proof-step:not(:first-child)::before { content: ""; @apply mr-2 h-0.5 flex-1 bg-line; }
+  .proof-step-dot { @apply grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-line bg-white text-xs font-bold; }
+  .proof-step.is-current .proof-step-dot { @apply border-forest bg-forest text-white; }
+  .proof-step.is-done .proof-step-dot { @apply border-olive bg-olive text-forest; }
+  .proof-step.is-current, .proof-step.is-done { @apply text-forest; }
+  .proof-alert { @apply mx-6 mt-4 rounded-xl border-2 border-brick bg-white p-4 text-sm text-carbon; }
+  .proof-selected { @apply flex items-center gap-3 rounded-2xl border border-line bg-mist p-4; }
+  .proof-selected-icon { @apply grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-forest [&>svg]:h-5 [&>svg]:w-5; }
+  .proof-checklist { @apply space-y-1 text-sm text-carbon; list-style: none; }
+  .proof-checklist li::before { content: "✓"; @apply mr-2 font-bold text-forest; }
+  .proof-actions { @apply grid gap-3 sm:grid-cols-2; }
+  .proof-action { @apply grid gap-1 rounded-2xl border-2 border-line bg-white p-5 text-left transition hover:border-palm hover:bg-mist focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky; }
+  .proof-action-icon { @apply mb-2 grid h-12 w-12 place-items-center rounded-full bg-forest text-white [&>svg]:h-6 [&>svg]:w-6; }
+  .proof-action-title { @apply font-semibold text-forest; }
+  .proof-action-text { @apply text-sm text-carbon; }
+  .proof-dropzone { @apply rounded-2xl border-2 border-dashed border-palm bg-white p-6 text-center text-sm font-medium text-forest transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky; }
+  .proof-dropzone.is-dragover { @apply border-forest bg-mist; }
+  .proof-camera { @apply space-y-4 rounded-2xl bg-carbon p-4 text-white; }
+  .proof-camera-view { @apply relative mx-auto max-w-2xl overflow-hidden rounded-xl bg-black; }
+  .proof-camera-view video { @apply max-h-[60vh] w-full object-contain; }
+  .proof-camera-frame { @apply pointer-events-none absolute rounded-lg border-2 border-white; inset: 8%; }
+  .proof-camera-hint { @apply absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-carbon px-3 py-1 text-sm text-white; }
+  .proof-camera-controls { @apply flex items-center justify-between gap-3; }
+  .proof-capture { @apply h-16 w-16 rounded-full border-4 border-olive bg-white transition active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky; }
+  .proof-preview-frame { @apply rounded-2xl border border-line bg-mist p-3; }
+  .proof-preview-frame img { @apply mx-auto max-h-80 rounded-lg object-contain; }
+  .proof-footer { @apply sticky bottom-0 flex flex-wrap justify-end gap-3 bg-white pt-3; }
+  .proof-stages { @apply mt-5 space-y-3; }
+  .proof-stage { @apply flex items-center gap-3 rounded-xl border border-line bg-white p-3 text-sm text-carbon; }
+  .proof-stage-icon { @apply grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-line text-xs font-bold; }
+  .proof-stage[data-state="active"] { @apply border-forest bg-mist text-forest; }
+  .proof-stage[data-state="active"] .proof-stage-icon { @apply border-forest border-t-transparent; animation: proof-spin 800ms linear infinite; }
+  .proof-stage[data-state="done"] { @apply border-olive; }
+  .proof-stage[data-state="done"] .proof-stage-icon { @apply border-olive bg-olive text-forest; }
+  .proof-stage[data-state="done"] .proof-stage-icon::before { content: "✓"; }
+  .proof-stage[data-state="error"] { @apply border-brick; }
+  .proof-stage[data-state="error"] .proof-stage-icon { @apply border-brick text-brick; }
+  .proof-stage[data-state="error"] .proof-stage-icon::before { content: "!"; }
+  .proof-result { @apply mt-5 rounded-2xl border border-line bg-white p-5; }
+}
+@keyframes proof-modal-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes proof-spin { to { transform: rotate(360deg); } }
+@media (max-width: 640px) {
+  .proof-modal { max-width: none; margin: auto 0 0 0; border-radius: 1.5rem 1.5rem 0 0; max-height: 94vh; }
+  .proof-modal-shell { max-height: 94vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proof-modal[open], .proof-stage[data-state="active"] .proof-stage-icon { animation: none; }
 }
 /* Keep the brand, navigation and actions balanced on large screens. */
 @media (min-width: 1280px) {

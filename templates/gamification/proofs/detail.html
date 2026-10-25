@@ -24,16 +24,13 @@
     <div class="ui-card flex items-center gap-4 p-5
       {% if proof.status == 'APPROVED' %}border-palm/40 bg-olive/10
       {% elif proof.status == 'REJECTED' %}border-brick/30 bg-brick/5
-      {% elif proof.status == 'NEEDS_REVIEW' %}border-sky/40 bg-sky/10
       {% else %}bg-sand/50{% endif %}">
       <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl [&>svg]:h-5 [&>svg]:w-5
         {% if proof.status == 'APPROVED' %}bg-olive/30 text-palm-deep
         {% elif proof.status == 'REJECTED' %}bg-brick/15 text-brick
-        {% elif proof.status == 'NEEDS_REVIEW' %}bg-sky/20 text-sky
         {% else %}bg-sand text-muted{% endif %}">
         {% if proof.status == 'APPROVED' %}{% include "ui/icon.html" with name="check" %}
         {% elif proof.status == 'REJECTED' %}{% include "ui/icon.html" with name="info" %}
-        {% elif proof.status == 'NEEDS_REVIEW' %}{% include "ui/icon.html" with name="search" %}
         {% else %}{% include "ui/icon.html" with name="clock" %}{% endif %}
       </div>
       <div>
@@ -41,12 +38,11 @@
         <p class="text-sm text-muted">
           {% if proof.status == 'PENDING' %}Votre preuve est en file d'attente d'analyse.
           {% elif proof.status == 'APPROVED' %}Votre preuve a été approuvée. Les points ont été crédités.
-          {% elif proof.status == 'NEEDS_REVIEW' %}Votre preuve nécessite un examen manuel par notre équipe.
           {% elif proof.status == 'REJECTED' %}Votre preuve a été rejetée. Vous pouvez en soumettre une nouvelle.
           {% endif %}
         </p>
         {% if proof.rejection_reason_fr %}
-          <p class="mt-2 rounded-lg bg-brick/10 px-3 py-2 text-xs font-medium text-brick">
+          <p class="mt-2 rounded-lg bg-brick/10 px-3 py-2 text-sm font-semibold text-carbon">
             Motif : {{ proof.rejection_reason_fr }}
           </p>
         {% endif %}

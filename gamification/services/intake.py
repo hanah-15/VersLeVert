@@ -17,8 +17,6 @@ from __future__ import annotations
 import hashlib
 import io
 import logging
-import time
-from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from typing import Optional
 
@@ -26,10 +24,9 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-logger = logging.getLogger(__name__)
+from gamification.services.rules import effective_proof_cap
 
-# Module-level thread pool: max 2 concurrent OCR workers
-_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="proof_ocr")
+logger = logging.getLogger(__name__)
 
 # Supported real MIME types (checked by opening with Pillow, not by extension)
 ALLOWED_PILLOW_FORMATS = {"JPEG", "PNG", "HEIF", "HEIC", "WEBP"}
@@ -169,7 +166,7 @@ def _check_global_monthly_cap(user) -> None:
     """Raise IntakeError if user already reached PROOF_MAX_POINTS_PER_MONTH this month."""
     from gamification.models import EcoProof, PointsTransaction
     from django.db.models import Sum
-    max_pts = getattr(settings, "PROOF_MAX_POINTS_PER_MONTH", 400)
+    max_pts = effective_proof_cap(getattr(settings, "PROOF_MAX_POINTS_PER_MONTH", 400))
     now = timezone.now()
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     earned = (
@@ -193,7 +190,7 @@ def _check_type_cap(user, proof_type) -> None:
     """Raise IntakeError if user reached the per-type cap this period."""
     from gamification.models import EcoProof
     period = proof_type.cap_period
-    cap = proof_type.cap_count
+    cap = effective_proof_cap(proof_type.cap_count)
     now = timezone.now()
 
     if period == "MONTH":
@@ -217,7 +214,7 @@ def _check_type_cap(user, proof_type) -> None:
     if count >= cap:
         raise IntakeError(
             f"Vous avez déjà atteint la limite pour ce type de preuve "
-            f"({cap} par {proof_type.get_cap_period_display().lower()}).",
+            f"({cap} {proof_type.get_cap_period_display().lower()}).",
             code="CAP_REACHED",
         )
 
@@ -246,7 +243,7 @@ def process_intake(
     Raises IntakeError on any validation failure.
 
     This function is called from ProofUploadView. It does NOT call OCR;
-    OCR is triggered via on_commit in a background thread.
+    OCR is dispatched via the configured background backend after commit.
     """
     from gamification.models import EcoProof, OcrAnalysis
     from gamification.services.storage import get_storage, StorageError
@@ -337,18 +334,9 @@ def process_intake(
             )
 
             def _submit():
-                _executor.submit(_safe_process, proof.pk)
+                from gamification.tasks import dispatch_proof_processing
 
-            def _safe_process(proof_pk: int):
-                try:
-                    from gamification.services.pipeline import process_proof
-                    process_proof(proof_pk)
-                except Exception as exc:  # noqa: BLE001
-                    logger.exception(
-                        "Unhandled error in proof worker for proof_pk=%s: %s",
-                        proof_pk,
-                        exc,
-                    )
+                dispatch_proof_processing(proof.pk)
 
             transaction.on_commit(_submit)
     except Exception as exc:

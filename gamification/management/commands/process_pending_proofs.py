@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from gamification.models import EcoProof
-from gamification.services.pipeline import process_proof
+from gamification.tasks import dispatch_proof_processing
 
 
 class Command(BaseCommand):
@@ -21,6 +21,6 @@ class Command(BaseCommand):
         ).order_by("updated_at")[:max(1, options["limit"])]
         count = 0
         for proof in proofs:
-            process_proof(proof.pk)
+            dispatch_proof_processing(proof.pk)
             count += 1
-        self.stdout.write(self.style.SUCCESS(f"Processed {count} pending proof(s)."))
+        self.stdout.write(self.style.SUCCESS(f"Dispatched {count} pending proof(s)."))

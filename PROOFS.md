@@ -1,149 +1,169 @@
 # Module Preuves écologiques (Eco-Proof)
 
 Le module permet aux citoyens de transmettre une photo ou un PDF justificatif.
-Les fichiers sont nettoyés, stockés de façon privée, analysés par OCR et soit
-approuvés, soit envoyés en vérification manuelle, soit refusés.
+Les fichiers sont nettoyés, stockés de façon privée et analysés automatiquement
+par OCR. La décision finale est toujours une approbation ou un refus ; aucune
+preuve n'attend une validation manuelle. Les règles serveur restent responsables
+de la décision et de l'attribution des points : le texte retourné par un
+fournisseur OCR ne suffit jamais à approuver une preuve.
+Chaque fournisseur a un délai maximal configuré. Une expiration déclenche
+immédiatement le fournisseur de repli, sans attendre de nouvelles tentatives
+auprès du fournisseur qui a dépassé son délai.
+Pour les justificatifs datés, `PROOF_WINDOW_OVERRIDE_DAYS=365` permet en
+développement d'accepter des documents datant de moins d'un an. Les preuves
+photo sans date sont aussi décidées automatiquement à partir de leur contenu.
+Une photo d'étiquette textile n'a pas besoin de date ; photographiez clairement
+l'étiquette et sa mention de matière ou de certification responsable.
 
-## Prérequis OCR
+## Installation et démarrage local
 
-Installez les dépendances Python du projet dans l'environnement virtuel :
+Installez les dépendances du projet dans l'environnement virtuel :
 
 ```powershell
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Installez aussi **Tesseract OCR** séparément de Python et ajoutez ses données de
-langue française (`fra`), anglaise (`eng`) et arabe (`ara`). Sous Windows,
-installez Tesseract puis renseignez son exécutable dans `.env` :
+Configurez `.env` sans publier les clés API ni identifiants Cloudinary. Pour le
+stockage local, utilisez `DEBUG=True` et `PROOF_STORAGE_BACKEND=local`. Le
+stockage local des preuves est interdit avec `DEBUG=False`.
 
-```dotenv
-TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
-```
+Le fournisseur par défaut est la chaîne `gemini,ocrspace`. Renseignez les clés
+des fournisseurs utilisés et les utilisateurs doivent donner leur consentement
+avant tout appel OCR externe. Une chaîne locale facultative peut sélectionner
+Tesseract (`PROOF_OCR_PROVIDERS=tesseract`) ; installez alors Tesseract et ses
+données de langue française, arabe et anglaise, puis configurez `TESSERACT_CMD`.
+Le contrôle Django vérifie Tesseract uniquement lorsqu'il figure dans la chaîne.
 
-Sous Debian/Ubuntu, les paquets correspondants sont :
-
-```bash
-sudo apt-get install tesseract-ocr tesseract-ocr-fra tesseract-ocr-eng tesseract-ocr-ara
-```
-
-Le contrôle Django vérifie l'exécutable et ces trois langues. Un contrôle qui
-échoue signifie que l'OCR ne pourra pas traiter les justificatifs.
-
-## Configuration du stockage
-
-Pour le développement local, utilisez `DEBUG=True` et :
-
-```dotenv
-PROOF_STORAGE_BACKEND=local
-```
-
-Les fichiers locaux sont écrits dans `private_proofs/`, hors de `MEDIA_ROOT`.
-Ils ne sont accessibles qu'à travers les vues authentifiées du module. Ce mode
-est interdit lorsque `DEBUG=False`.
-
-En production, configurez Cloudinary avec une URL complète au format
-`cloudinary://<api_key>:<api_secret>@<cloud_name>` et :
-
-```dotenv
-PROOF_STORAGE_BACKEND=cloudinary
-PROOF_CLOUDINARY_FOLDER=vers-le-vert/proofs
-```
-
-Ne publiez jamais les identifiants Cloudinary ni le fichier `.env`. Les images
-sont téléversées comme ressources Cloudinary authentifiées ; le navigateur ne
-reçoit pas d'URL publique Cloudinary. Les anciennes preuves sont migrées avec
-leur chemin de fichier conservé et leurs fichiers sont servis via la vue privée.
-
-## Initialisation et contrôles
-
-Après avoir configuré PostgreSQL et `.env`, lancez les migrations et chargez les
-types de preuves ainsi que leurs facteurs de points :
+Lancez la base, les migrations et les données de référence :
 
 ```powershell
+docker compose up -d db redis
 .\venv\Scripts\python.exe manage.py migrate
 .\venv\Scripts\python.exe manage.py seed_proof_types
 .\venv\Scripts\python.exe manage.py check
 ```
 
-La commande de seed peut être relancée sans dupliquer les types ni les facteurs.
-Ne validez pas de preuves avant d'avoir exécuté le seed et vérifié les facteurs
-dans l'administration Django.
+Par défaut, `seed_proof_types` ajoute les types et facteurs manquants et
+désactive les types retirés connus, sans écraser les réglages des lignes
+existantes. Pour rétablir toutes les valeurs intégrées (et remplacer les
+éventuelles modifications faites dans l'administration), lancez explicitement :
 
-Pour exécuter les tests du module :
+```powershell
+.\venv\Scripts\python.exe manage.py seed_proof_types --reset
+```
+
+En développement, `PROOF_CAP_MULTIPLIER=10` multiplie les plafonds de preuves
+et de points pendant leur vérification, sans changer les valeurs enregistrées ;
+en production, utilisez `1`. `PROOF_WINDOW_OVERRIDE_DAYS=365` remplace
+temporairement les fenêtres de dates des justificatifs datés ; laissez cette
+variable vide pour utiliser les fenêtres individuelles de 30, 45, 60 ou 90
+jours.
+
+Les preuves sont décidées automatiquement : un score d'au moins 0,50 permet
+l'approbation ; un score plus faible, une analyse indisponible ou un signal de
+falsification entraîne un refus avec un motif explicatif. Aucune preuve ne
+part en attente d'approbation manuelle. Les écarts entre OCR et IA restent
+pris en compte dans le score, sans déclencher seuls un examen.
+
+En développement, le traitement utilise par défaut un worker thread local.
+Démarrez le serveur :
+
+```powershell
+.\venv\Scripts\python.exe manage.py runserver
+```
+
+En production, `PROOF_TASK_BACKEND=celery` utilise Redis. Démarrez un worker
+dans un second terminal (sur Windows, utilisez le pool `solo`) :
+
+```powershell
+.\venv\Scripts\celery.exe -A config worker --pool=solo --loglevel=info
+```
+
+Pour revenir au traitement local, définissez `PROOF_TASK_BACKEND=thread` dans
+l'environnement de développement. Pour désactiver un fournisseur cloud,
+retirez-le de `PROOF_OCR_PROVIDERS` et conservez uniquement un fournisseur
+configuré et disponible. Tesseract n'est pas un repli automatique tant qu'il
+n'est pas présent dans cette chaîne.
+
+## Tests automatisés
+
+Les tests n'appellent aucun service OCR externe. Les réponses des fournisseurs
+sont simulées ; Tesseract reste facultatif et ne doit pas être installé pour les
+tests :
 
 ```powershell
 .\venv\Scripts\python.exe manage.py test gamification.tests
 ```
 
-Le contrôle système exige Tesseract même si les tests OCR utilisent des réponses
-simulées. Une fois Tesseract installé, la commande doit terminer avec `OK` (le
-nombre de tests affiché peut évoluer lorsque de nouveaux tests sont ajoutés).
+Sortie attendue : `OK`, sans clé Gemini/OCR.space requise. Pour vérifier les
+migrations et la configuration Django :
 
-## Test manuel du parcours
+```powershell
+.\venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\venv\Scripts\python.exe manage.py check
+```
 
-1. Démarrez Django avec `.\venv\Scripts\python.exe manage.py runserver`.
+## Parcours manuel
+
+1. Configurez les clés des fournisseurs cloud activés dans `.env`, démarrez la
+   base puis Django.
 2. Connectez-vous avec un compte citoyen et ouvrez `/preuves/nouvelle/`.
-3. Sélectionnez un type de preuve, puis envoyez une photo nette en JPG/PNG ou un
-   PDF de test. Les PDF sont limités au nombre de pages configuré ; seuls les
-   JPEG nettoyés sont conservés.
-4. Vérifiez l'état sur la page des preuves. Le traitement OCR peut décider
-   automatiquement ou placer la preuve en attente d'une vérification.
-5. Connectez-vous comme administrateur et ouvrez **Gamification → Preuves
-   écologiques** pour contrôler le texte OCR, les métriques et la décision.
-6. Vérifiez que l'utilisateur reçoit ses points et une notification après
-   approbation. Les points proviennent du facteur d'impact du type de preuve.
+3. Acceptez l'information et le consentement OCR avant d'envoyer une photo nette
+   JPG/PNG ou un PDF de test.
+4. Vérifiez que chaque envoi aboutit automatiquement à une approbation ou à un
+   refus motivé ; une analyse indisponible ou un doute entraîne un refus, pas une
+   mise en attente pour l'administration.
+5. Dans l'administration Django, ouvrez **Gamification → Preuves écologiques**
+   pour contrôler le fournisseur, la chaîne de repli, les drapeaux, les
+   extractions et la décision. Consultez **Appels IA des preuves** pour les
+   appels et totaux quotidiens ; l'administration sert au diagnostic, pas à
+   approuver les preuves.
+6. Vérifiez qu'une approbation automatique crédite les points une seule fois et
+   notifie le citoyen.
 
-La caméra du navigateur nécessite un contexte sécurisé : `localhost` en
-développement ou HTTPS en production, ainsi que l'autorisation caméra du
-navigateur.
+La caméra du navigateur nécessite `localhost` ou HTTPS et une autorisation
+explicite du navigateur.
 
-## Commandes d'exploitation
+## Jeu d'évaluation OCR
 
-Les preuves en attente depuis au moins cinq minutes peuvent être retraitées :
+`samples/labels.csv` contient 31 exemples synthétiques qui couvrent les 14 types
+actifs. Ils servent à vérifier le pipeline et ne remplacent pas un jeu de
+référence validé par une personne. La commande exige au moins 30 lignes et la
+couverture de tous les types actifs. N'ajoutez que des documents synthétiques ou
+anonymisés ; ne versionnez jamais de données personnelles. Le format des
+colonnes est décrit dans [samples/README.md](./samples/README.md).
+
+Après avoir complété au moins 30 annotations humaines cohérentes et vérifié les
+types de preuve actifs, lancez :
+
+```powershell
+.\venv\Scripts\python.exe manage.py ai_eval .\samples --labels .\samples\labels.csv --providers gemini,ocrspace,tesseract --out .\reports
+```
+
+N'incluez `tesseract` que s'il est installé et configuré. Les fournisseurs
+externes peuvent consommer des requêtes payantes ou limitées ; la commande
+vérifie le budget journalier avant tout appel. Elle produit un rapport Markdown
+et un CSV de comparaison avec exactitude, macro-F1, matrice de confusion,
+latences, erreurs et exactitude des champs. L'évaluation compare chaque
+fournisseur isolément : son taux de repli correspond aux échecs de cet
+évaluateur individuel, et ne mesure pas encore une simulation complète de la
+chaîne de repli de production. Aucun rapport baseline n'est fourni tant qu'un
+jeu de 30 échantillons étiquetés n'est pas disponible.
+
+## Exploitation et conservation
+
+Pour retraiter les preuves en attente depuis au moins cinq minutes :
 
 ```powershell
 .\venv\Scripts\python.exe manage.py process_pending_proofs --limit 100
 ```
 
-Les fichiers des preuves rejetées plus anciennes que
-`PROOF_REJECTED_RETENTION_DAYS` peuvent être supprimés tout en conservant leurs
-empreintes anti-doublon :
+Pour supprimer les fichiers des preuves rejetées après la durée de conservation
+configurée, tout en gardant les empreintes anti-doublon :
 
 ```powershell
 .\venv\Scripts\python.exe manage.py purge_old_proofs
 ```
 
-Pour évaluer l'OCR sur des exemples synthétiques ou anonymisés, créez un dossier
-local de fichiers et un CSV `filename,proof_type,expected` :
-
-```csv
-filename,proof_type,expected
-facture-test.jpg,ELECTRICITY_BILL,APPROVED
-ticket-test.jpg,TRANSPORT_TICKET,NEEDS_REVIEW
-```
-
-Puis lancez :
-
-```powershell
-.\venv\Scripts\python.exe manage.py ocr_eval .\samples --labels .\labels.csv
-```
-
-La sortie contient les décisions prédites (approuvée, à examiner, rejetée), la
-confiance OCR moyenne, l'exactitude par rapport à `expected` et les éventuels
-désaccords. Par exemple :
-
-```text
-Type | Samples | Approved | Review | Rejected | Average OCR confidence
-TRANSPORT_TICKET | 2 | 1 | 1 | 0 | 0.842
-Accuracy: 2/2 (100.0%)
-Mismatches: 0
-Note: duplicate detection, user caps, and storage/anti-fraud history are not simulated.
-```
-
-Cette commande exécute Tesseract sur les échantillons et partage les règles de
-qualité, mots-clés, dates et seuils de score du pipeline. Elle ne simule pas
-l'historique des doublons, les plafonds utilisateur ni les décisions liées au
-stockage. Les noms de `proof_type` doivent correspondre aux codes actifs de la
-commande `seed_proof_types`. Gardez les justificatifs de test localement : ils
-peuvent contenir des informations personnelles et ne doivent pas être ajoutés
-au dépôt.
+Les fichiers privés sont servis par les vues authentifiées du module ; ne
+publiez pas de liens ou identifiants d'assets Cloudinary privés.

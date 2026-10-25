@@ -72,6 +72,7 @@
 
   if (window.isSecureContext && navigator.mediaDevices?.getUserMedia) {
     openButton.classList.remove("hidden");
+    document.getElementById("camera-fallback-open")?.classList.add("hidden");
     openButton.addEventListener("click", () => startCamera(selectedDeviceId));
     captureButton.addEventListener("click", () => {
       if (!video.videoWidth || !video.videoHeight) return;
@@ -97,6 +98,8 @@
     });
     closeButton.addEventListener("click", closeCamera);
   }
+
+  document.addEventListener("proof:reset", closeCamera);
 
   fallbackInput.addEventListener("change", () => {
     const file = fallbackInput.files?.[0];

@@ -17,12 +17,14 @@ from django.db.models import Sum
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
-from django.views.generic import DetailView, FormView, ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 
-from .forms import PointsAdjustmentForm, ProofReviewForm
+from .forms import PointsAdjustmentForm
 from .models import Badge, EcoProof, ImpactFactor, PointsTransaction, ProofType, UserBadge
 from .services import PointsService
+from .services.rules import effective_proof_cap, effective_window_days
 
 logger = logging.getLogger(__name__)
 
@@ -95,16 +97,33 @@ class ProofNewView(LoginRequiredMixin, TemplateView):
 
         now = timezone.now()
         for proof_type in proof_types:
+            proof_type.effective_cap_count = effective_proof_cap(proof_type.cap_count)
+            proof_type.effective_window_days = effective_window_days(proof_type)
             used = EcoProof.objects.filter(
                 user=self.request.user,
                 proof_type=proof_type,
                 status=EcoProof.Status.APPROVED,
                 submitted_at__gte=_period_start(proof_type.cap_period, now),
             ).count()
-            proof_type.remaining_this_period = max(0, proof_type.cap_count - used)
+            proof_type.remaining_this_period = max(0, proof_type.effective_cap_count - used)
             proof_type.points_value = proof_type.points_awarded()
+        proof_types.sort(key=lambda proof_type: (
+            proof_type.category,
+            proof_type.points_value,
+            proof_type.label_fr,
+        ))
         ctx["proof_types"] = proof_types
-        ctx["proof_categories"] = ProofType.Category.choices
+        ctx["proof_rules"] = proof_types
+        active_categories = {proof_type.category for proof_type in proof_types}
+        ctx["proof_categories"] = [
+            (value, label)
+            for value, label in ProofType.Category.choices
+            if value in active_categories
+        ]
+        ctx["ai_consent_required"] = (
+            self.request.user.proof_ai_consent_at is None
+            and any(provider in {"gemini", "ocrspace"} for provider in settings.PROOF_OCR_PROVIDERS)
+        )
         ctx["status_url_template"] = reverse("proofs:status", kwargs={"pk": 0}).replace("/0/", "/__proof_id__/")
         return ctx
 
@@ -113,6 +132,32 @@ class ProofUploadView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
+        cloud_provider_enabled = any(
+            provider in {"gemini", "ocrspace"} for provider in settings.PROOF_OCR_PROVIDERS
+        )
+        if (
+            cloud_provider_enabled
+            and request.user.proof_ai_consent_at is None
+            and request.POST.get("ai_consent") != "on"
+        ):
+            return JsonResponse({
+                "error": (
+                    "Avant l'analyse, acceptez l'envoi de votre document à un service "
+                    "d'analyse IA."
+                ),
+                "code": "AI_CONSENT_REQUIRED",
+            }, status=400)
+        if cloud_provider_enabled and request.user.proof_ai_consent_at is None:
+            request.user.proof_ai_consent_at = timezone.now()
+            request.user.save(update_fields=["proof_ai_consent_at"])
+        if cloud_provider_enabled:
+            from .services.pipeline import ai_user_daily_limit_reached
+            if ai_user_daily_limit_reached(request.user):
+                return JsonResponse({
+                    "error": "Limite d'analyses atteinte aujourd'hui.",
+                    "code": "AI_USER_DAILY_LIMIT",
+                }, status=429)
+
         proof_type_id = request.POST.get("proof_type")
         upload = request.FILES.get("file")
         if not upload:
@@ -146,12 +191,22 @@ class ProofStatusView(LoginRequiredMixin, View):
         proof = get_object_or_404(EcoProof, pk=pk)
         if proof.user_id != request.user.pk and not request.user.is_staff:
             raise Http404
-        return JsonResponse({
+        analysis = getattr(proof, "ocr_analysis", None)
+        response = {
             "proof_id": proof.pk,
             "status": proof.status,
             "points_awarded": proof.points_awarded,
             "reason": proof.rejection_reason_fr,
-        })
+            "provider": analysis.provider if analysis else "",
+            "provider_model": analysis.provider_model if analysis else "",
+            "transcript": analysis.raw_text if analysis else "",
+            "extracted": {
+                "date": proof.document_date.isoformat() if proof.document_date else None,
+                "amount": str(proof.amount) if proof.amount is not None else None,
+                "merchant": proof.merchant or "",
+            },
+        }
+        return JsonResponse(response)
 
 
 class ProofFileView(LoginRequiredMixin, View):
@@ -397,80 +452,6 @@ class MyCodesView(LoginRequiredMixin, TemplateView):
             ctx["codes"] = []
         ctx["points_balance"] = PointsService.balance(self.request.user)
         return ctx
-
-
-# ---------------------------------------------------------------------------
-# Admin: proof review queue — /rewards/admin/preuves/  (PT-06)
-# ---------------------------------------------------------------------------
-
-class AdminProofQueueView(LoginRequiredMixin, ListView):
-    template_name       = "gamification/admin/proof_queue.html"
-    context_object_name = "proofs"
-    paginate_by         = 20
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        status = self.request.GET.get("status", EcoProof.Status.NEEDS_REVIEW)
-        if status not in EcoProof.Status.values:
-            status = EcoProof.Status.NEEDS_REVIEW
-        return (
-            EcoProof.objects
-            .filter(status=status)
-            .select_related("user", "ocr_analysis")
-            .order_by("-submitted_at")
-        )
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["status_filter"] = self.request.GET.get("status", EcoProof.Status.NEEDS_REVIEW)
-        ctx["status_choices"] = EcoProof.Status.choices
-        return ctx
-
-
-class AdminProofReviewView(LoginRequiredMixin, FormView):
-    template_name = "gamification/admin/proof_review.html"
-    form_class    = ProofReviewForm
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise PermissionDenied
-        self.proof = get_object_or_404(EcoProof, pk=kwargs["pk"])
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["proof"] = self.proof
-        try:
-            ctx["ocr"] = self.proof.ocr_analysis
-        except EcoProof.ocr_analysis.RelatedObjectDoesNotExist:
-            ctx["ocr"] = None
-        return ctx
-
-    def form_valid(self, form):
-        action = form.cleaned_data["action"]
-        reason = form.cleaned_data.get("rejection_reason", "")
-
-        if action == "approve":
-            from .services.pipeline import approve_proof
-            approve_proof(self.proof.pk, admin_user=self.request.user, note=reason)
-            messages.success(self.request, "Preuve approuvée et décision enregistrée.")
-        elif action == "needs_review":
-            self.proof.send_to_review(self.request.user, note=reason)
-            messages.info(self.request, "Preuve marquée 'À examiner'.")
-        else:
-            self.proof.reject("ADMIN_REJECTED", reason, admin_user=self.request.user, note=reason)
-            from accounts.models import Notification
-            Notification.objects.create(
-                user=self.proof.user,
-                message=f"Preuve refusée : {reason}"[:255],
-            )
-            messages.warning(self.request, "Preuve rejetée.")
-
-        return redirect("gamification:admin-proof-queue")
 
 
 # ---------------------------------------------------------------------------

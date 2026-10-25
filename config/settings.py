@@ -177,11 +177,34 @@ STORAGES = {
 PROOF_MAX_UPLOAD_MB = int(os.getenv("PROOF_MAX_UPLOAD_MB", "5"))
 PROOF_MAX_PIXELS = int(os.getenv("PROOF_MAX_PIXELS", "25000000"))
 PROOF_MAX_PDF_PAGES = int(os.getenv("PROOF_MAX_PDF_PAGES", "3"))
-PROOF_AUTO_APPROVE_THRESHOLD = float(os.getenv("PROOF_AUTO_APPROVE_THRESHOLD", "0.80"))
-PROOF_REVIEW_THRESHOLD = float(os.getenv("PROOF_REVIEW_THRESHOLD", "0.50"))
+PROOF_AUTO_APPROVE_THRESHOLD = float(os.getenv(
+    "PROOF_AUTO_APPROVE_THRESHOLD",
+    "0.50" if DEBUG else "0.80",
+))
 PROOF_MAX_POINTS_PER_MONTH = int(os.getenv("PROOF_MAX_POINTS_PER_MONTH", "400"))
+PROOF_CAP_MULTIPLIER = int(os.getenv(
+    "PROOF_CAP_MULTIPLIER",
+    "10" if DEBUG else "1",
+))
+_proof_window_override = os.getenv("PROOF_WINDOW_OVERRIDE_DAYS", "").strip()
+PROOF_WINDOW_OVERRIDE_DAYS = int(_proof_window_override) if _proof_window_override else None
 PROOF_UPLOADS_PER_HOUR = int(os.getenv("PROOF_UPLOADS_PER_HOUR", "10"))
 PROOF_OCR_TIMEOUT_SECONDS = int(os.getenv("PROOF_OCR_TIMEOUT_SECONDS", "25"))
+PROOF_OCR_PROVIDERS = [
+    provider.strip().lower()
+    for provider in os.getenv("PROOF_OCR_PROVIDERS", "gemini,ocrspace").split(",")
+    if provider.strip()
+]
+PROOF_AI_MODEL = os.getenv("PROOF_AI_MODEL", "gemini-3.8-flash")
+OCRSPACE_API_KEY = os.getenv("OCRSPACE_API_KEY", "")
+PROOF_AI_TIMEOUT_SECONDS = int(os.getenv("PROOF_AI_TIMEOUT_SECONDS", "12"))
+PROOF_AI_MAX_RETRIES = int(os.getenv("PROOF_AI_MAX_RETRIES", "0"))
+PROOF_AI_MAX_RPM = int(os.getenv("PROOF_AI_MAX_RPM", "8"))
+PROOF_AI_DAILY_BUDGET = int(os.getenv("PROOF_AI_DAILY_BUDGET", "200"))
+PROOF_AI_USER_DAILY_LIMIT = int(os.getenv("PROOF_AI_USER_DAILY_LIMIT", "50"))
+PROOF_TASK_BACKEND = os.getenv("PROOF_TASK_BACKEND", "thread" if DEBUG else "celery").lower()
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 PROOF_PHASH_MAX_DISTANCE = int(os.getenv("PROOF_PHASH_MAX_DISTANCE", "5"))
 PROOF_MIN_SHORT_SIDE_PX = int(os.getenv("PROOF_MIN_SHORT_SIDE_PX", "700"))
 PROOF_BLUR_MIN_LAPLACIAN_VAR = float(os.getenv("PROOF_BLUR_MIN_LAPLACIAN_VAR", "60"))
@@ -192,6 +215,16 @@ PROOF_UPLOAD_RETRIES = int(os.getenv("PROOF_UPLOAD_RETRIES", "2"))
 PROOF_REJECTED_RETENTION_DAYS = int(os.getenv("PROOF_REJECTED_RETENTION_DAYS", "90"))
 
 # OCR score weights (must sum to ~1.0 before the camera bonus)
+PROOF_AI_SCORE_WEIGHTS = {
+    "type_match": 0.25,
+    "cross_check": 0.20,
+    "date": 0.15,
+    "amount": 0.10,
+    "quality": 0.15,
+    "keyword": 0.10,
+    "ai_self_conf": 0.05,
+    "camera_bonus": 0.03,
+}
 PROOF_SCORE_WEIGHTS = {
     "ocr_confidence": 0.30,
     "keyword": 0.30,
@@ -213,8 +246,10 @@ TESSERACT_CMD = os.getenv("TESSERACT_CMD", _default_tesseract)
 # Registered at the bottom of this file; they run on `manage.py check`.
 
 def _check_tesseract(app_configs, **kwargs):
-    """Fail the system check when the OCR engine or required languages are absent."""
-    from django.core.checks import Error
+    """Check Tesseract only when it is part of the configured provider chain."""
+    if "tesseract" not in PROOF_OCR_PROVIDERS:
+        return []
+    from django.core.checks import Error, Warning
     errors = []
     try:
         import pytesseract
@@ -222,8 +257,9 @@ def _check_tesseract(app_configs, **kwargs):
         langs = pytesseract.get_languages(config="")
         for lang in ("fra", "ara", "eng"):
             if lang not in langs:
+                check = Error if not DEBUG else Warning
                 errors.append(
-                    Error(
+                    check(
                         f"Le pack de langue Tesseract '{lang}' est absent. "
                         f"Install: tesseract-ocr-{lang}",
                         id=f"gamification.E_TESSERACT_{lang.upper()}",
@@ -231,12 +267,53 @@ def _check_tesseract(app_configs, **kwargs):
                 )
     except Exception as exc:  # noqa: BLE001
         errors.append(
-            Error(
+            (Error if not DEBUG else Warning)(
                 f"Tesseract est introuvable ou inutilisable. Installez-le et "
                 f"configurez TESSERACT_CMD (détail : {type(exc).__name__}).",
                 id="gamification.E_TESSERACT",
             )
         )
+    return errors
+
+
+def _check_ocr_providers(app_configs, **kwargs):
+    """Check provider configuration without exposing configured credentials."""
+    from django.core.checks import Error, Warning
+
+    errors = []
+    known = {"gemini", "ocrspace", "tesseract"}
+    check_type = Error if not DEBUG else Warning
+    for provider in PROOF_OCR_PROVIDERS:
+        if provider not in known:
+            errors.append(check_type(
+                f"Fournisseur OCR inconnu : {provider}.",
+                id="gamification.E_OCR_PROVIDER",
+            ))
+        elif provider == "gemini" and not GEMINI_API_KEY.strip():
+            errors.append(check_type(
+                "GEMINI_API_KEY est requis pour le fournisseur Gemini configuré.",
+                id="gamification.E_GEMINI_KEY",
+            ))
+        elif provider == "ocrspace" and not OCRSPACE_API_KEY.strip():
+            errors.append(check_type(
+                "OCRSPACE_API_KEY est requis pour le fournisseur OCR.space configuré.",
+                id="gamification.E_OCRSPACE_KEY",
+            ))
+    if PROOF_TASK_BACKEND not in {"celery", "thread"}:
+        errors.append(Error(
+            "PROOF_TASK_BACKEND doit être 'celery' ou 'thread'.",
+            id="gamification.E_TASK_BACKEND",
+        ))
+    if PROOF_CAP_MULTIPLIER < 1:
+        errors.append(Error(
+            "PROOF_CAP_MULTIPLIER doit être supérieur ou égal à 1.",
+            id="gamification.E_PROOF_CAP_MULTIPLIER",
+        ))
+    if PROOF_WINDOW_OVERRIDE_DAYS is not None and PROOF_WINDOW_OVERRIDE_DAYS < 1:
+        errors.append(Error(
+            "PROOF_WINDOW_OVERRIDE_DAYS doit être supérieur à 0 ou vide.",
+            id="gamification.E_PROOF_WINDOW_OVERRIDE",
+        ))
     return errors
 
 
@@ -278,6 +355,7 @@ def _check_cloudinary(app_configs, **kwargs):
 try:
     from django.core.checks import register, Tags
     register(_check_tesseract, Tags.compatibility)
+    register(_check_ocr_providers, Tags.compatibility)
     register(_check_cloudinary, Tags.security)
 except Exception:  # pragma: no cover
     pass

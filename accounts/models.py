@@ -8,6 +8,11 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     city = models.CharField(max_length=100, blank=True)
+    proof_ai_consent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="consentement à l'analyse IA des preuves",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "email"
