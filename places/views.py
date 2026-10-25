@@ -283,7 +283,7 @@ async def guide_search(request):
     """Non-blocking provider call under ASGI; ORM and templates stay synchronous."""
     from asgiref.sync import sync_to_async
 
-    form = GuideForm(request.POST)
+    form = await sync_to_async(GuideForm, thread_sensitive=True)(request.POST)
     if not form.is_valid():
         return JsonResponse({"error": "Vérifiez votre demande et vos filtres.", "fields": form.errors}, status=400)
     user = await request.auser()

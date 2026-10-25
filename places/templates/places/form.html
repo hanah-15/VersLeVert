@@ -1,5 +1,6 @@
 {% extends "places/base.html" %}
 {% block title %}{{ page_title }} · Vers le Vert{% endblock %}
+{% block extra_head %}{{ block.super }}{% if form_kind == 'place' %}{% include "components/map_head.html" %}{% endif %}{% endblock %}
 {% block places_content %}
 <div class="mx-auto max-w-2xl space-y-6">
   <header class="ui-title-panel space-y-3"><p class="text-xs font-bold uppercase tracking-widest text-forest">{% if form_kind == 'place' %}Le catalogue de lieux{% else %}Les découvertes de la communauté{% endif %}</p><h1 class="font-heading text-3xl font-bold text-forest">{{ page_title }}</h1>
@@ -7,11 +8,15 @@
     {% if editing_recommendation %}<p class="rounded-xl border border-palm bg-olive/25 p-4 text-sm">Toute modification nécessite une nouvelle validation et réinitialise les mentions J’aime.</p>{% endif %}
   </header>
   {% include "places/_tools.html" %}
-  <form method="post" class="ui-card ui-card-pad space-y-5" {% if form_kind == 'recommendation' %}data-recommendation-form data-preparation-endpoint="{% url 'places:recommendation-prepare' %}"{% endif %}>
+  <form method="post" enctype="multipart/form-data" class="ui-card ui-card-pad space-y-5" {% if form_kind == 'recommendation' %}data-recommendation-form data-preparation-endpoint="{% url 'places:recommendation-prepare' %}"{% endif %}>
     {% csrf_token %}
     {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
-    {% for field in form %}{% include "places/_field.html" %}{% endfor %}
-    {% if form_kind == 'recommendation' %}{% include "places/_preparation_assistant.html" %}{% endif %}
+    {% for field in form.visible_fields %}
+      {% include "places/_field.html" %}
+      {% if form_kind == 'recommendation' and field.name == 'description' %}{% include "places/_preparation_assistant.html" %}{% endif %}
+    {% endfor %}
+    {% for field in form.hidden_fields %}{{ field }}{% if field.errors %}<p class="ui-errors" role="alert">Choisissez la position du lieu sur la carte.</p>{% endif %}{% endfor %}
+    {% if form_kind == 'place' %}{% include "components/map_picker.html" with lat_id="id_latitude" lon_id="id_longitude" %}{% endif %}
     <p class="text-sm">Les champs marqués * sont obligatoires.</p>
     <div class="flex flex-wrap items-center gap-4 pt-2"><button class="inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">{{ submit_label }}</button><a class="inline-flex items-center justify-center rounded-full border border-palm/60 bg-white/20 px-7 py-3.5 font-ui text-[14px] font-semibold text-forest backdrop-blur-md !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:border-palm hover:bg-palm/20 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40" href="{% if object %}{{ object.get_absolute_url }}{% elif form_kind == 'place' %}{% url 'places:index' %}{% else %}{% url 'places:recommendations' %}{% endif %}">Annuler</a></div>
   </form>

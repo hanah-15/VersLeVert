@@ -1,8 +1,9 @@
 <article class="ui-card ui-card-pad flex flex-col gap-4">
-  <div class="flex flex-wrap items-center justify-between gap-2"><span class="ui-badge">{{ kind }}</span>{% if item.distance_km != None %}<span class="text-sm font-semibold text-forest">{{ item.distance_km|floatformat:1 }} km à vol d'oiseau</span>{% endif %}</div>
+  {% if item.image_url %}<img class="catalogue-photo guide-photo {% if kind == 'Produit' %}product-photo{% endif %}" src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy" width="800" height="480">{% endif %}
+  <div class="flex flex-wrap items-center justify-between gap-2"><span class="ui-badge">{{ item.category }}</span>{% if item.distance_km != None %}<span class="text-sm font-semibold text-forest">{{ item.distance_km|floatformat:1 }} km à vol d'oiseau</span>{% endif %}</div>
   <div><h3 class="text-xl"><a class="rounded hover:underline focus-visible:ring-4 focus-visible:ring-sky" href="{{ item.url }}">{{ item.name }}</a></h3><p class="mt-1 text-sm text-muted">{{ item.address }}</p></div>
-  <p class="text-sm text-forest">{{ item.reason }}</p>
-  <details class="guide-evidence"><summary>Pourquoi cette suggestion ? <span aria-hidden="true">+</span></summary><dl>{% for evidence in item.evidence %}<div><dt>{{ evidence.label }}</dt><dd>{{ evidence.text }}</dd></div>{% endfor %}</dl></details>
+  <p class="text-sm text-forest">{{ item.excerpt }}</p>
+  <details class="guide-evidence"><summary>Pourquoi cette suggestion ? <span aria-hidden="true">+</span></summary><p class="mt-3 text-xs">{{ item.reason }}</p><dl>{% for evidence in item.evidence %}<div><dt>{{ evidence.label }}</dt><dd>{{ evidence.text }}</dd></div>{% endfor %}</dl></details>
   <div class="mt-auto flex flex-wrap gap-3 border-t border-line pt-4">
     <a class="ui-button ui-button-primary ui-button-small" href="{{ item.url }}">Consulter la fiche</a>
     {% if kind != 'Lieu' and item.place_url %}<a class="ui-button ui-button-small" href="{{ item.place_url }}">Voir le lieu associé</a>{% endif %}

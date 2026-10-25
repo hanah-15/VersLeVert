@@ -1,0 +1,84 @@
+{
+  "places": [
+    {
+      "name": "Parc du Belvédère",
+      "category": "park",
+      "address": "Parc du Belvédère, Tunis, Tunisie",
+      "latitude": "36.823339",
+      "longitude": "10.171568",
+      "description": "Un grand parc urbain de Tunis pour une promenade parmi les arbres et la découverte du patrimoine végétal de la ville. Gardez les espaces propres et emportez vos déchets.",
+      "source_url": "https://www.environnement.gov.tn/tunisie-environnement/lenvironnement-urbain/biodiversite-urbaine",
+      "replaces": "Démo · Jardin partagé",
+      "image": "belvedere.jpg",
+      "image_credit": "DrFO.Jr.Tn · CC BY-SA 3.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Belv%C3%A9d%C3%A8re_-_Tunis.jpg"
+    },
+    {
+      "name": "Parc de Sidi Bou Saïd",
+      "category": "park",
+      "address": "Parc de Sidi Bou Saïd, Amilcar, Carthage, Tunis, Tunisie",
+      "latitude": "36.874761",
+      "longitude": "10.334865",
+      "description": "Un espace vert à Sidi Bou Saïd pour une balade en plein air. Une idée de sortie nature dans la banlieue nord de Tunis, à compléter avec une gourde et un pique-nique sans emballages jetables.",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Parc_Sidi_Bou_Said.jpg",
+      "replaces": "Démo · Café des feuilles",
+      "image": "sidi-bou-said.jpg",
+      "image_credit": "Afek91 · CC BY-SA 3.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Parc_Sidi_Bou_Said.jpg"
+    },
+    {
+      "name": "Parc national de l'Ichkeul",
+      "category": "park",
+      "address": "Parc national de l'Ichkeul, Tinja, Bizerte, Tunisie",
+      "latitude": "37.142353",
+      "longitude": "9.658680",
+      "description": "Un parc national autour du lac et des zones humides de l'Ichkeul, halte importante pour les oiseaux migrateurs. Pour observer la nature, restez sur les parcours autorisés et renseignez-vous sur les conditions de visite.",
+      "source_url": "https://whc.unesco.org/fr/list/8/",
+      "replaces": "Démo · Boutique en vrac",
+      "image": "ichkeul.jpg",
+      "image_credit": "Ahmedkrid · CC BY-SA 4.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Ichkeul_nature.jpg"
+    },
+    {
+      "name": "Parc national de Boukornine",
+      "category": "park",
+      "address": "Parc national de Boukornine, Hammam Chott, Ben Arous, Tunisie",
+      "latitude": "36.671190",
+      "longitude": "10.375705",
+      "description": "Un espace naturel protégé autour du massif de Boukornine, près de Hammam Chott. Une piste pour découvrir les paysages de la région et marcher en pleine nature. Vérifiez les accès autorisés avant votre sortie.",
+      "source_url": "https://commons.wikimedia.org/wiki/Category:Boukornine_National_Park",
+      "replaces": "Démo · Point de recyclage",
+      "image": "boukornine.jpg",
+      "image_credit": "S.TAYAR · CC BY-SA 4.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Boukornine_2016.jpg"
+    }
+  ],
+  "products": [
+    {
+      "product_name": "Gourde en inox réutilisable",
+      "category": "home",
+      "description": "Une gourde à remplir pour emporter de l'eau lors des sorties et éviter de prendre une nouvelle bouteille jetable à chaque fois. Nettoyez-la régulièrement et gardez-la aussi longtemps que possible.",
+      "replaces": "Démo · Gourde réutilisable",
+      "image": "gourde.jpg",
+      "image_credit": "Gannu03 · CC BY-SA 4.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Stainless_Steel_Water_Bottle.jpg"
+    },
+    {
+      "product_name": "Savon solide",
+      "category": "personal_care",
+      "description": "Un savon en pain pour la toilette quotidienne. Laissez-le sécher entre deux utilisations et choisissez une formule adaptée à votre peau. Comparez l'emballage au moment de l'achat.",
+      "replaces": "Démo · Savon solide QA",
+      "image": "savon.jpg",
+      "image_credit": "Chia Wei Ku · CC BY-SA 4.0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Handmade_Soap_1.JPG"
+    },
+    {
+      "product_name": "Bocal en verre réutilisable",
+      "category": "home",
+      "description": "Un bocal en verre pour ranger les aliments secs ou emporter des achats en vrac. Réutiliser un bocal déjà disponible à la maison évite d'acheter un contenant supplémentaire. Vérifiez son état et nettoyez-le avant utilisation.",
+      "image": "bocal.jpg",
+      "image_credit": "Alabama Extension · CC0",
+      "image_source": "https://commons.wikimedia.org/wiki/File:Empty_Clear_Jar_(51330638811).jpg"
+    }
+  ]
+}

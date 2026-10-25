@@ -1,13 +1,13 @@
 {
-  "measured_at": "2026-10-25T18:54:02.937447+00:00",
+  "measured_at": "2026-10-25T19:36:22.146661+00:00",
   "mode": "live",
   "model": "gemini-3.5-flash-lite",
-  "case_count": 7,
-  "completed_count": 7,
+  "case_count": 8,
+  "completed_count": 8,
   "category_accuracy": 1.0,
   "expected_issue_recall": 1.0,
-  "latency_median_ms": 1800,
-  "latency_p95_ms": 2062,
+  "latency_median_ms": 1990.5,
+  "latency_p95_ms": 2941,
   "rows": [
     {
       "id": "reusable_bottle",
@@ -15,9 +15,9 @@
       "expected_issues": [],
       "category": "home",
       "product_name": "",
-      "description": "Je la remplis au lieu d'acheter des bouteilles jetables.\n\nElle est facile à nettoyer.",
+      "description": "J'utilise cette gourde en inox depuis trois semaines. Je m'en sers pour la remplir au lieu d'acheter des bouteilles jetables. Elle est facile à nettoyer.",
       "issues": [],
-      "elapsed_ms": 2062,
+      "elapsed_ms": 2941,
       "exact_source_quotes": true,
       "missing_information": [
         "Précisez le nom du produit."
@@ -31,7 +31,7 @@
       "product_name": "Shampoing solide",
       "description": "J'ai testé ce shampoing solide pendant un mois. Je n'ai plus de flacon à jeter et il prend moins de place dans mon sac.",
       "issues": [],
-      "elapsed_ms": 1986,
+      "elapsed_ms": 1941,
       "exact_source_quotes": true,
       "missing_information": []
     },
@@ -41,9 +41,9 @@
       "expected_issues": [],
       "category": "food",
       "product_name": "Lentilles en vrac",
-      "description": "J'achète ces lentilles en vrac avec mon bocal.\n\nJe peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.",
+      "description": "J'achète ces lentilles en vrac avec mon bocal. Je peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.",
       "issues": [],
-      "elapsed_ms": 1796,
+      "elapsed_ms": 1832,
       "exact_source_quotes": true,
       "missing_information": []
     },
@@ -53,9 +53,9 @@
       "expected_issues": [],
       "category": "fashion",
       "product_name": "Veste de seconde main",
-      "description": "Je porte cette veste de seconde main depuis deux mois.\n\nJ'ai réparé un bouton plutôt que d'acheter une veste neuve.",
+      "description": "Je porte cette veste de seconde main depuis deux mois. J'ai réparé un bouton plutôt que d'en acheter une neuve.",
       "issues": [],
-      "elapsed_ms": 1758,
+      "elapsed_ms": 2018,
       "exact_source_quotes": true,
       "missing_information": []
     },
@@ -65,9 +65,9 @@
       "expected_issues": [],
       "category": "mobility",
       "product_name": "Vélo reconditionné",
-      "description": "Je roule avec ce vélo reconditionné pour aller à l'université deux fois par semaine. Je remplace ainsi certains trajets en voiture.",
+      "description": "J'utilise ce vélo reconditionné pour me rendre à l'université deux fois par semaine. Cela me permet de remplacer certains de mes trajets en voiture.",
       "issues": [],
-      "elapsed_ms": 1818,
+      "elapsed_ms": 2104,
       "exact_source_quotes": true,
       "missing_information": []
     },
@@ -85,7 +85,7 @@
         "absolute_eco_claim",
         "quantified_impact"
       ],
-      "elapsed_ms": 1800,
+      "elapsed_ms": 1915,
       "exact_source_quotes": true,
       "missing_information": []
     },
@@ -101,18 +101,30 @@
       "issues": [
         "certification"
       ],
-      "elapsed_ms": 1688,
+      "elapsed_ms": 1963,
       "exact_source_quotes": true,
       "missing_information": [
-        "Ajoutez votre expérience personnelle avec ce produit.",
-        "Expliquez un avantage pratique concret observé."
+        "Précisez le nom du produit.",
+        "Ajoutez votre expérience personnelle avec ce produit."
       ]
+    },
+    {
+      "id": "short_informal_review",
+      "expected_category": "food",
+      "expected_issues": [],
+      "category": "food",
+      "product_name": "Cookies Nasser",
+      "description": "Je trouve ces cookies très délicieux.",
+      "issues": [],
+      "elapsed_ms": 2411,
+      "exact_source_quotes": true,
+      "missing_information": []
     }
   ],
   "limitations": [
-    "Seven synthetic French drafts; not a general accuracy estimate.",
+    "Small synthetic French sample; not a general accuracy estimate.",
     "Warnings identify claims needing evidence; they do not establish whether a claim is true or false.",
-    "Only exact source spans may appear in the proposed description; this does not verify the author's experience.",
+    "Rewrites require exact source quotes and pass limited claim checks; author review remains necessary and truth is not verified.",
     "Latency covers the provider and validation, without browser rendering or cache.",
     "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues."
   ]

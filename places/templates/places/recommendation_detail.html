@@ -8,6 +8,7 @@
   <h1 class="break-words font-heading text-3xl font-bold text-forest sm:text-[40px]">{{ recommendation.product_name }}</h1>
   <p class="text-sm">Proposé par {{ recommendation.user.first_name|default:recommendation.user.username }} · {{ recommendation.created_at|date:"d/m/Y" }}</p>
   </header>
+  {% include "places/_photo.html" with entry=recommendation %}
   {% include "ui/rewards_tabs.html" %}
   {% include "places/_tools.html" %}
   {% if recommendation.status == 'pending' %}<p class="rounded-xl bg-sky/30 p-4">Cette recommandation attend la validation d’un administrateur. Elle n’est pas encore visible dans le catalogue.</p>{% elif recommendation.status == 'rejected' %}<div class="rounded-xl border-2 border-brick p-4"><h2 class="font-bold text-brick">Publication refusée</h2><p class="mt-2 break-words">{{ recommendation.rejection_reason }}</p><p class="mt-2 text-sm">Vous pouvez la modifier puis la renvoyer pour validation.</p></div>{% endif %}

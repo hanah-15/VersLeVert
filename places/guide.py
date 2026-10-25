@@ -105,10 +105,14 @@ def fallback_intent(query):
 
 
 def catalogue_snapshot():
-    places = list(Place.objects.values("id", "name", "category", "description", "address", "latitude", "longitude"))
+    from django.core.files.storage import default_storage
+
+    places = list(Place.objects.values("id", "name", "category", "description", "address", "latitude", "longitude", "image"))
     products = list(ProductRecommendation.objects.filter(status=ProductRecommendation.Status.APPROVED).values(
-        "id", "product_name", "category", "description", "place_id",
+        "id", "product_name", "category", "description", "place_id", "image",
     ))
+    for item in places + products:
+        item["image_url"] = default_storage.url(item.pop("image")) if item.get("image") else ""
     return {"places": places, "products": products}
 
 
@@ -182,7 +186,7 @@ def rank_catalogue(snapshot, query, intent, filters=None):
                 continue
             if filters.get("category") and (not place or place["category"] != filters["category"]):
                 continue
-            if city and (not place or normalize(city) not in normalize(place["address"])):
+            if city and (not place or not re.search(r"(?<!\w)" + re.escape(normalize(city)) + r"(?!\w)", normalize(place["address"]))):
                 continue
             distance = None
             if origin:
@@ -210,6 +214,8 @@ def rank_catalogue(snapshot, query, intent, filters=None):
             reason = "Catégorie liée à votre recherche : " + label + "." if category_match else "Mots correspondants dans la fiche : " + ", ".join(sorted(matched)[:6]) + "."
             result = {
                 "id": item["id"], "name": name, "category": label, "reason": reason,
+                "image_url": item.get("image_url", ""),
+                "excerpt": item["description"][:220],
                 "evidence": evidence, "matched_terms": sorted(matched),
                 "url": reverse("places:detail" if kind == "places" else "places:recommendation-detail", args=[item["id"]]),
                 "address": place["address"] if place else "Lieu non renseigné",

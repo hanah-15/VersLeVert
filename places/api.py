@@ -19,7 +19,7 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ("id", "name", "category", "category_label", "description", "address", "latitude", "longitude", "distance")
+        fields = ("id", "name", "category", "category_label", "description", "address", "latitude", "longitude", "distance", "image", "image_credit", "image_source")
 
 
 class RecommendationSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class RecommendationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductRecommendation
-        fields = ("id", "product_name", "category", "category_label", "description", "place", "author", "like_count", "created_at")
+        fields = ("id", "product_name", "category", "category_label", "description", "place", "author", "like_count", "created_at", "image", "image_credit", "image_source")
 
 
 class PlaceListAPI(generics.ListAPIView):

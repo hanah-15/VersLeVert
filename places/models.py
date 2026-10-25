@@ -16,6 +16,10 @@ class Place(models.Model):
     category = models.CharField("Catégorie", max_length=30, choices=Category.choices)
     description = models.TextField("Description", max_length=3000, blank=True)
     address = models.CharField("Adresse", max_length=255)
+    image = models.ImageField("Photo", upload_to="places/photos/", blank=True)
+    image_credit = models.CharField(max_length=255, blank=True)
+    image_source = models.URLField(max_length=500, blank=True)
+    source_url = models.URLField("Source", max_length=500, blank=True)
     latitude = models.DecimalField("Latitude", max_digits=9, decimal_places=6,
         validators=[MinValueValidator(-90), MaxValueValidator(90)])
     longitude = models.DecimalField("Longitude", max_digits=9, decimal_places=6,
@@ -61,6 +65,9 @@ class ProductRecommendation(models.Model):
     place = models.ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="recommendations", verbose_name="Lieu associé")
     product_name = models.CharField("Nom du produit", max_length=150)
+    image = models.ImageField("Photo du produit", upload_to="places/products/", blank=True)
+    image_credit = models.CharField(max_length=255, blank=True)
+    image_source = models.URLField(max_length=500, blank=True)
     description = models.TextField("Pourquoi le recommandez-vous ?", max_length=3000)
     category = models.CharField("Catégorie", max_length=30, choices=Category.choices)
     status = models.CharField("Statut", max_length=12, choices=Status.choices, default=Status.PENDING)

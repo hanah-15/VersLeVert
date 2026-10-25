@@ -278,11 +278,11 @@ class PlacesWorkflowTests(TestCase):
         Place.objects.all().delete()
         self.assertEqual(suggest_from_catalogue("Un lieu")["source"], "empty")
         generate.assert_not_called()
-        self.assertContains(self.client.get(reverse("places:guide")), "catalogue est encore vide")
+        self.assertContains(self.client.get(reverse("places:guide")), "dès l'ajout des premiers lieux")
 
     @patch("places.views.suggest_from_catalogue")
     def test_guide_html_fallback_escapes_generated_text(self, suggest):
-        suggest.return_value = {"summary": "<script>alert(1)</script>", "places": [], "products": []}
+        suggest.return_value = {"objective": "<script>alert(1)</script>", "places": [], "products": []}
         response = self.client.post(reverse("places:guide"), {"query": "Un lieu"})
         self.assertContains(response, "&lt;script&gt;alert(1)&lt;/script&gt;")
         self.assertNotContains(response, "<script>alert(1)</script>")

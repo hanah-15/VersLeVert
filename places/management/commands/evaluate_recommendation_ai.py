@@ -13,7 +13,7 @@ from places.recommendation_ai import prepare_recommendation
 
 
 class Command(BaseCommand):
-    help = "Measure category accuracy and claim-warning recall on 7 fictional drafts (real Gemini calls)."
+    help = "Measure category accuracy and claim-warning recall on synthetic drafts (real Gemini calls)."
 
     def add_arguments(self, parser):
         parser.add_argument("--live", action="store_true", required=True, help="Explicit consent to consume Gemini quota.")
@@ -38,9 +38,9 @@ class Command(BaseCommand):
             "latency_p95_ms": latencies[math.ceil(len(latencies) * .95) - 1] if latencies else None,
             "rows": rows,
             "limitations": [
-                "Seven synthetic French drafts; not a general accuracy estimate.",
+                "Small synthetic French sample; not a general accuracy estimate.",
                 "Warnings identify claims needing evidence; they do not establish whether a claim is true or false.",
-                "Only exact source spans may appear in the proposed description; this does not verify the author's experience.",
+                "Rewrites require exact source quotes and pass limited claim checks; author review remains necessary and truth is not verified.",
                 "Latency covers the provider and validation, without browser rendering or cache.",
                 "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues.",
             ],

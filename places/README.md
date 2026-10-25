@@ -6,7 +6,8 @@ une connexion. Les écritures utilisent des formulaires POST avec CSRF.
 ## Parcours
 
 - `/places/` : catalogue, recherche par nom/adresse/description, catégorie,
-  coordonnées facultatives et rayon en km. Avec une position, tri par distance.
+  ville/quartier, lieu de départ nommé ou position facultative, et distance en km.
+  Les coordonnées restent masquées ; le tri de proximité utilise la position du lieu choisi.
 - `/places/<id>/` : fiche d'un lieu, lien OpenStreetMap et produits publiés associés.
 - `/places/nouveau/`, `<id>/modifier/`, `<id>/supprimer/` : gestion réservée au staff.
 - `/places/recommandations/` : produits publiés, recherche, catégorie, tri récent/populaire.
@@ -27,7 +28,8 @@ changements de publication et de likes verrouillent la recommandation en transac
 ## Contrat d'intégration avec l'équipe
 
 - `places.models.Place` : `name`, `category`, `description`, `address`, `latitude`,
-  `longitude`, `created_by`, `created_at`, `updated_at`.
+  `longitude`, `image`, `image_credit`, `image_source`, `source_url`,
+  `created_by`, `created_at`, `updated_at`.
 - Catégories de lieu : `park`, `cafe`, `zero_waste_shop`, `recycling_point`.
 - Les modules événements/preuves peuvent ajouter une FK facultative vers
   `places.Place` avec `SET_NULL`. Ce module ne modifie pas leurs modèles.
@@ -48,7 +50,7 @@ Les modifications passent par les formulaires HTML et la modération ci-dessus.
 
 | GET | Paramètres |
 | --- | --- |
-| `/places/api/lieux/` | `q`, `category`, `latitude`, `longitude`, `radius`, `page` |
+| `/places/api/lieux/` | `q`, `category`, `city`, `near_place`, `latitude`, `longitude`, `radius`, `page` |
 | `/places/api/lieux/<id>/` | fiche publique du catalogue |
 | `/places/api/recommandations/` | `q`, `category`, `sort=recent/popular`, `page` |
 | `/places/api/recommandations/<id>/` | publication approuvée uniquement |
@@ -58,29 +60,43 @@ Une publication non approuvée ne figure pas dans l'API, même pour son auteur.
 
 ## IA : assistant de publication (fonction principale)
 
-Dans `/places/recommandations/nouvelle/`, le bouton **Préparer mon brouillon**
-transforme une expérience saisie librement en proposition de formulaire : nom
-extrait, catégorie proposée et passages utiles. Il signale les promesses
-écologiques absolues, certifications ou chiffres d'impact à documenter.
-**Appliquer au formulaire** remplit les champs ; **Rétablir mon texte initial**
-annule ce remplissage. La proposition ne publie rien et ne modifie aucune table.
-L'envoi normal conserve le statut `pending` et la modération humaine.
+Dans `/places/recommandations/nouvelle/`, **Améliorer mon texte** propose une
+correction légère en français, y compris pour un avis court ou familier.
+**Utiliser ce texte** remplace uniquement l'avis ; un nom ou une catégorie saisis
+manuellement sont conservés. **Garder mon texte** ferme la proposition et
+**Annuler la modification** rétablit le texte initial sans écraser une saisie récente.
+La suggestion ne publie rien. L'envoi conserve le statut `pending` et la modération.
 
-- `recommendation_ai.py` utilise une réponse JSON structurée validée par Pydantic.
-- Nom et extraits de publication doivent être retrouvés dans le texte source.
-  Les extraits inventés sont écartés ; les phrases contenant les affirmations
-  signalées sont retirées de la description proposée.
-- L'assistant ne certifie pas la qualité écologique d'un produit et ne prouve
-  pas la véracité de l'expérience de l'auteur. Un signalement n'est pas une
-  preuve que l'affirmation est fausse.
-- Un utilisateur confirme ses modifications. Une proposition devenue obsolète
-  ne peut pas remplacer silencieusement un texte modifié entre-temps.
-- Le nom et le texte du brouillon sont envoyés à Gemini uniquement au clic.
-  Le compte, les identifiants de lieu et les données privées des autres auteurs
-  ne sont pas envoyés. Le cache des brouillons est séparé par utilisateur.
-- POST authentifié, CSRF et validations de longueur ; délai borné de 15 s par
-  défaut, aucune répétition automatique, cache de 10 min et limitation d'appel.
-- Si le service échoue, le formulaire reste utilisable manuellement.
+- JSON structuré validé par Pydantic, citations justificatives exactes et vérification
+  de leur présence dans le texte. Les reformulations peuvent différer de ces citations.
+- Les clauses signalées sont exclues des justifications des propriétés du produit ;
+  des contrôles supplémentaires bloquent des chiffres et termes de certification
+  ajoutés. Ces contrôles limités ne prouvent ni la fidélité sémantique de toute phrase
+  ni la véracité de l'avis. La relecture de l'auteur reste indispensable.
+- Seuls le nom et le texte du brouillon sont envoyés à Gemini au clic, sans photo,
+  compte, position ou catalogue. Cache séparé par utilisateur, délai borné, CSRF.
+- En cas d'erreur, le formulaire et la rédaction manuelle restent disponibles.
+
+## Photos et catalogue initial
+
+Les lieux et produits acceptent une photo JPG, PNG ou WebP (5 Mo maximum).
+Les contributions restent possibles sans photo ; chaque entrée importée en possède
+une. Cartes, fiches et guide affichent les images. Une nouvelle photo retire le
+crédit de l'ancienne image. Les crédits des photos importées figurent sur les fiches
+et dans `static/places/catalogue/CREDITS.md`.
+
+```powershell
+.\venv\Scripts\python.exe manage.py migrate
+.\venv\Scripts\python.exe manage.py load_places_catalogue
+```
+
+`catalogue.json` contient quatre parcs tunisiens et trois types de produits aux
+textes neutres. Aucun faux témoignage ni disponibilité en magasin n'est ajouté.
+L'import est idempotent, utilise les images locales versionnées et remplace
+uniquement les anciens noms exacts connus ; pour les lieux, l'adresse fictive
+historique est aussi exigée. Les autres enregistrements sont préservés. Le compte
+« Sélection Vers le Vert » n'a pas de mot de passe utilisable. L'ancienne commande
+`seed_places_demo` est un alias de cet import et ne réintroduit aucun préfixe.
 
 ## Guide de découverte (fonction complémentaire)
 
@@ -138,8 +154,8 @@ les mesures réelles, distinctes des tests avec réponses simulées.
 .\venv\Scripts\python.exe manage.py check_gemini
 .\venv\Scripts\python.exe manage.py evaluate_recommendation_ai --live --output places/evaluation/recommendation-results-live.json
 .\venv\Scripts\python.exe manage.py evaluate_guide --live --output places/evaluation/results-live.json
-# Catalogue de démonstration facultatif, explicitement fictif et sans écrasement :
-.\venv\Scripts\python.exe manage.py seed_places_demo
+# Catalogue initial photographié :
+.\venv\Scripts\python.exe manage.py load_places_catalogue
 # Tests sans réseau ni consommation de quota :
 .\venv\Scripts\python.exe -m coverage run --source=places manage.py test places
 .\venv\Scripts\python.exe -m coverage report --omit="places/tests.py,places/test_*.py,places/migrations/*" -m

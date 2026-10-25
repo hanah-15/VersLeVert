@@ -1,0 +1,11 @@
+{{ location_form.latitude }}{{ location_form.longitude }}
+<div class="location-row">
+  {% include "places/_field.html" with field=location_form.city %}
+  <button type="button" data-use-location class="ui-button ui-button-small">{% include "ui/icon.html" with name="place" %} Autour de moi</button>
+</div>
+<p data-location-status aria-live="polite" class="text-xs text-muted">{% if location_form.location_label %}Recherche autour de : {{ location_form.location_label }}.{% else %}Toutes les villes. Vous pouvez préciser une ville ou utiliser votre position.{% endif %}</p>
+<details class="location-options" {% if location_form.near_place.value or location_form.radius.value %}open{% endif %}>
+  <summary>Autour d'un lieu précis <span aria-hidden="true">⌄</span></summary>
+  <div class="location-row">{% include "places/_field.html" with field=location_form.near_place %}{% include "places/_field.html" with field=location_form.radius %}</div>
+</details>
+{% if location_form.latitude.errors or location_form.longitude.errors %}<p class="ui-errors" role="alert">La position n'est pas disponible. Choisissez un lieu ou utilisez « Autour de moi ».</p>{% endif %}

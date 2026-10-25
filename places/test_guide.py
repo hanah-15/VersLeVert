@@ -167,13 +167,13 @@ class GuideIntegrationTests(TestCase):
             self.assertIn("&lt;script&gt;", content)
             self.assertIn("&lt;img", content)
 
-    def test_demo_seed_is_idempotent_and_has_no_usable_login(self):
+    def test_catalogue_import_is_idempotent_and_has_no_usable_login(self):
         output = StringIO()
-        call_command("seed_places_demo", stdout=output)
+        call_command("load_places_catalogue", stdout=output)
         count = Place.objects.count()
-        call_command("seed_places_demo", stdout=output)
+        call_command("load_places_catalogue", stdout=output)
         self.assertEqual(Place.objects.count(), count)
-        self.assertFalse(get_user_model().objects.get(username="places-demo-author").has_usable_password())
+        self.assertFalse(get_user_model().objects.get(username="places-catalogue").has_usable_password())
 
 
 class GuideFormTests(SimpleTestCase):

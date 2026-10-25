@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Count, Q
 from accounts.utils import distance_km
 from .models import Place, ProductRecommendation
@@ -10,6 +12,9 @@ def find_places(data):
         queryset = queryset.filter(Q(name__icontains=data["q"]) | Q(address__icontains=data["q"]) | Q(description__icontains=data["q"]))
     if data.get("category"):
         queryset = queryset.filter(category=data["category"])
+    if data.get("city"):
+        # Whole names: searching Tunis must not match every address in Tunisie.
+        queryset = queryset.filter(address__iregex=r"(^|\W)" + re.escape(data["city"].strip()) + r"($|\W)")
     if data.get("latitude") is None or data.get("longitude") is None:
         return queryset
     places = list(queryset)

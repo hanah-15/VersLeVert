@@ -24,6 +24,23 @@ def preparation(**changes):
 
 
 class PreparationValidationTests(SimpleTestCase):
+    def test_informal_review_can_be_corrected_without_inventing_benefits(self):
+        result = self.validate(description="Tres delicieux , healthy et packaging bien pour l'environnement", product_name="Cookies Nasser", experience_quotes=["Tres delicieux"], rewritten_sentences=[{"text": "Je trouve ces cookies très bons.", "source_quotes": ["Tres delicieux"]}])
+        self.assertEqual(result["description"], "Je trouve ces cookies très bons.")
+        self.assertNotIn("healthy", result["description"])
+
+    def test_rewrite_needs_real_support_and_cannot_add_numbers_or_product_claims(self):
+        for text, support in [("Certifié biologique.", TEXT), ("Économise 50 litres.", TEXT), ("Le bouchon est pratique.", "invented source")]:
+            with self.subTest(text=text):
+                result = self.validate(experience_quotes=[], rewritten_sentences=[{"text": text, "source_quotes": [support]}])
+                self.assertEqual(result["description"], "")
+
+    def test_review_is_kept_when_same_source_sentence_also_has_a_flagged_claim(self):
+        source = "Tres delicieux, packaging bien pour l'environnement"
+        result = self.validate(description=source, experience_quotes=[source], claims_to_check=[{"quote": "packaging bien pour l'environnement", "issue": "absolute_eco_claim"}], rewritten_sentences=[{"text": "Je les trouve très bons.", "source_quotes": [source]}])
+        self.assertEqual(result["description"], "Je les trouve très bons.")
+        self.assertEqual(result["evidence_quotes"], [source])
+
     def validate(self, description=TEXT, **changes):
         return verified_preparation(RecommendationPreparation.model_validate(preparation(**changes)), "", description)
 
@@ -125,4 +142,4 @@ class PreparationWorkflowTests(TestCase):
         response = self.client.post(self.url, {"description": TEXT})
         self.assertEqual(response.status_code, 503)
         self.assertNotContains(response, "private-detail", status_code=503)
-        self.assertContains(self.client.get(reverse("places:recommendation-create")), "Préparer mon brouillon")
+        self.assertContains(self.client.get(reverse("places:recommendation-create")), "Améliorer mon texte")

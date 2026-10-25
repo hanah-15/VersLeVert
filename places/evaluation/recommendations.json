@@ -1,9 +1,63 @@
 [
-  {"id": "reusable_bottle", "product_name": "", "description": "J'utilise une gourde inox depuis trois semaines. Je la remplis au lieu d'acheter des bouteilles jetables. Elle est facile à nettoyer.", "category": "home", "expected_issues": []},
-  {"id": "solid_shampoo", "product_name": "Shampoing solide", "description": "J'ai testé ce shampoing solide pendant un mois. Je n'ai plus de flacon à jeter et il prend moins de place dans mon sac.", "category": "personal_care", "expected_issues": []},
-  {"id": "bulk_food", "product_name": "Lentilles en vrac", "description": "J'achète ces lentilles en vrac avec mon bocal. Je peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.", "category": "food", "expected_issues": []},
-  {"id": "secondhand_clothes", "product_name": "Veste de seconde main", "description": "Je porte cette veste de seconde main depuis deux mois. J'ai réparé un bouton plutôt que d'acheter une veste neuve.", "category": "fashion", "expected_issues": []},
-  {"id": "bicycle", "product_name": "Vélo reconditionné", "description": "Je roule avec ce vélo reconditionné pour aller à l'université deux fois par semaine. Je remplace ainsi certains trajets en voiture.", "category": "mobility", "expected_issues": []},
-  {"id": "absolute_and_quantified", "product_name": "Sac magique", "description": "J'utilise ce sac pour mes courses. Il est 100% écologique et permet d'économiser 20 kg de CO2 par semaine.", "category": "home", "expected_issues": ["absolute_eco_claim", "quantified_impact"]},
-  {"id": "unsupported_certificate", "product_name": "Savon certifié", "description": "Ce savon est certifié biologique selon le vendeur. Je n'ai pas de référence de certification et je ne l'ai pas encore utilisé.", "category": "personal_care", "expected_issues": ["certification"]}
+  {
+    "id": "reusable_bottle",
+    "product_name": "",
+    "description": "J'utilise une gourde inox depuis trois semaines. Je la remplis au lieu d'acheter des bouteilles jetables. Elle est facile à nettoyer.",
+    "category": "home",
+    "expected_issues": []
+  },
+  {
+    "id": "solid_shampoo",
+    "product_name": "Shampoing solide",
+    "description": "J'ai testé ce shampoing solide pendant un mois. Je n'ai plus de flacon à jeter et il prend moins de place dans mon sac.",
+    "category": "personal_care",
+    "expected_issues": []
+  },
+  {
+    "id": "bulk_food",
+    "product_name": "Lentilles en vrac",
+    "description": "J'achète ces lentilles en vrac avec mon bocal. Je peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.",
+    "category": "food",
+    "expected_issues": []
+  },
+  {
+    "id": "secondhand_clothes",
+    "product_name": "Veste de seconde main",
+    "description": "Je porte cette veste de seconde main depuis deux mois. J'ai réparé un bouton plutôt que d'acheter une veste neuve.",
+    "category": "fashion",
+    "expected_issues": []
+  },
+  {
+    "id": "bicycle",
+    "product_name": "Vélo reconditionné",
+    "description": "Je roule avec ce vélo reconditionné pour aller à l'université deux fois par semaine. Je remplace ainsi certains trajets en voiture.",
+    "category": "mobility",
+    "expected_issues": []
+  },
+  {
+    "id": "absolute_and_quantified",
+    "product_name": "Sac magique",
+    "description": "J'utilise ce sac pour mes courses. Il est 100% écologique et permet d'économiser 20 kg de CO2 par semaine.",
+    "category": "home",
+    "expected_issues": [
+      "absolute_eco_claim",
+      "quantified_impact"
+    ]
+  },
+  {
+    "id": "unsupported_certificate",
+    "product_name": "Savon certifié",
+    "description": "Ce savon est certifié biologique selon le vendeur. Je n'ai pas de référence de certification et je ne l'ai pas encore utilisé.",
+    "category": "personal_care",
+    "expected_issues": [
+      "certification"
+    ]
+  },
+  {
+    "id": "short_informal_review",
+    "product_name": "Cookies Nasser",
+    "description": "Tres delicieux , healthy et packaging bien pour l'environment",
+    "category": "food",
+    "expected_issues": []
+  }
 ]
