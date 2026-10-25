@@ -80,14 +80,14 @@
   .brand-mark { @apply flex h-14 w-14 shrink-0 items-center justify-center; }
   .brand-mark img { @apply h-full w-full object-contain; }
   .brand-caption { @apply mt-2 block font-ui text-[8px] font-semibold uppercase tracking-[0.16em] text-forest/75; }
-  .eco-header { @apply sticky top-0 z-40 border-b border-paper/35 bg-palm/90 shadow-card backdrop-blur-2xl; }
-  .eco-header-inner { @apply mx-auto flex min-h-[88px] max-w-[1440px] items-center gap-5 px-5 sm:px-8 lg:px-10; }
-  .eco-header .brand-mark { @apply h-12 w-12 sm:h-14 sm:w-14; }
+  .eco-header { @apply sticky top-0 z-40 border-b border-forest/10 bg-palm/95 shadow-card backdrop-blur-2xl; }
+  .eco-header-inner { @apply mx-auto flex min-h-[82px] max-w-[1320px] items-center gap-4 px-5 sm:px-8 lg:px-10; }
+  .eco-header .brand { @apply gap-3 text-[22px] tracking-tight; }
   .eco-header .brand > span:last-child { @apply hidden sm:block; }
-  .eco-navigation { @apply mx-auto hidden items-center gap-0.5 xl:flex; }
-  .eco-navigation a { @apply relative rounded-full px-3 py-2.5 text-[13px] font-semibold text-forest hover:bg-porcelain/25; }
-  .eco-navigation a[aria-current=page] { @apply bg-porcelain/80 shadow-sm; }
-  .eco-header-actions { @apply ml-auto flex shrink-0 items-center gap-2 sm:gap-3; }
+  .eco-navigation { @apply mx-auto hidden shrink-0 items-center gap-0.5 rounded-full border border-porcelain/50 bg-porcelain/30 p-1.5 shadow-sm backdrop-blur-xl xl:flex; }
+  .eco-navigation a { @apply relative whitespace-nowrap rounded-full px-3 py-2.5 text-[13px] font-semibold text-forest hover:bg-porcelain/70; }
+  .eco-navigation a[aria-current=page] { @apply bg-forest text-porcelain shadow-sm hover:bg-forest; }
+  .eco-header-actions { @apply ml-auto flex shrink-0 items-center gap-2 rounded-full border border-porcelain/40 bg-porcelain/20 p-1.5 backdrop-blur-lg; }
   .eco-visitor-links { @apply mx-auto hidden items-center gap-8 text-sm font-semibold text-forest lg:flex; }
   .eco-visitor-links a, .eco-login { @apply rounded-md underline-offset-4 hover:underline; }
   .eco-login { @apply whitespace-nowrap text-xs font-bold text-forest sm:text-sm; }
@@ -99,8 +99,8 @@
   .dropdown a[aria-current=page] { @apply bg-palm/25; }
   .dropdown .dropdown-danger { @apply text-brick; }
   .mobile-drawer { @apply relative xl:hidden; }
-  .mobile-drawer > summary { @apply inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-porcelain/60 bg-porcelain/65 text-forest; }
-  .mobile-drawer .dropdown { @apply left-0 right-auto max-h-[75vh] overflow-y-auto; }
+  .mobile-drawer > summary { @apply inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-porcelain/60 bg-porcelain/65 text-forest hover:bg-porcelain; }
+  .mobile-drawer .dropdown { @apply left-auto right-0 max-h-[75vh] overflow-y-auto; }
   .mobile-tabs { @apply fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-palm/25 bg-porcelain/90 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl sm:hidden; }
   .mobile-tabs > a, .mobile-tabs > details > summary { @apply flex min-h-[48px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted; }
   .mobile-tabs a[aria-current=page] { @apply bg-palm/25 text-forest; }
@@ -234,6 +234,30 @@
   .app-content table { @apply w-full border-collapse text-left text-sm; }
   .app-content th { @apply border-b border-line bg-palm/15 p-3 text-xs font-bold text-muted; }
   .app-content td { @apply border-b border-line p-3; }
+}
+/* Keep the brand, navigation and actions balanced on large screens. */
+@media (min-width: 1280px) {
+  .is-authenticated .eco-header-inner {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(150px, 1fr);
+    column-gap: 16px;
+  }
+  .is-authenticated .eco-header-inner > .brand { grid-column: 1; }
+  .is-authenticated .eco-header-inner > .eco-navigation {
+    grid-column: 2;
+    justify-self: center;
+    margin: 0;
+  }
+  .is-authenticated .eco-header-inner > .eco-header-actions {
+    grid-column: 3;
+    justify-self: end;
+    margin: 0;
+  }
+}
+@media (max-width: 1279px) {
+  .is-authenticated .eco-header-inner > .brand { order: 1; }
+  .is-authenticated .eco-header-inner > .eco-header-actions { order: 2; }
+  .is-authenticated .eco-header-inner > .mobile-drawer { order: 3; }
 }
 @media (max-width: 639px) {
   .eco-header-inner { gap: 12px; min-height: 76px; }
