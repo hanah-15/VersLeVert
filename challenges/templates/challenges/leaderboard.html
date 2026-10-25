@@ -1,0 +1,9 @@
+{% extends "challenges/base.html" %}
+{% block title %}Classement · Défis · Vers le Vert{% endblock %}
+{% block challenges_content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow"><span class="ui-dot"></span> Communauté</p><h1>Classement des participants</h1><p>Les membres les plus engagés apparaissent ici selon leurs défis terminés et leur progression.</p></div></header>
+<section class="ui-card overflow-hidden rounded-2xl border border-olive/40 bg-white shadow-sm">
+  <div class="grid grid-cols-[4rem_1fr_8rem_8rem] gap-3 border-b border-olive/30 bg-mist/50 p-4 text-xs font-bold uppercase tracking-wider text-muted"><span>#</span><span>Participant</span><span>Défis terminés</span><span>Progression</span></div>
+  {% for row in leaderboard %}<div class="grid grid-cols-[4rem_1fr_8rem_8rem] items-center gap-3 border-b border-olive/20 p-4 last:border-0"><span class="text-xl font-bold text-palm">{{ forloop.counter }}</span><span class="font-bold text-forest">{{ row.user__first_name|default:row.user__username }}{% if row.user__last_name %} {{ row.user__last_name }}{% endif %}</span><span class="text-sm text-muted">{{ row.completed_count }}</span><span class="text-sm font-semibold text-forest">{{ row.progress_total|floatformat:"-2" }}</span></div>{% empty %}<p class="p-6 text-muted">Le classement apparaîtra dès les premières participations.</p>{% endfor %}
+</section>
+{% endblock %}

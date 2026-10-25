@@ -23,6 +23,7 @@ from django.views.generic import TemplateView
 from accounts.views import SponsorApplicationView
 from core.views import NotificationsView, PlaceholderView
 from accounts.views import ProfileOverviewView, ProfileSectionView
+from challenges.views import PersonalChallengeCreateView
 from sponsor.views import redeem_reward
 
 urlpatterns = [
@@ -39,7 +40,7 @@ urlpatterns = [
     path("notifications/", NotificationsView.as_view(), name="notifications"),
     path("actions/waste/new/", PlaceholderView.as_view(placeholder_title="Publier un déchet", placeholder_owner="module déchets"), name="waste-create"),
     path("actions/proof/new/", PlaceholderView.as_view(placeholder_title="Ajouter une preuve", placeholder_owner="module preuves"), name="proof-create"),
-    path("actions/challenge/new/", PlaceholderView.as_view(placeholder_title="Nouveau défi personnel", placeholder_owner="module défis"), name="personal-challenge-create"),
+    path("actions/challenge/new/", PersonalChallengeCreateView.as_view(), name="personal-challenge-create"),
     path("profil/", ProfileOverviewView.as_view(), name="profile-overview"),
     path("profil/<slug:section>/", ProfileSectionView.as_view(), name="profile-section"),
     path("profile/points/", ProfileSectionView.as_view(), name="profile-points-legacy"),

@@ -1,0 +1,34 @@
+{% extends "challenges/base.html" %}
+
+{% block title %}Défis recommandés · Vers le Vert{% endblock %}
+
+{% block challenges_content %}
+<header class="ui-page-header">
+  <div>
+    <p class="ui-eyebrow"><span class="ui-dot"></span> Coach écologique</p>
+    <h1>Des défis faits pour vous</h1>
+    <p>Groq analyse vos défis déjà réalisés et les défis actifs pour vous proposer un parcours adapté.</p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="ui-button ui-button-primary">Obtenir mes recommandations</button>
+  </form>
+</header>
+
+{% if recommendation %}
+  <article class="ui-card rounded-2xl border border-palm/40 bg-palm/10 p-6 shadow-sm sm:p-8">
+    <h2 class="text-xl font-bold text-forest">Vos recommandations</h2>
+    <div class="mt-4 whitespace-pre-line leading-relaxed text-carbon">{{ recommendation }}</div>
+  </article>
+{% elif recommendation_requested %}
+  <div class="ui-alert ui-alert-error" role="alert">
+    <p class="font-semibold">Impossible de générer les recommandations.</p>
+    {% if recommendation_error %}<p class="mt-1">{{ recommendation_error }}</p>{% endif %}
+  </div>
+{% else %}
+  <article class="ui-card rounded-2xl border border-olive/40 bg-white p-8 text-center shadow-sm">
+    <h2 class="text-xl font-bold text-forest">Prêt à progresser ?</h2>
+    <p class="mt-2 text-muted">Cliquez sur le bouton pour recevoir des défis adaptés à votre parcours.</p>
+  </article>
+{% endif %}
+{% endblock %}

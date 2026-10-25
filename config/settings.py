@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-load_dotenv(BASE_DIR / '.env')   # juste après la définition de BASE_DIR
+load_dotenv(BASE_DIR / '.env', override=True)   # .env est la source locale de configuration
 
 DATABASES = {
     'default': {
@@ -46,6 +46,14 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.1-flash-lite')
 GEMINI_TIMEOUT_SECONDS = int(os.getenv('GEMINI_TIMEOUT_SECONDS', '20'))
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')
+GROQ_API_URL = os.getenv(
+    'GROQ_API_URL',
+    'https://api.groq.com/openai/v1/chat/completions',
+)
+GROQ_TIMEOUT_SECONDS = int(os.getenv('GROQ_TIMEOUT_SECONDS', '20'))
+GROQ_MAX_TOKENS = int(os.getenv('GROQ_MAX_TOKENS', '500'))
 
 ALLOWED_HOSTS = [
     host.strip()
