@@ -126,24 +126,22 @@ L'application est disponible sur http://127.0.0.1:8000/ et l'administration sur
 http://127.0.0.1:8000/admin/. Pour arrêter uniquement la base de ce projet :
 `docker compose stop db`.
 
-### Gemini pour les lieux et recommandations
+### IA du module de Sofiene
 
-Le module utilise le [SDK officiel Google GenAI](https://ai.google.dev/gemini-api/docs/libraries)
-et l'[API Interactions](https://ai.google.dev/gemini-api/docs/text-generation).
-`places/ai.py` fournit `generate_text()`, avec délai maximal, réponse limitée et
-messages d'erreur sans données sensibles. Les appels ne sont pas conservés comme
-interactions réutilisables (`store=False`). Le guide du module utilise ce service pour proposer des entrées du catalogue publié.
+L'assistant de publication prépare les champs d'une recommandation à partir du
+texte de son auteur, propose une catégorie et signale les affirmations à documenter.
+L'utilisateur applique la proposition ; la publication passe toujours par la
+modération. Le guide de découverte dispose aussi d'une recherche sémantique avec
+filtres géographiques et extraits du catalogue.
 
-Les variables `GEMINI_API_KEY`, `GEMINI_MODEL` (par défaut `gemini-3.1-flash-lite`) et
-`GEMINI_TIMEOUT_SECONDS` restent côté serveur. `.env` est ignoré par Git.
+Le module utilise `GEMINI_API_KEY` et ses réglages dédiés `PLACES_GEMINI_MODEL`
+(par défaut `gemini-3.5-flash-lite`) et `PLACES_GEMINI_TIMEOUT_SECONDS`.
+Les réglages `GEMINI_MODEL` des autres modules sont conservés. Les nouveaux
+endpoints attendent le fournisseur de façon asynchrone sous ASGI ; `runserver`
+reste adapté à la démonstration locale. Les clés restent côté serveur.
 
-```powershell
-# Un petit appel réel pour vérifier la clé et le modèle.
-.\venv\Scripts\python.exe manage.py check_gemini
-# Tests du module, sans appel réseau ni consommation du quota Gemini.
-.\venv\Scripts\python.exe -m coverage run --source=places manage.py test places
-.\venv\Scripts\python.exe -m coverage report -m
-```
+Voir `places/DEMO.md` pour le scénario de démonstration, `places/README.md` pour
+les détails et `places/evaluation/` pour les jeux fictifs et les mesures réelles.
 
 ## Règles d'équipe
 - Une app = un module = un responsable

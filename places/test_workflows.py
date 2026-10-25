@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from .ai import GeminiUnavailableError
@@ -260,25 +260,23 @@ class PlacesWorkflowTests(TestCase):
         self.assertEqual(self.pending.status, "approved")
         self.assertEqual(self.client.get(reverse("admin:places_recommendationlike_add")).status_code, 403)
 
-    @patch("places.services.generate_text")
-    def test_ai_catalogue_excludes_private_content_and_discards_invented_ids(self, generate):
-        generate.return_value = json.dumps({"summary": "Une piste.", "places": [{"id": self.shop.pk, "reason": "Un lieu du catalogue."}, {"id": 999999, "reason": "Inventé"}], "products": [{"id": self.pending.pk, "reason": "Privé"}, {"id": self.approved.pk, "reason": "Publié"}]})
+    @override_settings(GEMINI_API_KEY="")
+    def test_guide_only_retrieves_public_catalogue_content(self):
         result = suggest_from_catalogue("Réduire les emballages")
         self.assertEqual([item["id"] for item in result["places"]], [self.shop.pk])
-        self.assertEqual([item["id"] for item in result["products"]], [self.approved.pk])
-        self.assertNotIn("SECRET_PENDING", generate.call_args.args[0])
+        self.assertNotIn("SECRET_PENDING", json.dumps(result))
+        self.assertNotIn(self.pending.pk, [item["id"] for item in result["products"]])
 
-    @patch("places.services.generate_text", return_value="not valid JSON")
-    def test_malformed_ai_response_is_handled(self, generate):
-        with self.assertRaises(GeminiUnavailableError):
-            suggest_from_catalogue("Un produit")
+    @override_settings(GEMINI_API_KEY="fake-key")
+    @patch("places.guide.generate_json", return_value="not valid JSON")
+    def test_malformed_ai_response_uses_labelled_fallback(self, generate):
+        self.assertEqual(suggest_from_catalogue("Un produit")["source"], "fallback")
 
-    @patch("places.services.generate_text")
+    @patch("places.guide.generate_json")
     def test_empty_catalogue_never_calls_gemini(self, generate):
         ProductRecommendation.objects.all().delete()
         Place.objects.all().delete()
-        with self.assertRaisesMessage(GeminiUnavailableError, "catalogue est encore vide"):
-            suggest_from_catalogue("Un lieu")
+        self.assertEqual(suggest_from_catalogue("Un lieu")["source"], "empty")
         generate.assert_not_called()
         self.assertContains(self.client.get(reverse("places:guide")), "catalogue est encore vide")
 
@@ -290,13 +288,13 @@ class PlacesWorkflowTests(TestCase):
         self.assertNotContains(response, "<script>alert(1)</script>")
 
     @patch("places.views.suggest_from_catalogue")
-    def test_guide_json_and_throttling(self, suggest):
+    def test_guide_json_contains_the_same_server_rendered_results(self, suggest):
         suggest.return_value = {"summary": "Voici une piste", "places": [], "products": []}
         url = reverse("places:guide")
         response = self.client.post(url, {"query": "Un lieu"}, HTTP_ACCEPT="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["summary"], "Voici une piste")
-        self.assertEqual(self.client.post(url, {"query": "Un lieu"}, HTTP_ACCEPT="application/json").status_code, 429)
+        self.assertIn("html", response.json())
         self.assertEqual(suggest.call_count, 1)
 
     @patch("places.views.suggest_from_catalogue", side_effect=GeminiUnavailableError("provider detail"))

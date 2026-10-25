@@ -1,0 +1,23 @@
+<div class="guide-result-heading" tabindex="-1" data-results-heading>
+  <div><p class="ui-eyebrow">Votre prochaine découverte</p><h2>Vos pistes à explorer</h2></div>
+  <span class="ui-badge">{% if result.source == 'gemini' %}Compréhension Gemini{% elif result.source == 'empty' %}Catalogue vide{% else %}Recherche simplifiée{% endif %}</span>
+</div>
+{% if result.source == 'fallback' %}<p class="ui-alert" role="status">L'IA est indisponible ou sa réponse n'a pas pu être validée. Ces résultats proviennent d'une recherche locale par mots-clés et catégories.</p>{% endif %}
+<div class="ui-card ui-card-pad space-y-3">
+  <p>{{ result.summary }}</p>
+  {% if result.objective %}<p class="text-sm text-muted"><strong class="text-forest">Demande comprise :</strong> {{ result.objective }}</p>{% endif %}
+  <div class="flex flex-wrap gap-2 text-xs text-forest">
+    {% for category in result.understood_categories %}<span class="rounded-full bg-olive/30 px-3 py-1">{{ category }}</span>{% endfor %}
+    {% if result.filters.city %}<span class="rounded-full bg-olive/30 px-3 py-1">{{ result.filters.city }}</span>{% endif %}
+    {% if result.filters.radius %}<span class="rounded-full bg-olive/30 px-3 py-1">Rayon : {{ result.filters.radius }} km</span>{% endif %}
+  </div>
+  <p class="text-xs text-muted">{{ result.catalogue_counts.places }} lieux et {{ result.catalogue_counts.products }} avis publiés parcourus · {{ result.elapsed_ms }} ms{% if result.cached %} · compréhension réutilisée{% endif %}</p>
+</div>
+<div class="grid gap-5 md:grid-cols-2">
+  {% for item in result.places %}{% include "places/_guide_card.html" with kind="Lieu" %}{% endfor %}
+  {% for item in result.products %}{% include "places/_guide_card.html" with kind="Avis produit modéré" %}{% endfor %}
+</div>
+<aside class="guide-limits" aria-label="Informations à vérifier">
+  <h3>Avant de vous déplacer</h3>
+  <ul>{% for warning in result.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+</aside>

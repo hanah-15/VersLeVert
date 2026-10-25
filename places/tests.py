@@ -13,6 +13,7 @@ from .ai import GeminiUnavailableError, generate_text
 @override_settings(
     GEMINI_API_KEY="test-key",
     GEMINI_MODEL="test-model",
+    PLACES_GEMINI_MODEL="test-model",
     GEMINI_TIMEOUT_SECONDS=5,
 )
 class GeminiTests(SimpleTestCase):
@@ -70,14 +71,17 @@ class GeminiTests(SimpleTestCase):
                 with self.assertRaisesMessage(GeminiUnavailableError, "no text"):
                     generate_text("Hello")
 
-    @patch("places.management.commands.check_gemini.generate_text", return_value="GEMINI_OK")
+    @patch("places.management.commands.check_gemini.generate_json")
     def test_check_command_reports_connection(self, generate):
+        from .test_guide import intent
+        import json
+        generate.return_value = json.dumps(intent())
         output = StringIO()
         call_command("check_gemini", stdout=output)
         self.assertIn("GEMINI_OK", output.getvalue())
         self.assertIn("test-model", output.getvalue())
 
-    @patch("places.management.commands.check_gemini.generate_text")
+    @patch("places.management.commands.check_gemini.generate_json")
     def test_check_command_exits_with_error_when_provider_is_unavailable(self, generate):
         generate.side_effect = GeminiUnavailableError("quota reached")
         with self.assertRaisesMessage(CommandError, "quota reached"):

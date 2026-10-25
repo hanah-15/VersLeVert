@@ -12,10 +12,10 @@ class StyledFormMixin:
         for name, field in self.fields.items():
             field.widget.attrs["class"] = INPUT_CLASS
             if field.help_text:
-                field.widget.attrs["aria-describedby"] = f"id_{name}_help"
+                field.widget.attrs["aria-describedby"] = f"{self[name].auto_id}_helptext"
             if self.is_bound and name in self.errors:
                 field.widget.attrs["aria-invalid"] = "true"
-                field.widget.attrs["aria-describedby"] = f"id_{name}_errors"
+                field.widget.attrs["aria-describedby"] = f"{self[name].auto_id}_error"
 
 
 class PlaceForm(StyledFormMixin, forms.ModelForm):
@@ -76,6 +76,16 @@ class ModerationForm(StyledFormMixin, forms.Form):
         return data
 
 
-class GuideForm(StyledFormMixin, forms.Form):
+class GuideForm(PlaceFilterForm):
+    # Reuse the catalogue's validated coordinate-pair and radius rules.
+    q = None
     query = forms.CharField(label="Que recherchez-vous ?", max_length=500,
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Je cherche une boutique pour réduire les emballages et un produit réutilisable."}))
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Un parc pour un pique-nique, puis une boutique en vrac pour éviter les emballages."}))
+    city = forms.CharField(label="Ville ou quartier", required=False, max_length=100,
+        widget=forms.TextInput(attrs={"placeholder": "Ex. Tunis, La Marsa…"}),
+        help_text="Filtre sur l'adresse enregistrée dans le catalogue.")
+
+
+class RecommendationPreparationForm(forms.Form):
+    product_name = forms.CharField(required=False, max_length=150)
+    description = forms.CharField(min_length=20, max_length=3000)

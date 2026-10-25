@@ -1,0 +1,119 @@
+{
+  "measured_at": "2026-10-25T18:54:02.937447+00:00",
+  "mode": "live",
+  "model": "gemini-3.5-flash-lite",
+  "case_count": 7,
+  "completed_count": 7,
+  "category_accuracy": 1.0,
+  "expected_issue_recall": 1.0,
+  "latency_median_ms": 1800,
+  "latency_p95_ms": 2062,
+  "rows": [
+    {
+      "id": "reusable_bottle",
+      "expected_category": "home",
+      "expected_issues": [],
+      "category": "home",
+      "product_name": "",
+      "description": "Je la remplis au lieu d'acheter des bouteilles jetables.\n\nElle est facile à nettoyer.",
+      "issues": [],
+      "elapsed_ms": 2062,
+      "exact_source_quotes": true,
+      "missing_information": [
+        "Précisez le nom du produit."
+      ]
+    },
+    {
+      "id": "solid_shampoo",
+      "expected_category": "personal_care",
+      "expected_issues": [],
+      "category": "personal_care",
+      "product_name": "Shampoing solide",
+      "description": "J'ai testé ce shampoing solide pendant un mois. Je n'ai plus de flacon à jeter et il prend moins de place dans mon sac.",
+      "issues": [],
+      "elapsed_ms": 1986,
+      "exact_source_quotes": true,
+      "missing_information": []
+    },
+    {
+      "id": "bulk_food",
+      "expected_category": "food",
+      "expected_issues": [],
+      "category": "food",
+      "product_name": "Lentilles en vrac",
+      "description": "J'achète ces lentilles en vrac avec mon bocal.\n\nJe peux choisir la quantité dont j'ai besoin et je réutilise mon contenant.",
+      "issues": [],
+      "elapsed_ms": 1796,
+      "exact_source_quotes": true,
+      "missing_information": []
+    },
+    {
+      "id": "secondhand_clothes",
+      "expected_category": "fashion",
+      "expected_issues": [],
+      "category": "fashion",
+      "product_name": "Veste de seconde main",
+      "description": "Je porte cette veste de seconde main depuis deux mois.\n\nJ'ai réparé un bouton plutôt que d'acheter une veste neuve.",
+      "issues": [],
+      "elapsed_ms": 1758,
+      "exact_source_quotes": true,
+      "missing_information": []
+    },
+    {
+      "id": "bicycle",
+      "expected_category": "mobility",
+      "expected_issues": [],
+      "category": "mobility",
+      "product_name": "Vélo reconditionné",
+      "description": "Je roule avec ce vélo reconditionné pour aller à l'université deux fois par semaine. Je remplace ainsi certains trajets en voiture.",
+      "issues": [],
+      "elapsed_ms": 1818,
+      "exact_source_quotes": true,
+      "missing_information": []
+    },
+    {
+      "id": "absolute_and_quantified",
+      "expected_category": "home",
+      "expected_issues": [
+        "absolute_eco_claim",
+        "quantified_impact"
+      ],
+      "category": "home",
+      "product_name": "Sac magique",
+      "description": "J'utilise ce sac pour mes courses.",
+      "issues": [
+        "absolute_eco_claim",
+        "quantified_impact"
+      ],
+      "elapsed_ms": 1800,
+      "exact_source_quotes": true,
+      "missing_information": []
+    },
+    {
+      "id": "unsupported_certificate",
+      "expected_category": "personal_care",
+      "expected_issues": [
+        "certification"
+      ],
+      "category": "personal_care",
+      "product_name": "Savon certifié",
+      "description": "",
+      "issues": [
+        "certification"
+      ],
+      "elapsed_ms": 1688,
+      "exact_source_quotes": true,
+      "missing_information": [
+        "Ajoutez votre expérience personnelle avec ce produit.",
+        "Expliquez un avantage pratique concret observé."
+      ]
+    }
+  ],
+  "limitations": [
+    "Seven synthetic French drafts; not a general accuracy estimate.",
+    "Warnings identify claims needing evidence; they do not establish whether a claim is true or false.",
+    "Only exact source spans may appear in the proposed description; this does not verify the author's experience.",
+    "Latency covers the provider and validation, without browser rendering or cache.",
+    "Category accuracy counts provider failures as incorrect; warning recall counts only manually labelled issues."
+  ]
+}

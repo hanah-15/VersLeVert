@@ -1,4 +1,5 @@
 <nav aria-label="Outils de découverte" class="places-tools">
+  <a href="{% url 'places:recommendation-create' %}">{% include "ui/icon.html" with name="plus" %} Recommander un produit · aide IA</a>
   <a href="{% url 'places:guide' %}">{% include "ui/icon.html" with name="spark" %} Guide éco</a>
   <a href="{% url 'places:my-recommendations' %}">{% include "ui/icon.html" with name="profile" %} Mes publications</a>
   {% if request.user.is_staff %}<a href="{% url 'places:moderation' %}">{% include "ui/icon.html" with name="shield" %} Modération</a>{% endif %}

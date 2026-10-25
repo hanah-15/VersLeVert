@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -14,7 +14,8 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 
 from core.permissions import AdminRequiredMixin
 from .ai import GeminiUnavailableError
-from .forms import GuideForm, ModerationForm, PlaceFilterForm, PlaceForm, RecommendationFilterForm, RecommendationForm
+from .guide import GuideRateLimitError, search_catalogue
+from .forms import GuideForm, ModerationForm, PlaceFilterForm, PlaceForm, RecommendationFilterForm, RecommendationForm, RecommendationPreparationForm
 from .models import Place, ProductRecommendation, RecommendationLike
 from .services import find_places, suggest_from_catalogue
 
@@ -253,25 +254,59 @@ class GuideView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         wants_json = self.request.headers.get("Accept") == "application/json"
-        if not cache.add(f"places:guide:{self.request.user.pk}", True, timeout=15):
-            error = "Patientez quelques secondes avant une nouvelle demande."
-            if wants_json:
-                return JsonResponse({"error": error}, status=429)
-            form.add_error(None, error)
-            return self.form_invalid(form)
         try:
-            result = suggest_from_catalogue(form.cleaned_data["query"])
-        except GeminiUnavailableError:
-            error = "Le guide est momentanément indisponible. Vous pouvez rechercher directement dans les lieux et les recommandations."
+            result = suggest_from_catalogue(form.cleaned_data["query"], filters=form.cleaned_data, user_id=self.request.user.pk)
+        except (GuideRateLimitError, GeminiUnavailableError) as exc:
+            throttled = isinstance(exc, GuideRateLimitError)
+            error = str(exc) if throttled else "Le guide est momentanément indisponible. Réessayez dans un instant."
             if wants_json:
-                return JsonResponse({"error": error}, status=503)
+                return JsonResponse({"error": error}, status=429 if throttled else 503)
             form.add_error(None, error)
             return self.form_invalid(form)
         if wants_json:
-            return JsonResponse(result)
+            return JsonResponse(guide_payload(result))
         return self.render_to_response(self.get_context_data(form=form, result=result))
 
     def form_invalid(self, form):
         if self.request.headers.get("Accept") == "application/json":
-            return JsonResponse({"error": "Vérifiez votre demande (500 caractères maximum)."}, status=400)
+            return JsonResponse({"error": "Vérifiez votre demande et vos filtres.", "fields": form.errors}, status=400)
         return super().form_invalid(form)
+
+
+def guide_payload(result):
+    return {**result, "html": render_to_string("places/_guide_results.html", {"result": result})}
+
+
+@login_required
+@require_POST
+async def guide_search(request):
+    """Non-blocking provider call under ASGI; ORM and templates stay synchronous."""
+    from asgiref.sync import sync_to_async
+
+    form = GuideForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"error": "Vérifiez votre demande et vos filtres.", "fields": form.errors}, status=400)
+    user = await request.auser()
+    try:
+        result = await search_catalogue(form.cleaned_data, user_id=user.pk)
+    except GuideRateLimitError as exc:
+        return JsonResponse({"error": str(exc)}, status=429)
+    return JsonResponse(await sync_to_async(guide_payload, thread_sensitive=True)(result))
+
+
+@login_required
+@require_POST
+async def prepare_recommendation(request):
+    from .recommendation_ai import prepare_recommendation as prepare
+
+    form = RecommendationPreparationForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"error": "Décrivez votre expérience en 20 à 3 000 caractères.", "fields": form.errors}, status=400)
+    user = await request.auser()
+    try:
+        result = await prepare(**form.cleaned_data, user_id=user.pk)
+    except GuideRateLimitError as exc:
+        return JsonResponse({"error": str(exc)}, status=429)
+    except GeminiUnavailableError:
+        return JsonResponse({"error": "L'assistant est momentanément indisponible. Votre texte est conservé ; vous pouvez compléter et envoyer le formulaire vous-même."}, status=503)
+    return JsonResponse(result)

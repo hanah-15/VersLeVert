@@ -1,20 +1,39 @@
 {% extends "places/base.html" %}
 {% block title %}Guide éco · Vers le Vert{% endblock %}
 {% block places_content %}
-<div class="mx-auto max-w-4xl space-y-6">
-  <header class="ui-title-panel space-y-4"><p class="text-xs font-bold uppercase tracking-widest text-forest">Le guide de vos prochaines découvertes</p><h1 class="font-heading text-3xl font-bold text-forest sm:text-[40px]">Une envie ?<br>Trouvez une piste plus verte.</h1><p>Décrivez ce que vous cherchez. Découvrez des lieux et des produits issus de notre catalogue publié.</p><p class="text-sm">Les suggestions sont générées par IA et peuvent être imparfaites. Consultez les fiches avant de faire votre choix.</p></header>
-  {% include "ui/rewards_tabs.html" %}
+<div class="mx-auto max-w-5xl space-y-7 places-guide">
+  <header class="guide-intro">
+    <p class="ui-eyebrow">Le guide de vos prochaines découvertes</p>
+    <h1>Une envie.<br>Des pistes près de vous.</h1>
+    <p>Décrivez votre idée, même sans connaître le nom d'un lieu ou d'un produit. Le guide cherche dans notre catalogue et vous montre ce qui correspond.</p>
+    <div class="guide-steps" aria-label="Comment fonctionne le guide"><span>1 · Votre envie</span><span>2 · Les fiches du catalogue</span><span>3 · À vous de choisir</span></div>
+  </header>
   {% include "places/_tools.html" %}
-  <form method="post" data-guide-form class="ui-content-panel space-y-5">{% csrf_token %}
-    {% if form.non_field_errors %}<div role="alert" class="font-bold text-brick">{{ form.non_field_errors }}</div>{% endif %}
-    {% include "places/_field.html" with field=form.query %}
-    {% if catalogue_empty %}<p class="rounded-xl bg-olive/25 p-4">Le catalogue est encore vide. Le guide sera disponible dès la publication de lieux ou de produits.</p>{% endif %}
-    <button {% if catalogue_empty %}disabled{% endif %} class="disabled:opacity-60 inline-flex items-center justify-center rounded-full bg-palm px-7 py-3.5 font-ui text-[14px] font-semibold text-forest shadow-card !transition-all !duration-500 !ease-out hover:-translate-y-0.5 hover:bg-olive hover:shadow-float active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-palm/40">Trouver des idées ✦</button>
-    <p data-guide-status aria-live="polite" class="text-sm"></p>
-  </form>
-  <section data-guide-results aria-label="Suggestions du guide" class="space-y-4" {% if not result %}hidden{% endif %}>
-    {% if result %}<h2 class="font-heading text-2xl font-semibold text-forest">Vos pistes à explorer</h2><p class="break-words">{{ result.summary }}</p>{% for item in result.places %}<article class="ui-card rounded-lg-ui border border-olive bg-white p-6"><p class="text-xs font-bold uppercase text-forest">Lieu</p><h3 class="mt-2 font-heading text-xl font-semibold text-forest"><a class="underline focus:ring-4 focus:ring-sky" href="{{ item.url }}">{{ item.name }}</a></h3><p class="mt-2 break-words">{{ item.reason }}</p></article>{% endfor %}{% for item in result.products %}<article class="ui-card rounded-lg-ui border border-olive bg-white p-6"><p class="text-xs font-bold uppercase text-forest">Produit recommandé</p><h3 class="mt-2 font-heading text-xl font-semibold text-forest"><a class="underline focus:ring-4 focus:ring-sky" href="{{ item.url }}">{{ item.name }}</a></h3><p class="mt-2 break-words">{{ item.reason }}</p></article>{% endfor %}{% endif %}
+  <section class="ui-card ui-card-pad space-y-5" aria-labelledby="guide-form-title">
+    <h2 id="guide-form-title" class="text-xl">Qu'avez-vous envie de faire ?</h2>
+    <div class="flex flex-wrap gap-2" aria-label="Exemples de demandes">
+      <button type="button" class="guide-example" data-guide-example="Un parc pour un pique-nique, puis une boutique en vrac pour éviter les emballages.">Un pique-nique et du vrac</button>
+      <button type="button" class="guide-example" data-guide-example="Je veux remplacer mes bouteilles jetables par une gourde réutilisable.">Moins de bouteilles jetables</button>
+      <button type="button" class="guide-example" data-guide-example="Où déposer mes emballages pour les recycler ?">Un point de recyclage</button>
+    </div>
+    <form method="post" data-guide-form data-guide-endpoint="{% url 'places:guide-search' %}" class="space-y-5">{% csrf_token %}
+      {% if form.non_field_errors %}<div role="alert" class="ui-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% include "places/_field.html" with field=form.query %}
+      <div class="grid gap-4 sm:grid-cols-2">{% include "places/_field.html" with field=form.city %}{% include "places/_field.html" with field=form.category %}</div>
+      <details class="guide-location" {% if form.latitude.value or form.longitude.value or form.errors %}open{% endif %}>
+        <summary>Affiner par proximité <span aria-hidden="true">+</span></summary>
+        <div class="mt-4 space-y-4">
+          <div class="flex flex-wrap items-center gap-3"><button type="button" data-guide-location class="ui-button ui-button-small">Utiliser ma position</button><p data-guide-location-status class="text-xs text-muted" aria-live="polite">Facultatif. Vos coordonnées servent au calcul local des distances et ne sont pas envoyées à Gemini.</p></div>
+          <div class="grid gap-4 sm:grid-cols-3">{% include "places/_field.html" with field=form.latitude %}{% include "places/_field.html" with field=form.longitude %}{% include "places/_field.html" with field=form.radius %}</div>
+        </div>
+      </details>
+      {% if catalogue_empty %}<p class="ui-alert">Le catalogue est encore vide. Le guide sera disponible dès la publication de lieux ou de produits.</p>{% endif %}
+      <div class="flex flex-wrap items-center gap-4"><button type="submit" data-guide-submit {% if catalogue_empty %}disabled{% endif %} class="ui-button ui-button-primary">Trouver mes pistes</button><p class="text-xs text-muted">Uniquement les lieux et les avis publiés dans Vers le Vert.</p></div>
+      <div data-guide-status role="status" aria-live="polite" class="text-sm text-forest"></div>
+      <div data-guide-errors role="alert" class="ui-errors" hidden></div>
+    </form>
   </section>
-  <p class="text-sm">Vous préférez explorer ? <a class="rounded font-bold text-forest underline focus:ring-4 focus:ring-sky" href="{% url 'places:index' %}">Parcourir les lieux</a> ou <a class="rounded font-bold text-forest underline focus:ring-4 focus:ring-sky" href="{% url 'places:recommendations' %}">voir les produits</a>.</p>
+  <section data-guide-results aria-label="Suggestions du guide" class="space-y-5" {% if not result %}hidden{% endif %}>{% if result %}{% include "places/_guide_results.html" %}{% endif %}</section>
+  <p class="guide-footnote">Le guide interprète votre demande ; les fiches restent la source d'information. Horaires, stocks, prix et certifications sont à vérifier auprès du lieu. <a class="ui-link" href="{% url 'places:index' %}">Explorer tous les lieux</a></p>
 </div>
 {% endblock %}

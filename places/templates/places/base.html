@@ -1,6 +1,7 @@
 {% extends "ui/base.html" %}
 {% load static %}
 {% block title %}Découvrir · Vers le Vert{% endblock %}
-{% block extra_head %}<script src="{% static 'places/places.js' %}" defer></script>{% endblock %}
+{% block body_class %}places-space{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'places/places.css' %}?v=5"><script src="{% static 'places/places.js' %}?v=5" defer></script>{% endblock %}
 {% block secondary_navigation %}{% endblock %}
 {% block content %}<div class="space-y-7">{% block places_content %}{% endblock %}</div>{% endblock %}

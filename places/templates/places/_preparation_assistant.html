@@ -1,0 +1,14 @@
+<section class="preparation-assistant space-y-4" aria-labelledby="preparation-title">
+  <div><p class="ui-eyebrow">Un coup de main pour publier</p><h2 id="preparation-title" class="text-xl">Préparer ma recommandation avec l'IA</h2><p class="mt-2 text-sm">Écrivez votre expérience ci-dessus, même en vrac. L'assistant propose la catégorie, sélectionne les passages utiles et repère les affirmations à justifier.</p></div>
+  <button type="button" class="ui-button ui-button-primary ui-button-small" data-prepare-recommendation>Préparer mon brouillon</button>
+  <p class="text-xs text-muted">Le nom et votre texte sont envoyés à Gemini à votre demande. Rien n'est publié automatiquement. Le lieu associé reste votre choix.</p>
+  <p data-preparation-status role="status" aria-live="polite" class="text-sm text-forest"></p>
+  <div data-preparation-errors role="alert" class="ui-errors" hidden></div>
+  <div data-preparation-result class="space-y-4" hidden>
+    <div class="grid gap-3 sm:grid-cols-2"><div><p class="text-xs text-muted">Nom proposé</p><p data-prepared-name class="font-semibold text-forest"></p></div><div><p class="text-xs text-muted">Catégorie proposée</p><p data-prepared-category class="font-semibold text-forest"></p></div></div>
+    <div><h3 class="text-sm font-semibold">Texte proposé à partir de vos mots</h3><blockquote data-prepared-description class="mt-2 whitespace-pre-wrap rounded-xl border border-line bg-paper p-4 text-sm text-carbon"></blockquote><p class="mt-2 text-xs text-muted">Les passages proviennent de votre texte. L'IA ne vérifie pas la véracité de votre expérience.</p></div>
+    <div data-preparation-warnings class="space-y-2"></div>
+    <div class="flex flex-wrap gap-3"><button type="button" data-apply-preparation class="ui-button ui-button-primary ui-button-small">Appliquer au formulaire</button><button type="button" data-restore-preparation class="ui-button ui-button-small" hidden>Rétablir mon texte initial</button></div>
+    <p class="text-xs text-muted">Relisez votre recommandation avant de l'envoyer. La validation par l'équipe reste obligatoire.</p>
+  </div>
+</section>

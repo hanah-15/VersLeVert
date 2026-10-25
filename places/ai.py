@@ -1,15 +1,52 @@
 """Server-side Gemini access for the places and recommendations module."""
 
+import asyncio
+import logging
+
 import httpx
 from django.conf import settings
 from google import genai
 from google.genai import types
+from google.genai.errors import APIError as ContentAPIError
 # google-genai 2.33 exposes Interactions errors through this compatibility module.
 from google.genai._gaos.lib.compat_errors import APIConnectionError, APIError
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiUnavailableError(Exception):
     """An AI request could not be completed; its message contains no credentials."""
+
+
+async def generate_json(question, *, system_instruction, schema):
+    """One bounded asynchronous request, with a schema enforced by Gemini.
+
+    Only query interpretation is generated. No catalogue or account data is sent.
+    """
+    if not settings.GEMINI_API_KEY:
+        raise GeminiUnavailableError("Gemini is not configured.")
+    timeout = max(10, min(float(settings.PLACES_GEMINI_TIMEOUT_SECONDS), 20))
+    try:
+        with genai.Client(
+            api_key=settings.GEMINI_API_KEY,
+            http_options=types.HttpOptions(timeout=int(timeout * 1000), retry_options=types.HttpRetryOptions(attempts=0)),
+        ) as client:
+            async with client.aio as async_client:
+                response = await asyncio.wait_for(async_client.models.generate_content(
+                    model=settings.PLACES_GEMINI_MODEL,
+                    contents=question,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction, response_mime_type="application/json",
+                        response_json_schema=schema, max_output_tokens=1200,
+                        thinking_config=types.ThinkingConfig(thinking_level="minimal"),
+                    ),
+                ), timeout=timeout)
+    except (TimeoutError, APIConnectionError, APIError, ContentAPIError, httpx.HTTPError, OSError) as exc:
+        logger.warning("Places guide provider unavailable (%s, HTTP %s).", type(exc).__name__, getattr(exc, "code", "n/a"))
+        raise GeminiUnavailableError("Gemini is temporarily unavailable.") from None
+    if not isinstance(response.text, str) or not response.text.strip():
+        raise GeminiUnavailableError("Gemini returned no structured search.")
+    return response.text
 
 
 def generate_text(prompt, *, max_output_tokens=1024):
