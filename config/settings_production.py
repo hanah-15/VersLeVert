@@ -14,13 +14,18 @@ if len(SECRET_KEY) < 50 or SECRET_KEY.startswith("django-insecure"):
 
 DATABASES = {
     "default": dj_database_url.parse(
-        os.environ["DATABASE_URL"], conn_max_age=60, conn_health_checks=True,
+        os.environ["DATABASE_URL"],
+        conn_max_age=int(os.getenv(
+            "DB_CONN_MAX_AGE", "0" if os.getenv("RENDER_EXTERNAL_HOSTNAME") else "60",
+        )),
+        conn_health_checks=True,
     ),
 }
 
 for domain in (
     os.getenv("RAILWAY_PUBLIC_DOMAIN", ""),
     os.getenv("RAILWAY_PRIVATE_DOMAIN", ""),
+    os.getenv("RENDER_EXTERNAL_HOSTNAME", ""),
     "healthcheck.railway.app",
 ):
     if domain and domain not in ALLOWED_HOSTS:
@@ -31,8 +36,11 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
-if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
-    CSRF_TRUSTED_ORIGINS.append("https://" + os.environ["RAILWAY_PUBLIC_DOMAIN"])
+for variable in ("RAILWAY_PUBLIC_DOMAIN", "RENDER_EXTERNAL_HOSTNAME"):
+    if os.getenv(variable):
+        origin = "https://" + os.environ[variable]
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
