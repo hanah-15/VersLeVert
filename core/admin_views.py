@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -6,6 +7,7 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from accounts.models import SponsorAccount, User
 from core.permissions import AdminRequiredMixin
+from places.models import Place, ProductRecommendation
 
 
 class AdminDashboardView(AdminRequiredMixin, TemplateView):
@@ -19,6 +21,11 @@ class AdminDashboardView(AdminRequiredMixin, TemplateView):
         context["rejected_sponsors"] = SponsorAccount.objects.filter(status=SponsorAccount.Status.REJECTED).count()
         context["recent_users"] = User.objects.order_by("-date_joined")[:5]
         context["recent_pending"] = SponsorAccount.objects.filter(status=SponsorAccount.Status.PENDING).order_by("-created_at")[:5]
+        context["places_count"] = Place.objects.count()
+        context["recommendation_counts"] = ProductRecommendation.objects.aggregate(
+            total=Count("pk"),
+            pending=Count("pk", filter=Q(status=ProductRecommendation.Status.PENDING)),
+        )
         return context
 
 

@@ -21,6 +21,38 @@
   <article class="ui-card ui-card-pad border-t-4 border-brick"><p class="ui-eyebrow">Sponsors rejetés</p><p class="mt-2 text-3xl font-semibold text-forest">{{ rejected_sponsors }}</p><a class="ui-link mt-4" href="{% url 'admin_dashboard:sponsors_list' %}?status=REJECTED">Voir</a></article>
 </div>
 
+<section class="ui-card ui-card-pad" aria-labelledby="places-admin-heading">
+  <header class="mb-5 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="ui-eyebrow">Votre catalogue et les avis de la communauté</p>
+      <h2 id="places-admin-heading" class="text-xl font-semibold text-forest">Lieux et recommandations</h2>
+      <p class="mt-2 text-sm text-muted">Gérez les adresses et vérifiez les recommandations de produits avant leur publication.</p>
+    </div>
+    <span class="ui-badge">{{ recommendation_counts.pending }} recommandation{{ recommendation_counts.pending|pluralize }} en attente</span>
+  </header>
+  <div class="grid gap-4 md:grid-cols-3">
+    <div class="rounded-xl border border-line p-4">
+      <h3 class="font-semibold text-forest">Les lieux</h3>
+      <p class="mt-2 text-sm text-muted">{{ places_count }} adresse{{ places_count|pluralize }} au catalogue. Ajoutez, modifiez ou supprimez une fiche.</p>
+      <a class="ui-link mt-4" href="{% url 'places:index' %}">Gérer les lieux →</a>
+    </div>
+    <div class="rounded-xl border border-line p-4">
+      <h3 class="font-semibold text-forest">Recommandations à vérifier</h3>
+      <p class="mt-2 text-sm text-muted">{{ recommendation_counts.pending }} avis en attente. Acceptez une publication ou indiquez le motif du refus.</p>
+      <a class="ui-link mt-4" href="{% url 'places:moderation' %}">Modérer les produits →</a>
+    </div>
+    <div class="rounded-xl border border-line p-4">
+      <h3 class="font-semibold text-forest">Tous les produits recommandés</h3>
+      <p class="mt-2 text-sm text-muted">{{ recommendation_counts.total }} recommandation{{ recommendation_counts.total|pluralize }} au total, avec leur statut et leur auteur.</p>
+      {% if perms.places.view_productrecommendation or perms.places.change_productrecommendation %}
+      <a class="ui-link mt-4" href="{% url 'admin:places_productrecommendation_changelist' %}">Voir tous les produits →</a>
+      {% else %}
+      <a class="ui-link mt-4" href="{% url 'places:recommendations' %}">Voir les produits publiés →</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
 <div class="grid gap-6 lg:grid-cols-2">
   <section class="ui-card ui-card-pad">
     <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Derniers utilisateurs</h2><a class="ui-link" href="{% url 'admin_dashboard:users_list' %}">Tout voir</a></header>
