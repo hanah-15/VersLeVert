@@ -1,0 +1,7 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block title %}{{ module.title }} · Administration{% endblock %}
+{% block page_title %}{{ module.title }}{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Administration des modules</p><h1>{{ module.title }}</h1><p>{{ module.description }}</p></div><a class="ui-button ui-button-secondary" href="{% url 'admin_dashboard:dashboard' %}">Retour au tableau de bord</a></header>
+{% include "admin_dashboard/_module_card.html" %}
+{% endblock %}

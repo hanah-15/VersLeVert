@@ -1,0 +1,15 @@
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:dashboard" label="Vue d'ensemble" icon="home" %}
+<p class="px-3 pb-1 pt-4 text-xs font-semibold text-muted">Comptes et partenaires</p>
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:users_list" label="Utilisateurs" icon="profile" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:sponsors_list" label="Demandes sponsors" icon="shop" %}
+<p class="px-3 pb-1 pt-4 text-xs font-semibold text-muted">Modules</p>
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:module_challenges" label="Défis" icon="challenge" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:module_events" label="Événements" icon="event" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:module_places" label="Lieux et recommandations" icon="place" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:module_waste" label="Déchets et collectes" icon="waste" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="admin_dashboard:module_gamification" label="Points, badges et OCR" icon="reward" %}
+{% if perms.sponsor.view_offer %}{% include "admin_dashboard/_nav_link.html" with url_name="admin:sponsor_offer_changelist" label="Offres partenaires" icon="shop" %}{% endif %}
+{% if perms.sponsor.view_rewardcode %}{% include "admin_dashboard/_nav_link.html" with url_name="admin:sponsor_rewardcode_changelist" label="Codes de récompense" icon="reward" %}{% endif %}
+<p class="px-3 pb-1 pt-4 text-xs font-semibold text-muted">Général</p>
+{% include "admin_dashboard/_nav_link.html" with url_name="admin:index" label="Django Admin" icon="shield" %}
+{% include "admin_dashboard/_nav_link.html" with url_name="home" label="Voir le site" icon="home" %}

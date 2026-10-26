@@ -1,28 +1,17 @@
 {% extends "sponsor/base_sponsor.html" %}
 {% block title %}Tableau de bord · Espace sponsor{% endblock %}
 {% block content %}
-<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Bonjour, {{ sponsor.business_name }}.</h1><p>Gérez vos offres, suivez vos échanges et présentez votre entreprise.</p></div><span class="ui-badge"><span class="ui-dot"></span>{{ sponsor.get_status_display }}</span></header>
+<header class="ui-page-header"><div class="min-w-0"><p class="ui-eyebrow">Espace sponsor</p><h1 class="break-words">Bonjour, {{ sponsor.business_name }}.</h1><p>Gérez vos offres, suivez vos échanges et présentez votre entreprise.</p></div><span class="ui-badge">{{ sponsor.get_status_display }}</span></header>
 <div class="grid gap-4 md:grid-cols-3">
-  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres</p><p class="mt-2 text-3xl font-semibold text-forest">{{ offers.count }}</p><a class="ui-link mt-4" href="{% url 'sponsor-shop' %}">Gérer la boutique</a></article>
-  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Mes statistiques</p><p class="mt-2 text-lg text-forest">Voir l'activité</p><a class="ui-link mt-4" href="{% url 'sponsor-stats' %}">Accéder</a></article>
-  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Mon entreprise</p><p class="mt-2 text-lg text-forest">Profil & informations</p><a class="ui-link mt-4" href="{% url 'sponsor-profile' %}">Mettre à jour</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres actives</p><p class="mt-2 text-3xl font-semibold text-forest">{{ active_count }}</p><p class="mt-2 text-sm text-muted">Sur {{ offer_count }} offre{{ offer_count|pluralize }}</p><a class="ui-link mt-4" href="{% url 'sponsor-shop' %}">Gérer la boutique →</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Codes à utiliser</p><p class="mt-2 text-3xl font-semibold text-forest">{{ pending_count }}</p><a class="ui-link mt-4" href="{% url 'sponsor-codes' %}?status=available">Consulter les codes →</a></article>
+  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Récompenses remises</p><p class="mt-2 text-3xl font-semibold text-forest">{{ used_count }}</p><a class="ui-link mt-4" href="{% url 'sponsor-stats' %}">Voir les statistiques →</a></article>
 </div>
-<div class="grid gap-6 lg:grid-cols-2">
-  <section class="ui-card ui-card-pad">
-    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Mes offres</h2><a class="ui-button ui-button-primary ui-button-small" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a></header>
-    <div class="divide-y divide-line">
-      {% for offer in offers %}
-      <div class="flex items-center justify-between py-3"><div><p class="font-semibold text-forest">{{ offer.title }}</p><p class="text-sm text-muted">{{ offer.points_cost }} pts · {% if offer.active %}Active{% else %}Inactive{% endif %}</p></div><div class="flex gap-2"><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a></div></div>
-      {% empty %}<p class="text-sm text-muted">Aucune offre pour le moment.</p>{% endfor %}
-    </div>
+<div class="grid gap-6 xl:grid-cols-2">
+  <section class="ui-card ui-card-pad min-w-0"><header class="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 class="text-xl font-semibold text-forest">Dernières offres</h2><a class="ui-button ui-button-primary ui-button-small" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a></header>
+    <div class="divide-y divide-line">{% for offer in offers %}<div class="flex flex-wrap items-center justify-between gap-3 py-3"><div class="min-w-0"><p class="break-words font-semibold text-forest">{{ offer.title }}</p><p class="text-sm text-muted">{{ offer.points_cost }} pts · {% if offer.active %}Active{% else %}Inactive{% endif %} · {{ offer.exchanges_count }} échange{{ offer.exchanges_count|pluralize }}</p></div><a class="ui-link text-sm" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier<span class="sr-only"> {{ offer.title }}</span></a></div>{% empty %}<p class="text-sm text-muted">Aucune offre pour le moment.</p>{% endfor %}</div>
+    <a class="ui-link mt-4 text-sm" href="{% url 'sponsor-shop' %}">Toutes mes offres →</a>
   </section>
-  <section class="ui-card ui-card-pad">
-    <header class="mb-4 flex items-center justify-between"><h2 class="text-xl text-forest">Raccourcis</h2></header>
-    <div class="grid gap-3">
-      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-shop' %}"><div><p class="font-semibold text-forest">Boutique</p><p class="text-sm text-muted">Gérer toutes vos offres</p></div><span class="text-sky">→</span></a>
-      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-stats' %}"><div><p class="font-semibold text-forest">Statistiques</p><p class="text-sm text-muted">Suivre vos échanges</p></div><span class="text-sky">→</span></a>
-      <a class="flex items-center justify-between rounded-lg border border-line p-3 hover:bg-mist" href="{% url 'sponsor-profile' %}"><div><p class="font-semibold text-forest">Profil entreprise</p><p class="text-sm text-muted">Mettre à jour vos informations</p></div><span class="text-sky">→</span></a>
-    </div>
-  </section>
+  <section class="ui-card ui-card-pad space-y-3"><h2 class="text-xl font-semibold text-forest">Raccourcis</h2><a class="block rounded-xl border border-line p-4 hover:bg-mist" href="{% url 'sponsor-codes' %}"><strong class="text-forest">Valider une récompense</strong><p class="mt-1 text-sm text-muted">Saisir le code présenté par un membre.</p></a><a class="block rounded-xl border border-line p-4 hover:bg-mist" href="{% url 'sponsor-profile' %}"><strong class="text-forest">Mon entreprise</strong><p class="mt-1 text-sm text-muted">Mettre à jour le logo et les coordonnées.</p></a><a class="block rounded-xl border border-line p-4 hover:bg-mist" href="{% url 'gamification:index' %}"><strong class="text-forest">Catalogue de la communauté</strong><p class="mt-1 text-sm text-muted">Voir les récompenses proposées aux membres.</p></a></section>
 </div>
 {% endblock %}

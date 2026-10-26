@@ -1,6 +1,29 @@
 {% extends "sponsor/base_sponsor.html" %}
 {% block title %}Mes offres · Vers le Vert{% endblock %}
+{% block page_title %}Mes offres{% endblock %}
 {% block content %}
-<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Mes offres</h1><p>Gérez vos récompenses pour la communauté.</p></div>{% url 'sponsor-offer-new' as offer_new_url %}{% include "ui/button.html" with href=offer_new_url label="Nouvelle offre" variant="primary" %}</header>
-<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{% for offer in offers %}<article class="ui-card flex flex-col overflow-hidden border-t-4 border-sky"><div class="relative h-40 w-full bg-mist">{% if offer.primary_image_url %}<img src="{{ offer.primary_image_url }}" alt="{{ offer.title }}" class="h-full w-full object-cover" loading="lazy">{% endif %}</div><div class="flex flex-1 flex-col p-5"><div class="flex items-center justify-between gap-3"><h2 class="text-xl text-forest">{{ offer.title }}</h2><span class="rounded-full px-2 py-0.5 text-xs {% if offer.active %}bg-palm/30 text-forest{% else %}bg-porcelain text-muted{% endif %}">{% if offer.active %}Active{% else %}Inactive{% endif %}</span></div><p class="mt-2 text-sm text-muted">{{ offer.description|linebreaksbr }}</p><p class="mt-4 font-semibold text-forest">{{ offer.points_cost }} pts</p><div class="mt-5 flex flex-wrap gap-3 border-t border-line pt-4"></div></div><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a>{% if offer.active %}<a class="ui-link text-brick" href="{% url 'sponsor-offer-deactivate' offer.pk %}">Désactiver</a>{% endif %}</div></article>{% empty %}<div class="ui-card ui-card-pad text-center md:col-span-2 xl:col-span-3"><p class="text-lg font-semibold text-forest">Aucune offre</p><p class="mt-2 text-sm text-muted">Créez votre première récompense pour la communauté.</p>{% include "ui/button.html" with href=offer_new_url label="Créer une offre" variant="primary" %}</div>{% endfor %}</div>
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace sponsor</p><h1>Mes offres</h1><p>Gérez vos récompenses pour la communauté.</p></div><a class="ui-button ui-button-primary" href="{% url 'sponsor-offer-new' %}">Nouvelle offre</a></header>
+<form method="get" class="ui-card ui-card-pad flex flex-wrap items-end gap-3">
+  <div class="ui-field min-w-0 flex-1"><label for="offer-q">Rechercher une offre</label><input id="offer-q" type="search" name="q" value="{{ search_query }}" placeholder="Titre ou description"></div>
+  <div class="ui-field"><label for="offer-status">Statut</label><select id="offer-status" name="status"><option value="">Toutes les offres</option value="active"{% if status_filter == 'active' %} selected{% endif %}>Actives</option><option value="inactive"{% if status_filter == 'inactive' %} selected{% endif %}>Inactives</option></select></div>
+  <button class="ui-button ui-button-secondary">Filtrer</button><a class="ui-link text-sm" href="{% url 'sponsor-shop' %}">Effacer</a>
+</form>
+<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+  {% for offer in offers %}
+  <article class="ui-card flex min-w-0 flex-col overflow-hidden border-t-4 border-sky">
+    <div class="h-40 w-full bg-mist">{% if offer.primary_image_url %}<img src="{{ offer.primary_image_url }}" alt="{{ offer.title }}" class="h-full w-full object-cover" loading="lazy">{% else %}<div class="flex h-full items-center justify-center text-muted"><span class="[&>svg]:h-10 [&>svg]:w-10" aria-hidden="true">{% include "ui/icon.html" with name="reward" %}</span><span class="sr-only">Aucune photo</span></div>{% endif %}</div>
+    <div class="flex flex-1 flex-col gap-3 p-5">
+      <div class="flex flex-wrap items-start justify-between gap-2"><h2 class="min-w-0 break-words text-xl font-semibold text-forest">{{ offer.title }}</h2><span class="ui-badge">{% if offer.active %}Active{% else %}Inactive{% endif %}</span></div>
+      <p class="line-clamp-3 break-words text-sm text-muted">{{ offer.description }}</p>
+      <p class="font-semibold text-forest">{{ offer.points_cost }} pts</p>
+      <p class="text-xs text-muted">{{ offer.exchanges_count }} échange{{ offer.exchanges_count|pluralize }} · {{ offer.used_count }} code{{ offer.used_count|pluralize }} utilisé{{ offer.used_count|pluralize }}</p>
+      <div class="mt-auto flex flex-wrap gap-3 border-t border-line pt-4">
+        <a class="ui-link text-sm" href="{% url 'sponsor-offer-edit' offer.pk %}">Modifier</a>
+        {% if offer.active %}<a class="ui-link text-sm text-brick" href="{% url 'sponsor-offer-deactivate' offer.pk %}">Désactiver</a>{% else %}<form method="post" action="{% url 'sponsor-offer-activate' offer.pk %}">{% csrf_token %}<button class="ui-link text-sm" type="submit">Réactiver</button></form>{% endif %}
+      </div>
+    </div>
+  </article>
+  {% empty %}<div class="ui-card ui-card-pad text-center md:col-span-2 xl:col-span-3"><h2 class="text-lg font-semibold text-forest">Aucune offre à afficher</h2><p class="mt-2 text-sm text-muted">Créez une offre ou modifiez vos filtres.</p><a class="ui-link mt-4" href="{% url 'sponsor-offer-new' %}">Créer une offre →</a></div>{% endfor %}
+</div>
+{% include "admin_dashboard/_pagination.html" %}
 {% endblock %}

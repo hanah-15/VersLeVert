@@ -26,7 +26,7 @@
   <div class="relative z-10 flex min-h-screen gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
 
     {# ── Sidebar ─────────────────────────────────────────────────────── #}
-    <aside class="hidden w-68 flex-col rounded-2xl border border-white/50 bg-porcelain lg:flex" style="width:272px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:4px 0 32px -8px rgba(4,46,9,0.08);">
+    <aside class="hidden w-68 shrink-0 flex-col rounded-2xl border border-white/50 bg-porcelain lg:flex" style="width:272px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:4px 0 32px -8px rgba(4,46,9,0.08);">
 
       {# Brand #}
       <div class="flex items-center gap-3 px-6 py-5" style="border-bottom:1px solid rgba(255,255,255,0.4);">
@@ -37,48 +37,7 @@
         </div>
       </div>
 
-      {# Nav #}
-      <nav class="flex-1 space-y-0.5 px-3 py-4 overflow-y-auto">
-
-        <a href="{% url 'sponsor-dashboard' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all
-           {% if request.resolver_match.url_name == 'sponsor-dashboard' %}bg-forest text-porcelain shadow-card{% else %}text-forest/80 hover:bg-white/60 hover:text-forest{% endif %}">
-          <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none"><path d="M3.333 10.833h5v-8.333h-5v8.333zm6.667 7.5h5v-10h-5v10zm0-17.5v5h5v-5h-5zm-6.667 10h5v-10h-5v10z" fill="currentColor"/></svg>
-          Tableau de bord
-        </a>
-
-        <p class="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted/70">Boutique</p>
-
-        <a href="{% url 'sponsor-shop' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all
-           {% if request.resolver_match.url_name == 'sponsor-shop' or 'offer' in request.resolver_match.url_name %}bg-forest text-porcelain shadow-card{% else %}text-forest/80 hover:bg-white/60 hover:text-forest{% endif %}">
-          <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none"><path d="M4.167 6.667h11.666l-.834 10H5L4.167 6.667zm0 0L3.333 3.333H1.667m5 9.167v3.333m3.333-3.333v3.333m3.334-3.333v3.333" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Mes offres
-        </a>
-
-        <a href="{% url 'sponsor-stats' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all
-           {% if request.resolver_match.url_name == 'sponsor-stats' %}bg-forest text-porcelain shadow-card{% else %}text-forest/80 hover:bg-white/60 hover:text-forest{% endif %}">
-          <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none"><path d="M2.5 15.833h15M3.333 14.167V8.333M8.333 14.167V5.833M13.333 14.167V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Statistiques
-        </a>
-
-        <p class="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted/70">Entreprise</p>
-
-        <a href="{% url 'sponsor-profile' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all
-           {% if request.resolver_match.url_name == 'sponsor-profile' %}bg-forest text-porcelain shadow-card{% else %}text-forest/80 hover:bg-white/60 hover:text-forest{% endif %}">
-          <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none"><path d="M10 2.5a4.166 4.166 0 100 8.333 4.166 4.166 0 000-8.333zm-6.667 15a6.667 6.667 0 0113.334 0H3.333z" fill="currentColor"/></svg>
-          Mon entreprise
-        </a>
-
-        <p class="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted/70">Général</p>
-
-        <a href="{% url 'home' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-forest/70 hover:bg-white/60 hover:text-forest transition-all">
-          <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none"><path d="M3.333 7.5L10 2.5l6.667 5v10H3.333v-10z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-          Retour au site
-        </a>
-      </nav>
+      <nav aria-label="Navigation de l'espace sponsor" class="flex-1 space-y-1 overflow-y-auto px-3 py-4">{% include "sponsor/_navigation.html" %}</nav>
 
       {# User footer #}
       <div class="px-4 py-4" style="border-top:1px solid rgba(255,255,255,0.4);">
@@ -100,7 +59,7 @@
 
       {# Top bar #}
       <header class="relative z-30 flex items-center justify-between rounded-2xl border border-white/40 bg-porcelain px-4 py-3 shadow-card backdrop-blur-xl lg:px-8" style="backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 2px 16px -4px rgba(4,46,9,0.06);">
-        <p class="font-semibold text-forest text-sm">Espace Sponsor · {% block page_title %}Dashboard{% endblock %}</p>
+        <p class="font-semibold text-forest text-sm">Espace Sponsor · {% block page_title %}Tableau de bord{% endblock %}</p>
         <div class="flex items-center gap-3">
           <a href="{% url 'notifications' %}" aria-label="Notifications"
              class="relative flex h-9 w-9 items-center justify-center rounded-full text-forest/70 hover:text-forest transition-colors"
@@ -125,7 +84,12 @@
         </div>
       </header>
 
-      <main id="contenu" class="flex-1 rounded-2xl border border-white/40 bg-white/20 px-4 py-6 shadow-card backdrop-blur-xl lg:px-8">
+      <details class="rounded-2xl border border-line bg-porcelain p-4 lg:hidden">
+        <summary class="cursor-pointer font-semibold text-forest">Navigation de l'espace sponsor</summary>
+        <nav aria-label="Navigation de l'espace sponsor sur mobile" class="mt-3 space-y-1">{% include "sponsor/_navigation.html" %}</nav>
+      </details>
+
+      <main id="contenu" class="min-w-0 flex-1 space-y-6 rounded-2xl border border-white/40 bg-white/20 px-4 py-6 shadow-card backdrop-blur-xl lg:px-8">
         {% if messages %}<div class="mb-6 space-y-3">{% for message in messages %}<div class="ui-alert {% if message.tags == 'error' or message.tags == 'warning' %}ui-alert-error{% elif message.tags == 'success' %}ui-alert-success{% endif %}" role="alert"><span class="shrink-0" aria-hidden="true">{% include "ui/icon.html" with name="info" %}</span><span>{{ message }}</span></div>{% endfor %}</div>{% endif %}
         {% block content %}{% endblock %}
       </main>

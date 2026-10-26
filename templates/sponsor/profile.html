@@ -1,3 +1,10 @@
 {% extends "sponsor/base_sponsor.html" %}
 {% block title %}Profil entreprise · Vers le Vert{% endblock %}
-{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Mon entreprise</h1><p>Présentez votre activité à la communauté.</p></div></header><div class="ui-card ui-card-pad max-w-2xl"><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button></div></form></div>{% endblock %}
+{% block page_title %}Mon entreprise{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace sponsor</p><h1>Mon entreprise</h1><p>Présentez votre activité et gardez vos coordonnées à jour.</p></div></header>
+<div class="ui-card ui-card-pad w-full max-w-2xl break-words">
+  {% if object.logo %}<div class="mb-5 flex items-center gap-4"><img src="{{ object.logo.url }}" alt="Logo actuel de {{ object.business_name }}" class="h-20 w-20 rounded-xl border border-line bg-white object-contain"><p class="text-sm text-muted">Logo actuel de votre entreprise</p></div>{% endif %}
+  <form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button><a class="ui-button ui-button-secondary" href="{% url 'sponsor-dashboard' %}">Retour au tableau de bord</a></div></form>
+</div>
+{% endblock %}

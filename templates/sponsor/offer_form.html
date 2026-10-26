@@ -1,3 +1,15 @@
 {% extends "sponsor/base_sponsor.html" %}
 {% block title %}Mon offre · Vers le Vert{% endblock %}
-{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>{% if object %}Modifier l'offre{% else %}Créer une offre{% endif %}</h1><p>Décrivez votre offre, son coût en points et ajoutez une image (upload Cloudinary ou URL).</p></div></header><div class="ui-card ui-card-pad max-w-2xl"><form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}{% include "ui/field.html" %}{% endfor %}<div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button><a class="ui-button ui-button-secondary" href="{% url 'sponsor-shop' %}">Annuler</a></div></form></div>{% endblock %}
+{% block page_title %}Mon offre{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace sponsor</p><h1>{% if object %}Modifier l'offre{% else %}Créer une offre{% endif %}</h1><p>Présentez la récompense, son coût en points et les conditions pour en profiter.</p></div><a class="ui-link text-sm" href="{% url 'sponsor-shop' %}">Retour aux offres →</a></header>
+<div class="ui-card ui-card-pad w-full max-w-2xl">
+  {% if object.primary_image_url %}<img class="mb-5 h-40 w-full rounded-xl object-cover" src="{{ object.primary_image_url }}" alt="Photo actuelle de {{ object.title }}">{% endif %}
+  <form method="post" enctype="multipart/form-data" class="space-y-5">{% csrf_token %}{{ form.non_field_errors }}
+    {% include "ui/field.html" with field=form.title %}{% include "ui/field.html" with field=form.description %}{% include "ui/field.html" with field=form.points_cost %}{% include "ui/field.html" with field=form.image %}
+    <details class="rounded-xl border border-line p-4"{% if form.image_url.errors or form.images_url.errors %} open{% endif %}><summary class="cursor-pointer font-semibold text-forest">Ajouter des photos par lien (facultatif)</summary><div class="mt-4 space-y-4">{% include "ui/field.html" with field=form.image_url %}{% include "ui/field.html" with field=form.images_url %}</div></details>
+    <div class="rounded-xl border border-line p-4"><label class="flex items-center gap-3 font-medium text-forest" for="{{ form.active.id_for_label }}">{{ form.active }}<span>{{ form.active.label }}</span></label><p class="mt-2 text-sm text-muted">{{ form.active.help_text }}</p>{{ form.active.errors }}</div>
+    <div class="flex flex-wrap gap-3"><button class="ui-button ui-button-primary" type="submit">Enregistrer</button><a class="ui-button ui-button-secondary" href="{% url 'sponsor-shop' %}">Annuler</a></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -7,7 +7,7 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from accounts.models import SponsorAccount, User
 from core.permissions import AdminRequiredMixin
-from places.models import Place, ProductRecommendation
+from .admin_modules import module_sections
 
 
 class AdminDashboardView(AdminRequiredMixin, TemplateView):
@@ -21,11 +21,10 @@ class AdminDashboardView(AdminRequiredMixin, TemplateView):
         context["rejected_sponsors"] = SponsorAccount.objects.filter(status=SponsorAccount.Status.REJECTED).count()
         context["recent_users"] = User.objects.order_by("-date_joined")[:5]
         context["recent_pending"] = SponsorAccount.objects.filter(status=SponsorAccount.Status.PENDING).order_by("-created_at")[:5]
-        context["places_count"] = Place.objects.count()
-        context["recommendation_counts"] = ProductRecommendation.objects.aggregate(
-            total=Count("pk"),
-            pending=Count("pk", filter=Q(status=ProductRecommendation.Status.PENDING)),
-        )
+        context["modules"] = module_sections(self.request.user)
+        places = next(item for item in context['modules'] if item['key'] == 'places')
+        context['places_count'] = places['count']
+        context['recommendation_counts'] = {'total': places['secondary_count'], 'pending': places['pending']}
         return context
 
 
@@ -35,6 +34,22 @@ class AdminUserListView(AdminRequiredMixin, ListView):
     context_object_name = "users"
     paginate_by = 20
     ordering = ["-date_joined"]
+
+    def get_queryset(self):
+        queryset = User.objects.select_related('sponsor_account').order_by('-date_joined', '-pk')
+        query = self.request.GET.get('q', '').strip()[:150]
+        if query:
+            queryset = queryset.filter(Q(email__icontains=query) | Q(username__icontains=query) |
+                Q(first_name__icontains=query) | Q(last_name__icontains=query))
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '').strip()[:150]
+        context['pagination_query'] = self.request.GET.copy()
+        context['pagination_query'].pop('page', None)
+        context['pagination_query'] = context['pagination_query'].urlencode()
+        return context
 
 
 class AdminUserDetailView(AdminRequiredMixin, DetailView):
@@ -56,12 +71,19 @@ class AdminSponsorListView(AdminRequiredMixin, ListView):
         qs = SponsorAccount.objects.select_related("user", "validated_by").order_by("-created_at", "-pk")
         if status in dict(SponsorAccount.Status.choices):
             qs = qs.filter(status=status)
+        query = self.request.GET.get('q', '').strip()[:150]
+        if query:
+            qs = qs.filter(Q(business_name__icontains=query) | Q(user__email__icontains=query) | Q(contact_email__icontains=query))
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["status_filter"] = self.request.GET.get("status")
         context["status_choices"] = SponsorAccount.Status.choices
+        context['search_query'] = self.request.GET.get('q', '').strip()[:150]
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        context['pagination_query'] = params.urlencode()
         return context
 
 
@@ -118,12 +140,10 @@ class AdminSponsorRejectView(AdminRequiredMixin, UpdateView):
 class AdminModuleView(AdminRequiredMixin, TemplateView):
     """Open each delivered module from the shared backoffice navigation."""
 
-    def get(self, request, *args, **kwargs):
-        destinations = {
-            "challenges": "challenges:admin-stats",
-            "events": "events:mine",
-            "places": "places:moderation",
-            "waste": "waste:index",
-            "gamification": "admin:gamification_ecoproof_changelist",
-        }
-        return redirect(destinations[self.kwargs["module"]])
+    template_name = 'admin_dashboard/module.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['module'] = next(item for item in module_sections(self.request.user)
+            if item['key'] == self.kwargs['module'])
+        return context

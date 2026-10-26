@@ -1,0 +1,4 @@
+{% url url_name as nav_url %}
+<a href="{{ nav_url }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {% if request.path == nav_url %}bg-forest text-porcelain{% else %}text-forest hover:bg-white/60{% endif %}"{% if request.path == nav_url %} aria-current="page"{% endif %}>
+  <span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4" aria-hidden="true">{% include "ui/icon.html" with name=icon %}</span><span>{{ label }}</span>
+</a>

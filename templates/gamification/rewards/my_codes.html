@@ -26,8 +26,8 @@
   <section class="ui-content-panel">
     <div class="space-y-6 p-5 lg:p-7">
       <div>
-        <h2 class="font-ui text-xl font-semibold text-porcelain">Codes obtenus</h2>
-        <p class="text-sm text-porcelain/80">Copiez vos codes et utilisez-les chez le partenaire.</p>
+        <h2 class="font-ui text-xl font-semibold text-forest">Codes obtenus</h2>
+        <p class="text-sm text-forest">Présentez votre code au partenaire pour recevoir la récompense.</p>
       </div>
 
       {% if codes %}
@@ -40,6 +40,7 @@
               <p class="font-semibold text-forest">{{ code.offer.title }}</p>
               <p class="text-xs text-muted">{{ code.offer.sponsor.business_name }}</p>
               <p class="text-xs text-muted">Échangé le {{ code.redeemed_at|date:"d M Y" }}</p>
+              {% if code.used_at %}<p class="text-xs text-muted">Utilisé le {{ code.used_at|date:"d M Y à H:i" }}</p>{% endif %}
             </div>
           </div>
           <div class="flex items-center gap-3">

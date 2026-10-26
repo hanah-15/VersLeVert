@@ -43,7 +43,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # Import from sponsor app (M1-B models live there)
         try:
             from sponsor.models import Offer
-            all_offers = Offer.objects.filter(active=True).select_related("sponsor")
+            all_offers = Offer.objects.filter(active=True, sponsor__status=SponsorAccount.Status.APPROVED).select_related("sponsor")
             offers = all_offers
 
             search_query = self.request.GET.get("q", "").strip()

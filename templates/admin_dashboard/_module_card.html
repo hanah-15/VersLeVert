@@ -1,0 +1,10 @@
+<section class="ui-card ui-card-pad min-w-0 space-y-4" aria-labelledby="module-{{ module.key }}">
+  <header class="space-y-2">
+    <h2 id="module-{{ module.key }}" class="text-xl font-semibold text-forest">{{ module.title }}</h2>
+    <p class="text-sm text-muted">{{ module.description }}</p>
+    <div class="flex flex-wrap gap-2"><span class="ui-badge">{{ module.count }} {{ module.count_label }}</span>{% if module.secondary_count != None %}<span class="ui-badge">{{ module.secondary_count }} {{ module.secondary_label }}</span>{% endif %}<span class="ui-badge">{{ module.pending }} {{ module.pending_label }}</span></div>
+  </header>
+  <ul class="space-y-2 border-t border-line pt-4">
+    {% for link in module.links %}<li><a class="ui-link text-sm" href="{{ link.url }}">{{ link.label }} →</a></li>{% empty %}<li class="text-sm text-muted">Les outils de gestion nécessitent les permissions de ce module.</li>{% endfor %}
+  </ul>
+</section>

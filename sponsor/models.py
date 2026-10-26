@@ -64,7 +64,8 @@ class RewardCode(models.Model):
     code = models.CharField(max_length=64, unique=True)
     redeemed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     redeemed_at = models.DateTimeField(null=True, blank=True)
+    used_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def is_used(self):
-        return self.redeemed_at is not None
+        return self.used_at is not None

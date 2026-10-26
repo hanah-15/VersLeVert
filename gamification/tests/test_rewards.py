@@ -28,6 +28,7 @@ class RewardCatalogueFilterTests(TestCase):
             activity=SponsorAccount.Activity.CLOTHING,
             description="Vêtements réutilisés",
             contact_email=clothing_user.email,
+            status=SponsorAccount.Status.APPROVED,
         )
         technology_sponsor = SponsorAccount.objects.create(
             user=technology_user,
@@ -35,6 +36,7 @@ class RewardCatalogueFilterTests(TestCase):
             activity=SponsorAccount.Activity.TECHNOLOGY,
             description="Réparation numérique",
             contact_email=technology_user.email,
+            status=SponsorAccount.Status.APPROVED,
         )
         self.offer_high = Offer.objects.create(
             sponsor=self.clothing_sponsor,

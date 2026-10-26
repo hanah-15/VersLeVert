@@ -1,0 +1,23 @@
+{% extends "sponsor/base_sponsor.html" %}
+{% block title %}Codes de récompense · Espace sponsor{% endblock %}
+{% block page_title %}Codes de récompense{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace sponsor</p><h1>Codes de récompense</h1><p>Vérifiez le code présenté par un membre, puis confirmez la remise de sa récompense.</p></div></header>
+<section class="ui-card ui-card-pad space-y-4" aria-labelledby="validate-heading">
+  <h2 id="validate-heading" class="text-xl font-semibold text-forest">Valider un code en boutique</h2>
+  <form method="post" action="{% url 'sponsor-code-check' %}" class="flex flex-wrap items-end gap-3">{% csrf_token %}<div class="min-w-0 flex-1">{% include "ui/field.html" with field=validation_form.code_value %}</div><button class="ui-button ui-button-primary" type="submit">Confirmer la remise</button></form>
+  <p class="text-sm text-muted">Validez uniquement après avoir remis la récompense. Un même code ne peut être utilisé qu'une fois.</p>
+</section>
+<form method="get" class="ui-card ui-card-pad flex flex-wrap items-end gap-3">
+  <div class="ui-field min-w-0 flex-1"><label for="code-q">Rechercher un code ou une offre</label><input id="code-q" type="search" name="q" value="{{ search_query }}"></div>
+  <div class="ui-field"><label for="code-status">Statut</label><select name="status" id="code-status"><option value="">Tous les codes</option><option value="available"{% if status_filter == 'available' %} selected{% endif %}>À utiliser</option><option value="used"{% if status_filter == 'used' %} selected{% endif %}>Utilisés</option></select></div>
+  <button class="ui-button ui-button-secondary">Filtrer</button><a class="ui-link text-sm" href="{% url 'sponsor-codes' %}">Effacer</a>
+</form>
+<section class="space-y-3" aria-label="Codes obtenus par les membres">
+  {% for code in codes %}<article class="ui-card ui-card-pad flex min-w-0 flex-wrap items-center justify-between gap-4">
+    <div class="min-w-0 space-y-1"><h2 class="break-words font-semibold text-forest">{{ code.offer.title }}</h2><p class="break-all font-mono text-lg font-semibold text-forest">{{ code.code }}</p><p class="text-sm text-muted">Obtenu le {{ code.redeemed_at|date:"d/m/Y à H:i" }}</p>{% if code.used_at %}<p class="text-sm text-muted">Utilisé le {{ code.used_at|date:"d/m/Y à H:i" }}</p>{% endif %}</div>
+    <span class="ui-badge">{% if code.is_used %}Utilisé{% else %}À utiliser{% endif %}</span>
+  </article>{% empty %}<div class="ui-card ui-card-pad"><h2 class="font-semibold text-forest">Aucun code à afficher</h2><p class="mt-2 text-sm text-muted">Les codes apparaissent lorsqu'un membre échange ses points contre l'une de vos offres.</p></div>{% endfor %}
+</section>
+{% include "admin_dashboard/_pagination.html" %}
+{% endblock %}

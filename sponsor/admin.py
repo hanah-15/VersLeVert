@@ -18,7 +18,13 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(RewardCode)
 class RewardCodeAdmin(admin.ModelAdmin):
-    list_display = ("code", "offer", "redeemed_by", "redeemed_at")
-    list_filter = ("redeemed_at",)
+    list_display = ("code", "offer", "redeemed_by", "redeemed_at", 'used_at')
+    list_filter = ("redeemed_at", 'used_at')
     search_fields = ("code", "offer__title")
-    readonly_fields = ("redeemed_at",)
+    readonly_fields = ('code', 'offer', 'redeemed_by', 'redeemed_at', 'used_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

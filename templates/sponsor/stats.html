@@ -1,3 +1,17 @@
 {% extends "sponsor/base_sponsor.html" %}
 {% block title %}Mes statistiques · Vers le Vert{% endblock %}
-{% block content %}<header class="ui-page-header"><div><p class="ui-eyebrow">Espace Sponsor</p><h1>Mes statistiques</h1><p>Suivez l'activité de vos offres.</p></div></header><div class="grid gap-4 md:grid-cols-3"><article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres totales</p><p class="mt-2 text-3xl font-semibold text-forest">{{ offer_count }}</p></article><article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Offres actives</p><p class="mt-2 text-3xl font-semibold text-forest">{{ active_count }}</p></article><article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Échanges réalisés</p><p class="mt-2 text-3xl font-semibold text-forest">{{ redeemed_count }}</p></article></div>{% endblock %}
+{% block page_title %}Statistiques{% endblock %}
+{% block content %}
+<header class="ui-page-header"><div><p class="ui-eyebrow">Espace sponsor</p><h1>Mes statistiques</h1><p>Distinguez les offres publiées, les échanges de points et les récompenses remises.</p></div><a class="ui-button ui-button-secondary" href="{% url 'sponsor-codes' %}">Voir les codes</a></header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Offres actives</p><p class="mt-2 text-3xl font-semibold text-forest">{{ active_count }}</p><p class="mt-2 text-sm text-muted">Sur {{ offer_count }} offre{{ offer_count|pluralize }}</p></article>
+  <article class="ui-card ui-card-pad border-t-4 border-palm"><p class="ui-eyebrow">Échanges de points</p><p class="mt-2 text-3xl font-semibold text-forest">{{ redeemed_count }}</p></article>
+  <article class="ui-card ui-card-pad border-t-4 border-olive"><p class="ui-eyebrow">Codes à utiliser</p><p class="mt-2 text-3xl font-semibold text-forest">{{ pending_count }}</p></article>
+  <article class="ui-card ui-card-pad border-t-4 border-sky"><p class="ui-eyebrow">Récompenses remises</p><p class="mt-2 text-3xl font-semibold text-forest">{{ used_count }}</p></article>
+</div>
+<section class="ui-card ui-card-pad" aria-labelledby="offer-stats-heading"><h2 id="offer-stats-heading" class="mb-4 text-xl font-semibold text-forest">Détail par offre</h2>
+  <div class="overflow-x-auto"><table class="w-full min-w-[580px] text-left text-sm"><caption class="sr-only">Activité et utilisation des codes de chaque offre</caption><thead><tr class="border-b border-line text-muted"><th class="p-3" scope="col">Offre</th><th class="p-3" scope="col">Statut</th><th class="p-3" scope="col">Coût</th><th class="p-3" scope="col">Échanges</th><th class="p-3" scope="col">Codes utilisés</th></tr></thead><tbody>
+    {% for offer in offers %}<tr class="border-b border-line"><th class="p-3 font-medium" scope="row"><a class="ui-link" href="{% url 'sponsor-offer-edit' offer.pk %}">{{ offer.title }}</a></th><td class="p-3">{% if offer.active %}Active{% else %}Inactive{% endif %}</td><td class="p-3">{{ offer.points_cost }} pts</td><td class="p-3">{{ offer.exchanges_count }}</td><td class="p-3">{{ offer.used_count }}</td></tr>{% empty %}<tr><td colspan="5" class="p-4 text-muted">Aucune offre pour le moment.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}
