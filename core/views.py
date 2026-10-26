@@ -1,11 +1,23 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 from django.db import connection, DatabaseError
-from django.http import JsonResponse
+from django.http import HttpResponseNotFound, HttpResponseServerError, JsonResponse
+from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from waste.services import total_impact
+
+
+@never_cache
+def page_not_found(request, exception):
+    # Keep error pages independent of sessions, navigation queries and failed views.
+    return HttpResponseNotFound(render_to_string("404.html"))
+
+
+@never_cache
+def server_error(request):
+    return HttpResponseServerError(render_to_string("500.html"))
 
 
 @require_GET

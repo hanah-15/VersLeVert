@@ -26,6 +26,9 @@ from accounts.views import ProfileOverviewView, ProfileSectionView
 from challenges.views import PersonalChallengeCreateView
 from sponsor.views import redeem_reward
 
+handler404 = "core.views.page_not_found"
+handler500 = "core.views.server_error"
+
 urlpatterns = [
     path("healthz/", healthcheck, name="healthcheck"),
     path("preuves/", include("gamification.proofs_urls")),

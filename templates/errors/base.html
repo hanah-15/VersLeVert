@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#8A9B63">
+  <title>{% block title %}{% endblock %} · Vers le Vert</title>
+  {# Inline styles keep recovery pages readable if static files are unavailable. #}
+  <style>
+    :root { color-scheme: light; font-family: "DM Sans", "Segoe UI", Arial, sans-serif; color: #042E09; background: #F8F7F2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; background: radial-gradient(ellipse at 8% 16%, #C9D5AE99, transparent 52%), radial-gradient(ellipse at 96% 88%, #B1C58866, transparent 48%), #F8F7F2; }
+    a { color: inherit; text-underline-offset: .2em; }
+    a:focus-visible { outline: 3px solid #042E09; outline-offset: 5px; }
+    .skip-link { position: absolute; top: 1rem; left: 1rem; padding: .75rem 1rem; background: #F8F7F2; border-radius: .75rem; transform: translateY(-200%); z-index: 2; }
+    .skip-link:focus { transform: none; }
+    header, footer { width: min(1180px, 100%); margin: auto; padding: 1.5rem 2rem; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .brand { display: inline-flex; align-items: center; gap: .8rem; text-decoration: none; font-weight: 700; font-size: 1.15rem; line-height: 1.3; }
+    .brand-mark { display: grid; place-items: center; width: 3rem; height: 3rem; flex-shrink: 0; border-radius: 50%; color: #042E09; background: #B1C588; }
+    .brand-mark svg { width: 1.6rem; height: 1.6rem; }
+    .brand small { display: block; margin-top: .25rem; color: #5C6B3C; font-size: .65rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+    .home-link { font-size: .85rem; font-weight: 600; white-space: nowrap; }
+    main { flex: 1; display: grid; align-items: center; width: 100%; padding: 2rem; }
+    .error-card { display: grid; grid-template-columns: 1.3fr 1fr; align-items: center; gap: 3rem; width: min(960px, 100%); margin: auto; padding: clamp(1.75rem, 5vw, 4rem); border: 1px solid #FFF; border-radius: 2rem; background: #FFFFFFB8; box-shadow: 0 24px 80px -48px #042E0966, inset 0 1px 0 #FFF; backdrop-filter: blur(16px); }
+    .eyebrow { display: flex; align-items: center; gap: .55rem; margin: 0 0 1.25rem; color: #5C6B3C; font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: .4rem; height: .4rem; border-radius: 50%; background: #8A9B63; }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -.045em; text-wrap: balance; }
+    .description { max-width: 39ch; margin: 1.25rem 0 0; color: #52634D; font-size: 1rem; line-height: 1.7; }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+    .button { display: inline-flex; justify-content: center; align-items: center; min-height: 48px; padding: .8rem 1.35rem; border: 1px solid #8A9B63; border-radius: 100px; text-decoration: none; font-size: .85rem; font-weight: 700; line-height: 1.4; }
+    .button-primary { background: #8A9B63; }
+    .button-primary:hover { background: #B1C588; }
+    .button-secondary { background: #F8F7F2; }
+    .button-secondary:hover { background: #C9D5AE; }
+    .error-art { display: flex; flex-direction: column; align-items: center; padding: 2.5rem 1rem; border: 1px solid #8A9B632E; border-radius: 50% 50% 42% 42%; background: linear-gradient(160deg, #B1C58844, #C9D5AE22); color: #5C6B3C; }
+    .error-art svg { width: 2.75rem; height: 2.75rem; margin-bottom: .7rem; }
+    .error-code { font-size: clamp(5rem, 10vw, 7.5rem); font-weight: 700; line-height: 1; letter-spacing: -.07em; }
+    .error-caption { margin-top: .9rem; font-size: .75rem; }
+    footer { color: #5C6B3C; font-size: .75rem; text-align: center; line-height: 1.6; }
+    @media (max-width: 640px) {
+      header, footer { padding: 1.25rem; }
+      main { padding: 1.25rem; }
+      .error-card { grid-template-columns: 1fr; gap: 1.75rem; }
+      .error-art { grid-row: 1; flex-direction: row; justify-content: center; gap: 1rem; padding: 1.25rem; border-radius: 1.25rem; }
+      .error-art svg { width: 2rem; height: 2rem; margin: 0; }
+      .error-code { font-size: 3.5rem; }
+      .error-caption { display: none; }
+      .actions { flex-direction: column; }
+    }
+    @media (forced-colors: active) { .error-card, .error-art { border: 1px solid CanvasText; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header>
+    <a class="brand" href="/" aria-label="Vers le Vert, accueil">
+      <span class="brand-mark">{% include "ui/icon.html" with name="leaf" %}</span>
+      <span>Vers le Vert<small>Chaque geste compte</small></span>
+    </a>
+    <a class="home-link" href="/">Accueil</a>
+  </header>
+  <main id="contenu">
+    <section class="error-card" aria-labelledby="error-heading">
+      <div>
+        <p class="eyebrow">{% block label %}{% endblock %}</p>
+        <h1 id="error-heading">{% block heading %}{% endblock %}</h1>
+        <p class="description">{% block description %}{% endblock %}</p>
+        <div class="actions">{% block actions %}{% endblock %}</div>
+      </div>
+      <div class="error-art" aria-hidden="true">
+        {% block icon %}{% endblock %}
+        <span class="error-code">{% block code %}{% endblock %}</span>
+        <span class="error-caption">Chaque chemin mène à un nouveau départ.</span>
+      </div>
+    </section>
+  </main>
+  <footer>Un petit geste. Un nouvel élan.<br>Vers le Vert · Chaque geste compte.</footer>
+</body>
+</html>

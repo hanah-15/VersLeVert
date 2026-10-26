@@ -1,0 +1,11 @@
+{% extends "errors/base.html" %}
+{% block title %}Page introuvable (404){% endblock %}
+{% block label %}Erreur 404 · Page introuvable{% endblock %}
+{% block heading %}On a perdu le chemin.{% endblock %}
+{% block description %}La page que vous cherchez n’existe plus ou son adresse a changé. Retrouvez votre chemin depuis l’accueil ou découvrez les bonnes adresses de la communauté.{% endblock %}
+{% block actions %}
+  <a class="button button-primary" href="/">Retour à l’accueil</a>
+  <a class="button button-secondary" href="/places/">Découvrir les lieux</a>
+{% endblock %}
+{% block icon %}{% include "ui/icon.html" with name="compass" %}{% endblock %}
+{% block code %}404{% endblock %}

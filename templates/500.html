@@ -1,0 +1,11 @@
+{% extends "errors/base.html" %}
+{% block title %}Problème temporaire (500){% endblock %}
+{% block label %}Erreur 500 · Problème temporaire{% endblock %}
+{% block heading %}Une petite pause imprévue.{% endblock %}
+{% block description %}Le site rencontre un problème temporaire. Réessayez dans quelques instants ou revenez à l’accueil pour continuer votre visite.{% endblock %}
+{% block actions %}
+  <a class="button button-primary" href="">Réessayer</a>
+  <a class="button button-secondary" href="/">Retour à l’accueil</a>
+{% endblock %}
+{% block icon %}{% include "ui/icon.html" with name="sprout" %}{% endblock %}
+{% block code %}500{% endblock %}
