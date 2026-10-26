@@ -21,12 +21,13 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.views.generic import RedirectView, TemplateView
 from accounts.views import SponsorApplicationView
-from core.views import HomeView, NotificationsView, PlaceholderView
+from core.views import HomeView, NotificationsView, PlaceholderView, healthcheck
 from accounts.views import ProfileOverviewView, ProfileSectionView
 from challenges.views import PersonalChallengeCreateView
 from sponsor.views import redeem_reward
 
 urlpatterns = [
+    path("healthz/", healthcheck, name="healthcheck"),
     path("preuves/", include("gamification.proofs_urls")),
     path("admin/", admin.site.urls),
     path("dashboard/", include("core.urls_admin")),

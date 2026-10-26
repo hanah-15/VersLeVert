@@ -1,7 +1,24 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
+from django.db import connection, DatabaseError
+from django.http import JsonResponse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET
 
 from waste.services import total_impact
+
+
+@require_GET
+@never_cache
+def healthcheck(request):
+    """Expose readiness without authentication or database details."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+    except DatabaseError:
+        return JsonResponse({"status": "unavailable"}, status=503)
+    return JsonResponse({"status": "ok"})
 
 
 class PlaceholderView(LoginRequiredMixin, TemplateView):

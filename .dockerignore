@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+.local
+venv
+node_modules
+media
+private_proofs
+output
+htmlcov
+.coverage
+__pycache__
+**/__pycache__
+*.pyc
+staticfiles
+samples
+static/css/tailwind.css
